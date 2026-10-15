@@ -178,5 +178,196 @@ def construire():
     return a
 
 
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py chien_corgi). Les mesures sont celles du modèle de jeu (TOURNE = 0), avant a.taille.
+# Le modèle est arc-bouté, les pattes avant loin devant lui (il refuse d'avancer) : c'est sa pose de repos. Les pattes
+# sont assez symétriques pour leurs miroirs ; les oreilles ne le sont pas (la tête est penchée et tournée) : chacune a
+# son os nommé à la main. La langue a le sien : elle pend, elle halète, elle bat au trot.
+
+from poses import Pose, borne, cloche, onde
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, 0.030, 0.150)),          # le milieu du tonneau
+    ("cou", "corps", (0.0, -0.155, 0.190)),            # le pied du cou, dans le jabot
+    ("tete", "cou", (0.005, -0.255, 0.345)),           # la nuque, en haut du cou
+    ("oreille_g", "tete", (0.053, -0.249, 0.448)),     # l'attache de chaque antenne sur le crâne
+    ("oreille_d", "tete", (-0.015, -0.277, 0.470)),
+    ("langue", "tete", (0.051, -0.409, 0.366)),        # la racine de la langue, sous le museau
+    ("avant_G", "corps", (0.060, -0.150, 0.115)),      # l'épaule (la droite est son miroir)
+    ("arriere_G", "corps", (0.066, 0.210, 0.108)),     # la hanche, au cœur de la cuisse
+    ("queue", "corps", (0.0, 0.302, 0.160)),           # le pied du plumeau
+]
+
+
+def _oreille_os(points, cote):
+    """Une oreille tout entière (le dos et son creux) sur l'os de son côté (nommé à la main, sans miroir)."""
+    return {"oreille_g" if cote == "_G" else "oreille_d": np.ones(len(points))}
+
+
+PORTEURS = [("corps", "corps"), ("dos", "corps"), ("echine", "corps"), ("rapiecage", "corps"),
+            ("cou", "cou"),
+            ("tete", "tete"), ("crane", "tete"), ("museau", "tete"), ("truffe", "tete"), ("bouche", "tete"),
+            ("oeil", "tete"), ("sourcil", "tete"), ("langue", "langue"),
+            ("oreille", _oreille_os), ("pavillon", _oreille_os),
+            ("patte_avant", "avant", True), ("pied_avant", "avant", True),
+            ("cuisse", "arriere", True), ("patte_arriere", "arriere", True), ("pied_arriere", "arriere", True),
+            ("queue", "queue"),
+            # les yeux sont posés un par un : l'usine appelle leurs paupières paupiere_0 et paupiere_1, chacune sur son os
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+RAMENE = 12.0                                  # avance : les pattes avant, arc-boutées sur le modèle, reviennent sous lui
+PLONGE = (48.0, 25.0)                          # mange : le cou et la tête plongent vers la gamelle
+REVERENCE = 12.0                               # joie : l'avant s'incline au ras de l'herbe, la croupe en l'air
+COUCHE = (-0.044, 80.0, 66.0, -44.0)           # dort : le corps descend, les pattes arrière s'étalent derrière lui
+                                               # (en grenouille), le cou plonge et la tête se pose à plat sur les pattes
+
+# chaque patte, posée : l'angle sous l'horizontale, vers l'avant, de l'épaule ou de la hanche jusqu'au milieu du pied,
+# et cette longueur (les pattes avant, arc-boutées, partent loin devant)
+_JAMBES = {"avant_G": (43.9, 0.1416), "avant_D": (40.7, 0.1505), "arriere_G": (78.8, 0.0930), "arriere_D": (78.8, 0.0930)}
+_PIEDS = {"avant": (0.044, 0.017), "arriere": (0.042, 0.017)}     # les demi-mesures d'un pied : sa longueur, son épaisseur
+_PIVOT = {n: t for n, _p, t in OS}
+
+
+def _hauteur(pivot, tangage, descente):
+    """La hauteur d'un pivot porté par le corps quand le corps penche de « tangage » degrés (> 0 : l'avant plonge) et
+    descend de « descente »."""
+    th = math.radians(tangage)
+    c = _PIVOT["corps"]
+    return c[2] + descente + (pivot[1] - c[1]) * math.sin(th) + (pivot[2] - c[2]) * math.cos(th)
+
+
+def _pied(p, os_, degres, tangage=0.0, descente=0.0, leve=0.0, libre=False):
+    """Une patte tourne de « degrés » par rapport au corps (> 0 : le pied part vers l'arrière) ; elle monte ou descend
+    juste ce qu'il faut pour que son pied reste posé dans l'herbe, le corps penché de « tangage » et descendu de
+    « descente » ; plus « leve » (le pied qui revient en l'air). libre : le pied peut quitter le sol, jamais s'y enfoncer."""
+    a, long = _JAMBES[os_]
+    pivot = _PIVOT[os_.replace("_D", "_G")]
+    sol = pivot[2] - long * math.sin(math.radians(a))
+    h = sol - _hauteur(pivot, tangage, descente) + long * math.sin(math.radians(a + tangage + degres))
+    lg, ep = _PIEDS[os_[:-2]]
+    b = math.radians(tangage + degres)                                  # le pied penché enfonce son talon ou ses doigts
+    h += math.hypot(lg * math.sin(b), ep * math.cos(b)) - ep
+    p.add(os_, rot=(degres, 0, 0), pos=(0, 0, (max(0.0, h) if libre else h) + leve))
+
+
+def _tendu(os_, tangage=0.0, descente=0.0):
+    """De combien tourner une patte pour que, tendue vers l'avant, son pied touche juste l'herbe (sans bouger son pivot)."""
+    a, long = _JAMBES[os_]
+    pivot = _PIVOT[os_.replace("_D", "_G")]
+    x = (_hauteur(pivot, tangage, descente) - pivot[2] + long * math.sin(math.radians(a))) / long
+    return math.degrees(math.asin(max(-1.0, min(1.0, x)))) - a - tangage
+
+
+def _plateau(t, centre, demi, pente):
+    """1 autour de « centre » sur une demi-largeur « demi », 0 au-delà de demi + pente, en douceur entre les deux (en boucle)."""
+    d = abs(((t - centre + 0.5) % 1.0) - 0.5)
+    x = borne((demi + pente - d) / pente)
+    return x * x * (3 - 2 * x)
+
+
+def _oreilles(p, avant, dehors=0.0):
+    """Les deux antennes ensemble : elles basculent vers l'avant (degrés > 0, vers l'arrière < 0) et s'écartent (dehors)."""
+    p.add("oreille_g", rot=(avant, dehors, 0))
+    p.add("oreille_d", rot=(avant, -dehors, 0))
+
+
+def repos(t):
+    """Arc-bouté, ravi de ne pas bouger : il halète, la langue pendue qui ballotte ; il penche la tête de l'autre côté
+    (« hein ? »), la remet, puis secoue la tête, têtu : non, il n'avancera pas ; les antennes tressaillent, le plumeau
+    frétille ; il cligne."""
+    p = Pose()
+    r = onde(t, 2)
+    halete = onde(t, 16)
+    p.add("corps", ech=(1 + 0.012 * r + 0.004 * halete, 1, 1 + 0.016 * r + 0.006 * halete))
+    hein = cloche(t, 0.36, 0.12)
+    non = cloche(t, 0.76, 0.07) * onde(t, 14)
+    p.add("cou", rot=(0, -4 * hein, 3 * non))
+    p.add("tete", rot=(-4 * hein, -30 * hein, 14 * non))
+    p.add("langue", rot=(6 * halete, 0, 5 * onde(t, 4) + 10 * non))
+    _oreilles(p, -8 * cloche(t, 0.20, 0.04) + 6 * hein, 4 * cloche(t, 0.56, 0.04))
+    p.add("queue", rot=(0, 0, 28 * onde(t, 12) * cloche(t, 0.55, 0.09)))
+    p.ouvert = 1 - cloche(t, 0.10, 0.04) - cloche(t, 0.60, 0.04)
+    return p
+
+
+def avance(t):
+    """Son petit trot de tonneau : les pattes avant reviennent sous lui et ses moignons moulinent, les diagonales
+    ensemble ; la croupe en miche se dandine, les grandes antennes ballottent, la langue bat au vent, le plumeau balance."""
+    p = Pose()
+    for os_, phase in (("avant_G", 0.0), ("arriere_D", 0.0), ("avant_D", 0.5), ("arriere_G", 0.5)):
+        a = math.tau * (t + phase)
+        base = RAMENE if os_.startswith("avant") else 0.0
+        _pied(p, os_, base + 20 * math.sin(a), leve=0.010 * max(0.0, -math.cos(a)), libre=True)
+    p.add("corps", pos=(0, 0, 0.005 * (0.5 - 0.5 * math.cos(2 * math.tau * t))), rot=(0, 4 * onde(t, 1), 3 * onde(t, 1, 0.25)))
+    p.add("cou", rot=(0, -2 * onde(t, 1), -3 * onde(t, 1, 0.25)))
+    p.add("tete", rot=(3 * onde(t, 2), 0, 0))
+    _oreilles(p, 7 * onde(t, 2, -0.1), 3 * onde(t, 2))
+    p.add("langue", rot=(14 * onde(t, 2, -0.15), 0, 8 * onde(t, 1)))
+    p.add("queue", rot=(0, 0, 18 * onde(t, 2)))
+    return p
+
+
+def mange(t):
+    """Les pattes déjà plantées devant lui, il plonge le nez dans la gamelle et lape à grands coups de langue, le
+    plumeau en folie ; puis il relève la tête, se pourlèche les babines et retrouve son sourire de travers."""
+    p = Pose()
+    bas = _plateau(t, 0.42, 0.26, 0.12)
+    lape = onde(t, 10) * _plateau(t, 0.42, 0.20, 0.06)
+    leche = cloche(t, 0.86, 0.05)
+    p.add("cou", rot=(PLONGE[0] * bas, 0, 0))
+    p.add("tete", rot=(PLONGE[1] * bas + 3 * lape - 8 * leche, 0, -10 * bas))
+    p.add("langue", rot=(16 * lape - 34 * leche, 0, 0))
+    _oreilles(p, 8 * bas, 6 * bas)
+    p.add("queue", rot=(0, 0, 24 * onde(t, 8) * bas))
+    p.ouvert = 1 - cloche(t, 0.94, 0.03)
+    return p
+
+
+def joie(t):
+    """Sa fête : la révérence du jeu, l'avant au ras de l'herbe, la croupe en l'air qui se tortille ; puis deux bonds sur
+    place, les antennes rabattues, la langue au vent, le plumeau fou ; il retombe arc-bouté, content de lui."""
+    p = Pose()
+    env = math.sin(math.pi * borne(t / 0.85)) if t < 0.85 else 0.0
+    salut = cloche(t, 0.22, 0.20, False)
+    u = borne((t - 0.42) / 0.40)
+    saut = abs(math.sin(2 * math.pi * u))
+    tangage, descente = REVERENCE * salut, -0.012 * salut
+    p.add("corps", pos=(0, 0, descente + 0.045 * saut), rot=(tangage - 3 * saut, 0, 5 * onde(t, 4) * salut))
+    for os_ in ("avant_G", "avant_D", "arriere_G", "arriere_D"):
+        _pied(p, os_, _tendu(os_, tangage, descente), tangage, descente)
+        p.add(os_, rot=(-14 * saut if os_.startswith("avant") else 14 * saut, 0, 0))   # en l'air, les pattes se replient
+    p.add("cou", rot=(-0.8 * tangage - 4 * saut, 0, 0))
+    p.add("tete", rot=(-6 * salut - 10 * saut, 0, 8 * onde(t, 3) * env))
+    _oreilles(p, -18 * saut - 6 * salut, 10 * saut)
+    p.add("langue", rot=(16 * onde(t, 6) * env, 0, 6 * onde(t, 3) * env))
+    p.add("queue", rot=(0, 0, 34 * onde(t, 12) * env))
+    return p
+
+
+def dort(t):
+    """Il s'étale en grenouille, la sieste du corgi : à plat ventre, les pattes de devant tendues, celles de derrière
+    allongées loin derrière lui, la tête posée à plat sur les pattes, les antennes tombées de côté, le bout de la langue
+    qui dépasse ; les yeux fermés, le tonneau respire lentement."""
+    p = Pose()
+    r = onde(t, 1)
+    p.ouvert = 0.0
+    d = COUCHE[0]
+    p.add("corps", pos=(0, 0, d), ech=(1 + 0.015 * r, 1, 1 + 0.025 * r))
+    for os_ in ("avant_G", "avant_D"):
+        _pied(p, os_, _tendu(os_, 0.0, d), 0.0, d)
+    for os_ in ("arriere_G", "arriere_D"):
+        _pied(p, os_, COUCHE[1], 0.0, d, libre=True)
+    p.add("cou", rot=(COUCHE[2], 0, 0))
+    p.add("tete", rot=(COUCHE[3], 0, 0))
+    _oreilles(p, -14, 18)
+    p.add("langue", rot=(-12 + 3 * r, 0, 0))
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}
+
+
 if __name__ == "__main__":
     K.planche(construire, "Corgi")
