@@ -120,6 +120,7 @@ def construire():
 
 # ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
 from rig_auto import rig
+GONFLAGE = True      # gardée par l'auteur sur la base GONFLÉE (planche 11, 15/10) : toujours gonflée, même dans une liste de gardées
 if __name__ != "__main__":
     OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "quad")
 

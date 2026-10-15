@@ -87,7 +87,7 @@ TETE_NOMS = ("tete", "crane", "museau", "machoire", "bec", "mufle", "groin", "tr
              "babine", "cou", "nez", "truffe")          # gonflés comme le corps, jamais renforcés ni coupés en boule (l'okapi, 15/10)
 MEMBRES = ("bras", "jambe", "cuisse", "patte", "main", "mollet", "epaule", "coude", "genou", "canon", "paturon", "avant_bras")
                                                 # gonflés comme le corps, sans renfort (l'élan, le bras de la loutre, 15/10)
-JAMBES_LONGUES = 0.28           # le bas du corps plus haut que cette part de la bête : une bête haute sur pattes (cerf, élan,
+JAMBES_LONGUES = 0.25           # le bas du corps plus haut que cette part de la bête (le cheval : 0,27) : haute sur pattes (cerf, élan,
 JAMBES_LONGUES_REGLAGES = {"pression": 0.12, "fins": 0.0}   # cheval, girafe) : moins de pression, aucun renfort
 PAUPIERES_LOURDES = "retirer"   # sur la base gonflée, les paupières lourdes : « retirer » (Principal, 15/10 : leur trait sombre se
                                 # lit comme un sourcil triste) ou « fines » (refaites fines à COUPE_MIN)
@@ -601,6 +601,9 @@ def reglages_bete(a, M, P, L, reglages=None):
             base.update(JAMBES_LONGUES_REGLAGES)
             _dire("haute sur pattes (le bas du corps « %s » à %.0f %% de la bête) : %s" % (
                 corps.p["nom"], 100 * haut_ / L, ", ".join("%s %s" % kv for kv in sorted(JAMBES_LONGUES_REGLAGES.items()))))
+        else:
+            _dire("le bas du corps « %s » à %.0f %% de la bête au-dessus du sol (haute sur pattes au-delà de %.0f %%)" % (
+                corps.p["nom"], 100 * haut_ / L, 100 * JAMBES_LONGUES))
     if reglages is None:
         reglages = getattr(a, "gonflage_reglages", None) or getattr(sys.modules.get("__main__"), "GONFLAGE_REGLAGES", None)
     if reglages:
@@ -1184,7 +1187,7 @@ def _ressorts(X1, T, E, deg, g, L, iterations, X0, n0, dedans, dehors, sol, zmin
     pas = g * om * l2 / (4.0 * L) * facteur     # facteur : plus de pression dans les parties fines (gonfler, « fins »)
     if iterations <= 0:                         # assez de pas pour qu'un ventre (un dixième de la bête) trouve son équilibre
         lmed = float(np.median(np.sqrt(l2)))
-        iterations = int(min(9000, max(1500, 30.0 * (0.1 * L / max(lmed, 1e-9)) ** 2)))
+        iterations = int(min(5000, max(1500, 15.0 * (0.1 * L / max(lmed, 1e-9)) ** 2)))   # 9000 au plus : 4 min sur le cheval
     X = X1.copy()
     z0 = X1[sol, 2]
     nn = n0

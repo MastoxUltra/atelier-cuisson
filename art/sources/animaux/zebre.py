@@ -65,7 +65,7 @@ def construire():
     chemin = [(0.0, y, z) for y, z in ((0.560, 0.640), (0.440, 0.690), (0.200, 0.700), (-0.050, 0.700), (-0.290, 0.720), (-0.450, 0.720))]
     fil = K.Fil(chemin, (1, 0, 0))
     L = fil.long
-    corps = fuseau([(0.0, 0.0), (0.03, 0.12), (0.12, 0.205), (0.30, 0.225), (0.55, 0.225), (0.80, 0.238), (0.94, 0.190), (1.0, 0.0)], L)
+    corps = fuseau([(0.0, 0.0), (0.03, 0.095), (0.12, 0.160), (0.30, 0.172), (0.55, 0.170), (0.80, 0.180), (0.94, 0.145), (1.0, 0.0)], L)   # un corps plus mince (l'auteur : « trop gros »)
 
     def phase(z, u):
         sw = 0.075 * u ** 1.6 + 0.020 * np.exp(-((z - 0.20 * L) / 0.15) ** 2) * u        # vers l'arrière en descendant ; arcs sur la croupe
@@ -81,7 +81,7 @@ def construire():
     BASE = Vector((0.0, -0.310, 0.750))
     enc = K.Fil([tuple(BASE + Vector((0, -u, z))) for u, z in ((0.0, 0.0), (0.030, 0.140), (0.080, 0.290), (0.140, 0.400), (0.200, 0.470))], (1, 0, 0))
     Lc = enc.long
-    cou = fuseau([(0.0, 0.10), (0.10, 0.150), (0.25, 0.138), (0.5, 0.108), (0.8, 0.088), (1.0, 0.078)], Lc, 56)
+    cou = fuseau([(0.0, 0.10), (0.10, 0.125), (0.25, 0.112), (0.5, 0.092), (0.8, 0.078), (1.0, 0.070)], Lc, 56)
     rayer(cou, lambda z, u: (z + 0.060 * u) / 0.085, lambda z, u: 0.52 * (1.0 - 0.55 * u ** 1.5), ventre=0.86)
     a.piece("cou", cou.sculpte(lambda v: v * [0.82, 1.0, 1.0]).sculpte(enc.couche), None)
     for i, f in enumerate(np.linspace(0.05, 0.97, 18)):

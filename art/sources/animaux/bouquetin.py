@@ -105,7 +105,7 @@ def construire():
 
     # ----- les yeux : deux boutons ouverts, de côté, pareils (la tête est tournée : on vise par vers()) -----
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", TETE, vers(0.62 * c, -0.70, 0.32))
+        p, n = a.surface("tete", TETE, vers(0.66 * c, -0.74, 0.14))
         a.oeil("oeil_" + nom, p + n * 0.002, n, 0.0165)
 
     # ----- la barbiche : un petit pinceau chocolat sous le menton -----
@@ -126,7 +126,7 @@ def construire():
         a.piece("oreille_" + nom, oreille, None, mat=NARGUE @ A.repere(racine + tombe * 0.020, A.viser(tombe)))
 
     # ----- les cornes : deux grands arcs d'ivoire, gros à la base, qui montent et se couchent en arrière, rayés de nœuds -----
-    arc = ((0.048, 0.020, 0.070), (0.062, 0.090, 0.200), (0.082, 0.210, 0.300), (0.096, 0.350, 0.310), (0.102, 0.470, 0.235), (0.100, 0.560, 0.105))
+    arc = ((0.058, 0.090, 0.060), (0.070, 0.150, 0.190), (0.086, 0.260, 0.290), (0.098, 0.390, 0.300), (0.102, 0.500, 0.225), (0.100, 0.590, 0.100))   # nés sur le crâne, DERRIÈRE les yeux
     for nom, c in (("G", 1), ("D", -1)):
         fil = A.courbe([tuple(NARGUE @ Vector((x * c, y, z_))) for x, y, z_ in arc], 12)
         corne = A.tube(fil, lambda t_: (0.050 - 0.036 * t_ ** 0.9) * (1 + 0.34 * max(0.0, math.cos(math.tau * 7.0 * t_)) ** 1.4), 18)
@@ -134,7 +134,7 @@ def construire():
         a.piece("corne_" + nom, corne, None, poil=False)
         socle = A.boule(1.0, 24, 12).etire(0.060, 0.060, 0.046)                    # la touffe du crâne où naît la corne (l'ivoire ne bave plus sur le front)
         socle.teinte = np.tile(PIERRE, (len(socle.v), 1))
-        a.piece("socle_" + nom, socle, None, mat=NARGUE @ A.repere((c * 0.052, 0.024, 0.060)))
+        a.piece("socle_" + nom, socle, None, mat=NARGUE @ A.repere((c * 0.060, 0.096, 0.050)))
 
     # ----- les quatre pattes : la jambe est une pièce tournée à sabot (comme celles de la chèvre), courte, forte, le genou
     #       gonflé ; l'épaule ou le gigot en haut ; la chaussette chocolat -----

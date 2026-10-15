@@ -88,9 +88,10 @@ def construire():
                                                       RT @ Vector((c * 0.165, -0.150, -0.012 + dz * 2.1))], 0.0014, BLANC)
     a.tete = T_TETE + Vector((0.0, -0.13, 0.0))
 
-    # ----- les bras : l'un contre la poitrine, l'autre au menton ; trois petits doigts -----
+    # ----- les bras : l'un contre la poitrine, l'autre posé plus bas sur la panse (Principal, 15/10 : levé au menton, il faisait
+    # une palette sombre collée à la joue) ; trois petits doigts -----
     for nom, c, pts, pat in (("G", 1, [(0.110, -0.010, 0.660), (0.175, -0.080, 0.600), (0.105, -0.150, 0.560), (0.050, -0.165, 0.570)], (0.036, -0.168, 0.574)),
-                             ("D", -1, [(-0.110, -0.010, 0.660), (-0.170, -0.095, 0.690), (-0.110, -0.165, 0.765), (-0.045, -0.188, 0.795)], (-0.020, -0.194, 0.802))):
+                             ("D", -1, [(-0.110, -0.010, 0.660), (-0.168, -0.080, 0.580), (-0.110, -0.140, 0.520), (-0.055, -0.148, 0.518)], (-0.040, -0.150, 0.515))):
         bras = O.tube_r(pts, [0.046, 0.040, 0.034, 0.030], 18)
         bras.teinte = np.tile(CAFE, (len(bras.v), 1))
         main = A.boule(1.0, 18, 10).etire(0.038, 0.032, 0.028).pose(pat)
@@ -109,6 +110,7 @@ def construire():
 
 # ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
 from rig_auto import rig
+GONFLAGE = True      # gardée par l'auteur sur la base GONFLÉE (planche 11, 15/10) : toujours gonflée, même dans une liste de gardées
 if __name__ != "__main__":
     OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "quad", souple=True)
 
