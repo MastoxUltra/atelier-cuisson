@@ -1,0 +1,3 @@
+# Paliers
+
+| souris | - | - | 1 | - |
