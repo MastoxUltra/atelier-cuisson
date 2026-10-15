@@ -396,15 +396,38 @@ def fusion_demandee(module=None):
     return bool(getattr(module, "FUSION", False)) or gonflage_demande(module)
 
 
+_GARDEES = None
+
+
+def gardees():
+    """Les bêtes gardées par l'auteur (animaux/gardees.txt, tiré de VALIDATIONS.md) : elles restent sur leur base."""
+    global _GARDEES
+    if _GARDEES is None:
+        try:
+            with open(os.path.join(ICI, "animaux", "gardees.txt"), encoding="utf-8") as f:
+                _GARDEES = {l.strip() for l in f if l.strip() and not l.startswith("#")}
+        except OSError:
+            _GARDEES = set()
+    return _GARDEES
+
+
 def gonflage_demande(module=None):
-    """Le gonflage des volumes sur la base fusionnée (fusion.gonfler : des volumes ronds et rembourrés), ÉTEINT par défaut :
-    « gonflage » sur la ligne de commande, BIBELOTS_GONFLAGE=1, ou GONFLAGE = True dans le fichier de la bête ;
-    « sans-gonflage » (ou « sans-fusion ») l'éteint toujours."""
-    if "sans-gonflage" in sys.argv or "sans-fusion" in sys.argv:
+    """Le gonflage des volumes sur la base fusionnée (fusion.gonfler : des volumes ronds et rembourrés). ALLUMÉ PAR DÉFAUT
+    depuis le 15/10 à 20 h 50 (l'auteur, par Principal) pour toute bête, SAUF les bêtes gardées (gardees()), qui restent sur leur
+    base. « gonflage » sur la ligne de commande ou BIBELOTS_GONFLAGE=1 l'allument toujours ; GONFLAGE = True/False dans le
+    fichier de la bête décide pour elle ; « sans-gonflage », « sans-fusion » ou BIBELOTS_GONFLAGE=0 l'éteignent."""
+    if "sans-gonflage" in sys.argv or "sans-fusion" in sys.argv or os.environ.get("BIBELOTS_GONFLAGE") == "0":
         return False
     if "gonflage" in sys.argv[1:] or os.environ.get("BIBELOTS_GONFLAGE") == "1":
         return True
-    return bool(getattr(module, "GONFLAGE", False))
+    if module is None:
+        return False
+    if hasattr(module, "GONFLAGE"):
+        return bool(module.GONFLAGE)
+    nom = str(getattr(module, "__name__", "")).rsplit(".", 1)[-1]
+    if nom in ("", "__main__"):
+        nom = os.path.splitext(os.path.basename(str(getattr(module, "__file__", "") or "")))[0]
+    return bool(nom) and nom not in gardees()
 
 
 def planche(construire, titre=None):

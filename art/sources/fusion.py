@@ -57,7 +57,7 @@ sys.path.insert(0, ICI)
 EXCLUS = ("oeil", "lourde", "paupiere", "cil", "cerne", "reflet", "pupille", "iris", "epingle", "couture_")
 VOXELS = 400            # le plus grand côté de la bête, en voxels (au plus fin)
 POINTS_MAX = 450000     # la peau remaillée ne dépasse pas ce nombre de points (sinon les voxels grossissent)
-DURS = ("griffe", "croc", "dent", "ongle", "nez", "truffe", "ourlet", "interieur", "dedans_")
+DURS = ("griffe", "croc", "dent", "ongle", "nez", "truffe", "ourlet", "interieur", "dedans_", "bois", "corne", "sabot")
 # posés sur la peau fondue, pas fondus dedans, et recollés d'un seul geste (essais du 15/10 : des taches blanches aux griffes,
 # la truffe du raton tombée sous la bouche, l'intérieur des oreilles froissé comme du papier par les voxels)
 CONGE = 0.60            # le rayon du congé : cette part de l'épaisseur du plus fin des deux morceaux (0,30 : trop peu de gain, 15/10)
@@ -83,6 +83,14 @@ GONFLAGE = {                    # le gonflage (3.) : ses réglages
     "images": 50,               # les images du simulateur de tissu
 }
 ESPION = None                   # pour les essais : appelé avec (a, P, Q, L, h) juste après la décimation de la peau
+TETE_NOMS = ("tete", "crane", "museau", "machoire", "bec", "mufle", "groin", "trompe", "joue", "front", "menton", "levre",
+             "babine", "cou", "nez", "truffe")          # gonflés comme le corps, jamais renforcés ni coupés en boule (l'okapi, 15/10)
+MEMBRES = ("bras", "jambe", "cuisse", "patte", "main", "mollet", "epaule", "coude", "genou", "canon", "paturon", "avant_bras")
+                                                # gonflés comme le corps, sans renfort (l'élan, le bras de la loutre, 15/10)
+JAMBES_LONGUES = 0.28           # le bas du corps plus haut que cette part de la bête : une bête haute sur pattes (cerf, élan,
+JAMBES_LONGUES_REGLAGES = {"pression": 0.12, "fins": 0.0}   # cheval, girafe) : moins de pression, aucun renfort
+PAUPIERES_LOURDES = "retirer"   # sur la base gonflée, les paupières lourdes : « retirer » (Principal, 15/10 : leur trait sombre se
+                                # lit comme un sourcil triste) ou « fines » (refaites fines à COUPE_MIN)
 COUPE_MIN = 0.60                # sur la base gonflée, le bord des paupières lourdes à au moins 0,60 rayon au-dessus du milieu
 EPAISSEUR_PAUPIERE = 0.30       # de l'œil (l'auteur, 15/10 : au moins 0,5) ; et fines (0,30 rayon au lieu de 0,62) : l'œil ouvert
 MOUSTACHES = ("moustache", "vibrisse")   # refaites souples sur la base gonflée : courbes, retombantes, plus fines au bout
@@ -933,9 +941,11 @@ def _recoller(a, peau, ancienne):
 
 # ---------------------------------------------------------------- 3. le gonflage : des volumes ronds et rembourrés
 
-def _reglages(autres=None):
-    """GONFLAGE, corrigé par BIBELOTS_GONFLAGE_REGLAGE (« methode=tissu,pression=1.5 »), puis par « autres »."""
+def _reglages(autres=None, base=None):
+    """GONFLAGE, corrigé par « base » (le réglage automatique, puis GONFLAGE_REGLAGES du fichier de la bête), puis par
+    BIBELOTS_GONFLAGE_REGLAGE (« methode=tissu,pression=1.5 »), puis par « autres »."""
     r = dict(GONFLAGE)
+    r.update({k: v for k, v in (base or {}).items() if k in r})
     for morceau in os.environ.get("BIBELOTS_GONFLAGE_REGLAGE", "").split(","):
         k, _egal, v = morceau.partition("=")
         k, v = k.strip(), v.strip()
@@ -1020,7 +1030,7 @@ def _arrondir(X0, T, E, deg, n0, rayon, t, dedans, dehors, sol):
     return X, passes
 
 
-def _pointes(X0, T, E, rayon, zmin, rayon_min=0.0):
+def _pointes(X0, T, E, rayon, zmin, rayon_min=0.0, interdit=None):
     """Les pointes : un bout plus pointu qu'une demi-boule de ce rayon (le bout d'une queue en cône) est coupé là où le tube
     atteint ce rayon et fermé d'une demi-boule, comme le bout cousu d'une queue de peluche. Un bout déjà rond (un doigt, une
     patte, un museau mousse), une pièce plate (une oreille) ou plus fine que le rayon sur toute sa longueur ne change pas.
@@ -1086,7 +1096,7 @@ def _pointes(X0, T, E, rayon, zmin, rayon_min=0.0):
     for i in np.argsort(-total).tolist():
         if total[i] < 0.45 * math.pi:
             break
-        if fait[i]:
+        if fait[i] or (interdit is not None and interdit[i]):       # jamais un museau, un bec, une tête
             continue
         apex = X[i].copy()
         proche = np.array([j for _c, j, _d in arbre.find_range(apex.tolist(), rayon)], np.int64)
@@ -1217,10 +1227,11 @@ def _tissu(X1, T, L, g, images):
     return V * L + c
 
 
-def gonfler(P, F, L, h, reglages=None):
+def gonfler(P, F, L, h, reglages=None, noms=None, base=None):
     """Le gonflage de la peau (P, F) d'une bête de taille L (voir le haut du fichier) : rend les nouveaux points (même ordre)
-    et une ligne de compte rendu. reglages : un dictionnaire qui corrige GONFLAGE."""
-    r = _reglages(reglages)
+    et une ligne de compte rendu. reglages : un dictionnaire qui corrige GONFLAGE (après tout le reste) ; base : celui de la
+    bête (voir _reglages) ; noms : la pièce d'origine de chaque point (la tête et les membres ne sont pas renforcés)."""
+    r = _reglages(reglages, base)
     t0 = time.time()
     P = np.asarray(P, float)
     if isinstance(F, np.ndarray) and F.ndim == 2 and F.shape[1] == 3:
@@ -1234,10 +1245,15 @@ def gonfler(P, F, L, h, reglages=None):
     deg = np.maximum(np.bincount(E[:, 0], minlength=n) + np.bincount(E[:, 1], minlength=n), 1).astype(float)
     zmin = float(P[:, 2].min())
     sol = np.nonzero(P[:, 2] <= zmin + 0.004 * L)[0]                  # posés au sol : ils y restent
+    tete = np.zeros(n, bool)                                         # les points venus de la tête, du cou, des membres
+    membre = np.zeros(n, bool)
+    if noms is not None and len(noms) == n:
+        tete = np.array([str(s).lower().startswith(TETE_NOMS) for s in noms], bool)
+        membre = np.array([str(s).lower().startswith(MEMBRES) for s in noms], bool)
     P0, faites = P, []
     if r["pointes"] > 0:                                             # d'abord les bouts pointus : coupés et fermés en boule
         try:
-            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin, 3.0 * h)
+            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin, 3.0 * h, tete)
         except Exception:
             import traceback
             traceback.print_exc()
@@ -1273,6 +1289,7 @@ def gonfler(P, F, L, h, reglages=None):
             if r["fins"] > 0:                                        # une queue, une oreille, un pied plat : gonflés eux aussi
                 rapport = np.maximum(float(np.median(t)) / t, 1.0) ** r["fins"]
                 facteur = np.clip(1.0 + r["renfort"] * (rapport - 1.0), 1.0, 25.0)
+                facteur[tete | membre] = 1.0                         # un museau long n'est pas une queue (l'okapi en boule, 15/10)
                 for _ in range(4):                                   # sans saut d'un point à l'autre (des pics au bout de la queue, v3)
                     facteur = 0.5 * facteur + 0.5 * _voisins(facteur, E, deg)
             Y, pas_faits = _ressorts(X, T, E, deg, r["pression"], L, int(r["iterations"]), P, n0, dedans, dehors, sol, zmin, facteur)
