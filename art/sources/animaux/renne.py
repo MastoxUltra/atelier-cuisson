@@ -102,13 +102,13 @@ def bois(c, pelle):
         return (c * x, y, z)
     merrain = A.courbe([p(0.035, 0.0, 0.0), p(0.100, 0.035, 0.065), p(0.180, 0.080, 0.140), p(0.250, 0.085, 0.230),
                         p(0.285, 0.040, 0.315), p(0.270, -0.030, 0.370), p(0.230, -0.080, 0.385)], 6)
-    tout = A.tube(merrain, lambda t: 0.024 - 0.013 * t, 16)
+    tout = A.tube(merrain, lambda t: 0.017 - 0.009 * t, 16)                  # fin : le gonflage les épaissit d'un tiers
     for depart, vers, long in (((0.180, 0.080, 0.140), (0.20, -0.85, 0.50), 0.100), ((0.250, 0.085, 0.230), (0.15, -0.70, 0.70), 0.110),
                                ((0.285, 0.040, 0.315), (0.25, -0.30, 0.92), 0.085)):
         d = np.array(p(*depart))
         v = np.array(p(*vers)) / np.linalg.norm(vers)
         bout = d + v * long + np.array([0, 0, 0.015])
-        tout = tout + A.tube(A.courbe([d, d + v * long * 0.55, bout], 4), lambda t: 0.015 - 0.008 * t, 14)
+        tout = tout + A.tube(A.courbe([d, d + v * long * 0.55, bout], 4), lambda t: 0.010 - 0.005 * t, 14)
     if pelle:
         chemin = A.courbe([p(0.045, -0.005, 0.030), p(0.060, -0.070, 0.055), p(0.050, -0.130, 0.048), p(0.030, -0.172, 0.020)], 6)
         lame = A.tube(chemin, lambda t: 0.012 + 0.024 * math.sin(math.pi * min(t * 1.3, 1.0)), 16)
