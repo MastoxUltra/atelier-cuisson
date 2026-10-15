@@ -82,6 +82,12 @@ def construire():
     return a
 
 
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "quad")
+
+
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("taupe_a_nez_etoile", styles.style_de("taupe_a_nez_etoile"), sys.modules[__name__]), "Taupe à nez étoilé")

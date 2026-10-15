@@ -100,6 +100,12 @@ def construire():
     return a
 
 
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "quad")
+
+
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("loup", styles.style_de("loup"), sys.modules[__name__]), "Loup")

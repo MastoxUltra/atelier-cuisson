@@ -1,7 +1,8 @@
-"""Le kookaburra en peluche, cousu main (3e dessin) : un petit corps trapu crème, le dos et les ailes café avec la
-plaque bleu ciel, la queue rousse barrée de brun ; une tête crème carrée au bandeau brun en travers de l'œil ; et un
-bec LONG, ÉPAIS et DROIT qui sort franchement du visage : sombre dessus, clair dessous, la pointe vers le haut quand il
-rit. Il rit : la tête rejetée en arrière, le bec ouvert vers le ciel, perché sur une patte.
+"""Le kookaburra en peluche cousue main (4e dessin, repris d'une autre base : l'œuf de la poule, la tête tendue sur le
+côté) : le grand martin-pêcheur rieur d'Australie, trapu, la TÊTE énorme et le bec énorme, droit comme une lance et
+pointé vers l'avant ; la tête crème coiffée d'une calotte brune et barrée d'un trait brun à travers l'œil ; le ventre
+crème, le dos brun avec la plaque bleu ciel de l'aile, une queue rousse barrée de noir, de courtes pattes. Il se tient
+tout droit sur son perchoir, la tête tournée vers nous, le bec en avant : il va rire.
 
     python kookaburra.py        fabrique la fiche art/apercus/animaux/kookaburra.png (cousu main, palier 2)
 """
@@ -15,83 +16,94 @@ import numpy as np
 from mathutils import Vector
 
 import atelier as A
-import garnitures as G
 import matieres as M
 import peluche as K
 
-CREME = M.hexa("#fff2d6")                     # la dominante : crème chaud
-CAFE = M.hexa("#8a6040")                      # le dos, le bandeau, la queue
+
+def propres(points, eps=2e-4):
+    """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""
+    sortie = []
+    for q in points:
+        if not sortie or (np.asarray(q, float) - np.asarray(sortie[-1], float)).dot(np.asarray(q, float) - np.asarray(sortie[-1], float)) > eps * eps:
+            sortie.append(q)
+    if len(sortie) < 2:
+        base = sortie[0] if sortie else Vector((0.0, 0.0, 0.0))
+        sortie = [base, Vector(base) + Vector((0.0, 0.0, 0.001))]
+    return sortie
+
+
+CREME = np.array(M.hexa("#fff2d6"))           # la dominante : crème chaud
+CAFE = np.array(M.hexa("#8a6040"))            # la calotte, le dos, le trait de l'œil
 CIEL = M.hexa("#58c0f0")                      # l'accent : la plaque bleu ciel de l'aile
 ROUX = M.hexa("#d88a50")                      # la queue
-CHARBON = M.hexa("#4a3a34")                   # le dessus du bec
+CHARBON = M.hexa("#4a3a34")                   # le dessus du bec, les barres de la queue
 CORNE = M.hexa("#f0dcb8")                     # le dessous du bec
-CORPS = Vector((0.0, 0.040, 0.250))
-TETE = Vector((0.0, -0.040, 0.440))
-LACET, RENVERSE = 44.0, -6.0
+PATTE = M.hexa("#c8aa94")
+CORPS = Vector((0.0, 0.050, 0.235))
+TETE = Vector((0.0, -0.030, 0.445))
+LACET = 38.0
+
+
+def pied():
+    """Un pied : trois doigts devant (vers -Y), un derrière."""
+    def doigt(degres, long):
+        t = math.radians(degres)
+        return A.boule(1.0, 16, 8).etire(0.009, long, 0.008).pose((0.8 * long * math.sin(t), -0.8 * long * math.cos(t), 0), (0, 0, degres))
+    return doigt(-30, 0.032) + doigt(0, 0.036) + doigt(30, 0.032) + doigt(180, 0.020)
 
 
 def construire():
     a = K.Animal("kookaburra")
-    a.taille = 0.60
+    a.taille = 0.50
 
-    # ----- le corps : un petit œuf trapu ; le dos brun, le ventre crème -----
-    corps = A.boule(1.0, 56, 28)
-    v = corps.v
-    t = np.tile(np.asarray(CREME, float), (len(v), 1))
-    t[(v[:, 1] > 0.30) & (v[:, 2] > -0.30)] = CAFE
-    corps.teinte = t
-
+    # ----- le corps : un œuf droit et trapu, la poitrine crème, un peu penché en arrière ; le dos brun -----
     def oeuf(v):
-        return K.bosse(v, (0, -0.9, 0.2), 0.14, 0.45) * [0.118, 0.115, 0.150]
-    G.sillons(corps, [14], 0.004, 1.1)
-    a.piece("corps", corps.sculpte(oeuf), None, pos=CORPS, rot=(-4, 0, 0))
+        v = K.bosse(v, (0, -0.85, 0.10), 0.20, 0.30)
+        s = v * [0.112, 0.124, 0.170]
+        s[:, 0] *= 1 - 0.20 * K.lisse((-v[:, 2] + 0.2) / 1.0)
+        return s
+    corps = A.boule(1.0, 56, 28)
+    corps.teinte = np.where((corps.v[:, 1] > 0.40)[:, None], tuple(CAFE), tuple(CREME))
+    a.piece("corps", corps.sculpte(oeuf), None, pos=CORPS, rot=(-8, 0, 0))
 
-    # ----- la tête : carrée, le crâne brun, le bandeau café ; renversée en arrière -----
-    H = A.repere(TETE, (RENVERSE, 0, LACET))
+    # ----- la tête : GROSSE et ronde, la calotte brune, la gorge et la nuque crème ; un trait brun à travers l'œil -----
+    H = A.repere(TETE, (0, 0, LACET))
     H3 = H.to_3x3()
-    a.piece("tete", A.boule(1.0, 48, 24).sculpte(lambda v: K.emousse(v, 0.80) * [0.092, 0.090, 0.088]), CREME, mat=H)
-    a.piece("calotte", A.boule(1.0, 32, 16).etire(0.086, 0.074, 0.044), CAFE, mat=H @ A.repere((0, 0.016, 0.050)))
-    for c in (1, -1):
-        a.rustine("bandeau_" + ("G" if c > 0 else "D"), "tete", H.to_translation(), H3 @ Vector((c * 0.88, -0.30, 0.08)),
-                  lambda th: 0.20 + 0.36 * abs(math.cos(th)), CAFE, 0.003, 0)
-    a.tete = H @ Vector((0, -0.170, -0.010))
-
-    # ----- le bec : long, épais, DROIT, sombre dessus et clair dessous, sorti bien en avant de la tête ; entrouvert vers le haut -----
-    B = A.cadre(H @ Vector((0, -0.070, -0.012)), H3 @ Vector((0, -1.0, 0.34)), H3 @ Vector((0, 0, 1)))
-    haut = A.tour(A.profil([(0, 0), (0.048, 0.006), (0.050, 0.060), (0.046, 0.150), (0.040, 0.230), (0.028, 0.285), (0.010, 0.310), (0, 0.320)], 6), 32)
-    a.piece("bec_haut", haut.etire(0.82, 0.62, 1.0).pose((0, 0.010, 0)), CHARBON, mat=B, poil=False)
-    bas = A.tour(A.profil([(0, 0), (0.044, 0.006), (0.046, 0.060), (0.042, 0.140), (0.034, 0.210), (0.020, 0.255), (0, 0.272)], 6), 32)
-    a.piece("bec_bas", bas.etire(0.82, 0.50, 1.0).pose((0, -0.064, 0.0), (14, 0, 0)), CORNE, mat=B, poil=False)
+    cr = A.boule(1.0, 56, 28)
+    cr.teinte = np.where((cr.v[:, 2] > 0.42)[:, None], tuple(CAFE), tuple(CREME))
+    a.piece("tete", cr, None, mat=H @ A.repere((0, 0, 0), (0, 0, 0), (0.100, 0.104, 0.098)))
+    a.tete = H @ Vector((0, -0.190, -0.020))
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.72, -0.56, 0.30)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0140)
-        a.piece("lourde_" + nom, K.paupiere(0.0170, 0.02), CAFE, mat=A.cadre(p + n * 0.005, n, H3 @ Vector((0, 0, 1))), poil=False)
+        regard = H3 @ Vector((c * 0.80, -0.50, 0.12))
+        a.rustine("trait_" + nom, "tete", H.to_translation(), regard, 0.30, tuple(CAFE), 0.003, 0)
+        p, n = a.surface("tete", H.to_translation(), regard)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0145)
 
-    # ----- les ailes : deux galets café avec la plaque bleu ciel ; la gauche entrouverte -----
-    for nom, c, rot in (("G", 1, (-10, 0, 26)), ("D", -1, (-8, 0, -4))):
-        aile = A.boule(1.0, 36, 18)
-        t = np.tile(np.asarray(CAFE, float), (len(aile.v), 1))
-        t[(aile.v[:, 2] > -0.10) & (aile.v[:, 2] < 0.55)] = CIEL
-        aile.teinte = t
+    # ----- le bec : ÉNORME, droit, épais à la base, qui part vers l'avant ; le dessus sombre, le dessous clair -----
+    lac = math.radians(LACET)
+    avant = H3 @ Vector((0.0, -1.0, -0.10))
+    haut = A.tour(A.profil([(0, 0), (0.054, 0.008), (0.056, 0.060), (0.044, 0.130), (0.026, 0.200), (0.010, 0.250), (0, 0.268)], 6), 48)
+    a.piece("bec", haut.etire(1.0, 0.86, 1.0), CHARBON, mat=A.cadre(H @ Vector((0, -0.070, -0.010)), avant, Vector((0, 0, 1))), poil=False)
+    bas = A.tour(A.profil([(0, 0), (0.046, 0.006), (0.046, 0.050), (0.034, 0.120), (0.016, 0.190), (0, 0.226)], 6), 40)
+    a.piece("bec_bas", bas.etire(1.0, 0.52, 1.0), CORNE,
+            mat=A.cadre(H @ Vector((0, -0.064, -0.038)), H3 @ Vector((0.0, -1.0, -0.04)), Vector((0, 0, 1))), poil=False)
 
-        def galet(v):
-            s = K.emousse(v, 0.88)
-            s[:, 1] *= 1 - 0.50 * K.lisse((v[:, 2] + 0.2) / 1.2)
-            return s
-        a.piece("aile_" + nom, aile.sculpte(galet).etire(0.030, 0.062, 0.160), None, pos=(c * 0.120, 0.050, 0.235), rot=rot)
+    # ----- les ailes : deux galets bruns serrés sur les flancs, chacun avec sa plaque bleu ciel en haut ; la queue :
+    #       un éventail roux barré de noir, qui dépasse derrière et pend -----
+    for nom, c in (("G", 1), ("D", -1)):
+        aile = A.boule(1.0, 40, 20)
+        aile.teinte = np.where((aile.v[:, 2] > 0.20)[:, None], tuple(CIEL), tuple(CAFE))
+        aile.teinte[aile.v[:, 2] > 0.80] = np.array(CAFE)
+        a.piece("aile_" + nom, aile.etire(0.030, 0.100, 0.130), None, pos=(c * 0.112, 0.070, 0.240), rot=(-6, 0, c * 5))
+    chemin = [(0.0, 0.130, 0.170), (0.0, 0.200, 0.110), (0.0, 0.245, 0.030)]
+    bandes = [(0.18, tuple(ROUX)), (0.30, CHARBON), (0.46, tuple(ROUX)), (0.58, CHARBON), (0.74, tuple(ROUX)), (0.86, CHARBON), (1.0, tuple(CREME))]
+    a.piece("queue", K.tube_peint(A.courbe(propres(chemin), 6), lambda t: 0.044 - 0.010 * t, bandes, 14), None)
 
-    # ----- la queue : roux barré de café, qui pend et se relève ; une seule patte plantée -----
-    queue = A.tour(A.profil([(0, 0), (0.044, 0.008), (0.048, 0.080), (0.042, 0.160), (0.028, 0.225), (0, 0.255)], 6), 28).etire(1.0, 0.36, 1.0)
-    K.bandes(queue, [(0.060, ROUX), (0.100, CAFE), (0.135, ROUX), (0.170, CAFE), (0.205, ROUX), (9, CREME)])
-    a.piece("queue", queue, None, pos=(0, 0.160, 0.255), rot=(128, 0, 0), poil=False)
-    a.piece("patte_D", A.tube(A.courbe([(-0.040, 0.020, 0.140), (-0.044, 0.000, 0.080), (-0.046, -0.026, 0.026)], 5), 0.019, 12),
-            M.hexa("#c8b090"), poil=False)
-    doigts = None
-    for ang in (-26, 0, 26):
-        d = A.boule(1.0, 14, 8).etire(0.012, 0.046, 0.011).pose((0, -0.036, 0.0)).pose((0, 0, 0), (0, 0, ang))
-        doigts = d if doigts is None else doigts + d
-    a.piece("doigts_D", doigts, M.hexa("#c8b090"), pos=(-0.046, -0.026, 0.010), poil=False)
-    a.piece("cuisse_G", A.boule(1.0, 24, 12).etire(0.034, 0.050, 0.042), CREME, pos=(0.062, 0.000, 0.150))
+    # ----- les pattes : courtes et fortes, grises ; un pied à trois doigts devant, un derrière -----
+    for nom, c in (("G", 1), ("D", -1)):
+        ch = [(c * 0.048, 0.030, 0.100), (c * 0.052, 0.020, 0.050), (c * 0.052, 0.010, 0.012)]
+        a.piece("patte_" + nom, A.tube(A.courbe(propres(ch), 5), 0.012, 10), PATTE, poil=False)
+        a.piece("pied_" + nom, pied().pose((c * 0.052, 0.010, 0.010), (0, 0, c * 10)), PATTE, poil=False)
     return a
 
 

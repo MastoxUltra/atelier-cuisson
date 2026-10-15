@@ -42,8 +42,8 @@ def construire():
     def galet(v):
         s = np.zeros_like(v)
         s[:, 0] = 0.115 * v[:, 0] * (1 - 0.35 * np.abs(v[:, 2]))                          # épaisseur (X)
-        s[:, 1] = 0.300 * v[:, 1] + 0.020 * np.clip(-v[:, 1], 0, None) * 0           # longueur (Y)
-        s[:, 2] = 0.360 * v[:, 2]                                                         # hauteur (Z)
+        s[:, 1] = 0.300 * v[:, 1]                                                         # longueur (Y)
+        s[:, 2] = 0.360 * v[:, 2] * (1 - 0.16 * np.clip(-v[:, 1], 0, None) ** 1.5 * (v[:, 2] > 0))    # le front qui fuit vers la bouche
         return s
     corps = A.boule(1.0, 64, 32)
     u = corps.v / np.maximum(np.linalg.norm(corps.v, axis=1, keepdims=True), 1e-9)
@@ -70,11 +70,11 @@ def construire():
     haut = A.decoupe([(0, 0), (0.05, 0.14), (0.12, 0.27), (0.17, 0.43), (0.205, 0.50), (0.21, 0.34), (0.17, 0.18), (0.10, 0.06), (0.14, 0.0)],
                      0.034, 0.010)
     haut.teinte = np.tile(GRIS * 1.08, (len(haut.v), 1))
-    a.piece("dorsale", couche(haut, A.cadre((0.0, 0.050, 1.125), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
+    a.piece("dorsale", couche(haut, A.cadre((0.0, 0.100, 1.120), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
     bas = A.decoupe([(0, 0), (0.05, -0.12), (0.12, -0.24), (0.17, -0.38), (0.20, -0.44), (0.20, -0.30), (0.16, -0.15), (0.10, -0.05), (0.14, 0.0)],
                     0.034, 0.010)
     bas.teinte = np.tile(GRIS * 1.08, (len(bas.v), 1))
-    a.piece("anale", couche(bas, A.cadre((0.0, 0.050, 0.462), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
+    a.piece("anale", couche(bas, A.cadre((0.0, 0.100, 0.468), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
 
     # ----- le visage, sur le côté gauche : l'œil rond sous une paupière lourde, la petite bouche en « o » devant -----
     CENTRE = Vector((0.0, 0.0, 0.790))
@@ -90,12 +90,27 @@ def construire():
 
     # ----- deux petites pectorales, qui battent comme des mains ; la gauche pendante -----
     for nom, c in (("G", 1), ("D", -1)):
-        pec = A.boule(1.0, 20, 10).etire(0.014, 0.060, 0.058)
+        pec = A.boule(1.0, 24, 12).etire(0.014, 0.078, 0.086)
         pec.teinte = np.tile(GRIS * 1.1, (len(pec.v), 1))
-        a.piece("pectorale_" + nom, pec, None, pos=(c * 0.100, -0.060, 0.680), rot=(0, 0, c * -26), poil=False)
+        a.piece("pectorale_" + nom, pec, None, pos=(c * 0.108, 0.010, 0.760), rot=(0, 0, c * -22), poil=False)
+    # la fente des ouïes : un trait brodé derrière l'œil, de chaque côté
+    for c in (1, -1):
+        pts = []
+        for u_ in np.linspace(0.0, 1.0, 6):
+            q = a.trace("corps", CENTRE, [Vector((c * 0.95, -0.10 + 0.06 * u_, 0.34 - 0.62 * u_))], 0.002)
+            if q:
+                pts.append(q[0])
+        if len(pts) > 1:
+            a.broderie("ouie_" + ("G" if c > 0 else "D"), A.courbe(pts, 3), 0.0030, FIL)
     if TOURNE:
         O.tourner(a, TOURNE)
     return a
+
+
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "poisson")
 
 
 if __name__ == "__main__":

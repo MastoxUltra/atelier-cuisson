@@ -134,6 +134,12 @@ def construire():
     return a
 
 
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "poisson")
+
+
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("dragon_de_mer_feuillu", styles.style_de("dragon_de_mer_feuillu"), sys.modules[__name__]),

@@ -113,6 +113,12 @@ def construire():
     return a
 
 
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "quad", souple=True)
+
+
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("lezard_de_lave", styles.style_de("lezard_de_lave"), sys.modules[__name__]), "Lézard de lave")

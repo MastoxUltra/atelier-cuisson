@@ -58,16 +58,37 @@ def construire():
         etoile = etoile + bras(90 + 72 * k + 36, leve=0.075 if k == 4 else 0.0)
     a.piece("etoile", etoile, CORAIL, motif=("pois", POIS))
 
-    # ----- le visage cousu sur le centre : deux boutons et un sourire -----
-    centre = Vector((0.0, 0.0, 0.040))
+    # ----- le visage cousu sur le centre : deux boutons et un sourire. Les points sont calculés sur le dôme (une ellipsoïde)
+    #       au lieu d'un lancer de rayons : le vrai Blender donnait ici des points confondus et une fiche vide -----
+    def dome(d):
+        """Le point du dôme et sa normale, dans la direction d (de l'étoile vers le haut), depuis le centre (0, 0, 0.040)."""
+        d = Vector(d).normalized()
+        o = Vector((0.0, 0.0, 0.040 - 0.046))
+        rx, ry, rz = 0.088, 0.088, 0.058
+        qa = (d.x / rx) ** 2 + (d.y / ry) ** 2 + (d.z / rz) ** 2
+        qb = 2.0 * (o.x * d.x / rx ** 2 + o.y * d.y / ry ** 2 + o.z * d.z / rz ** 2)
+        qc = (o.x / rx) ** 2 + (o.y / ry) ** 2 + (o.z / rz) ** 2 - 1.0
+        s_ = (-qb + math.sqrt(max(qb * qb - 4.0 * qa * qc, 0.0))) / (2.0 * qa)
+        q = o + d * s_
+        n = Vector((q.x / rx ** 2, q.y / ry ** 2, q.z / rz ** 2)).normalized()
+        return Vector((q.x, q.y, q.z + 0.046)), n
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("etoile", centre, Vector((c * 0.34, -0.40, 0.85)))
+        pos, n = dome((c * 0.34, -0.40, 0.85))
         a.bouton("oeil_" + nom, pos + n * 0.001, n, 0.020)
-    sourire = [Vector((0.46 * u, -0.78, 0.50 + 0.22 * u * u)) for u in np.linspace(-1, 1, 9)]
-    a.broderie("sourire", A.courbe(a.trace("etoile", centre, sourire, 0.002), 4), 0.0022, FIL)
+    pts = []
+    for u in np.linspace(-1, 1, 9):
+        p_, n_ = dome((0.46 * u, -0.78, 0.50 + 0.22 * u * u))
+        pts.append(tuple(p_ + n_ * 0.002))
+    a.broderie("sourire", A.courbe(pts, 4), 0.0022, FIL)
 
     a.tete = Vector((0.0, -0.040, 0.100))
     return a
+
+
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "fixe")
 
 
 if __name__ == "__main__":

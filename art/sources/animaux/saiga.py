@@ -130,3 +130,118 @@ def construire():
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("saiga", styles.style_de("saiga"), sys.modules[__name__]), "Saïga")
+
+
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py saiga). Les mesures sont celles du modèle, avant a.taille.
+
+from poses import Pose, borne, cloche, onde
+
+JAMBE = 0.56                                        # de l'épaule (ou de la hanche) au sol
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, 0.26, 0.58)),         # les hanches : il se penche, se cabre, se couche autour
+    ("cou", "corps", (0.0, -0.20, 0.64)),
+    ("tete", "cou", (0.0, -0.37, 0.70)),            # la nuque
+    ("trompe", "tete", (0.0, -0.45, 0.75)),         # la racine du nez : il se balance et frémit
+    ("oreille_G", "tete", (0.060, -0.44, 0.76)),
+    ("patte_av_G", "corps", (0.095, -0.20, 0.60)),  # l'épaule
+    ("patte_ar_G", "corps", (0.100, 0.25, 0.60)),   # la hanche
+    ("queue", "corps", (0.0, 0.34, 0.58)),
+]
+
+PORTEURS = [("corps", "corps"), ("cou", "cou"), ("tete", "tete"), ("trompe", "trompe"), ("narine", "trompe"), ("oeil", "tete"),
+            ("lourde", "tete"), ("corne", "tete"), ("oreille", "oreille", True), ("patte_av", "patte_av", True),
+            ("sabot_av", "patte_av", True), ("patte_ar", "patte_ar", True), ("sabot_ar", "patte_ar", True), ("queue", "queue"),
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+
+def repos(t):
+    """Debout, il respire ; l'énorme nez se balance et frémit ; il tourne la tête, une oreille puis l'autre pivote ; la queue claque."""
+    p = Pose()
+    r, b = onde(t, 2), onde(t, 1)
+    g, d = cloche(t, 0.28, 0.17), cloche(t, 0.72, 0.13)
+    p.add("corps", ech=(1 + 0.010 * r, 1, 1 + 0.016 * r))
+    p.add("cou", rot=(2 * r, 0, 8 * g - 6 * d))
+    p.add("tete", rot=(2 * g, -4 * g + 3 * d, 16 * g - 12 * d))
+    p.add("trompe", rot=(7 * onde(t, 2, 0.15), 0, 5 * onde(t, 1, 0.3)), ech=(1, 1, 1 + 0.03 * r))
+    p.add("oreille_G", rot=(0, 0, 24 * cloche(t, 0.50, 0.05) - 8 * g))
+    p.add("oreille_D", rot=(0, 0, -24 * cloche(t, 0.90, 0.05) + 6 * d))
+    p.add("queue", rot=(0, 0, 10 * cloche(t, 0.44, 0.04) - 10 * cloche(t, 0.50, 0.04)))
+    p.ouvert = borne(1 - 0.30 * g - cloche(t, 0.06, 0.02) - cloche(t, 0.60, 0.02))
+    return p
+
+
+def avance(t):
+    """Le trot menu de la steppe : les pattes vont par diagonales, le corps ne bouge presque pas, la tête dodeline,
+    et le grand nez balance d'un côté à l'autre."""
+    p = Pose()
+    c, s = math.cos(math.tau * t), math.sin(math.tau * t)
+    pas = 26.0
+    creux = JAMBE * (1 - math.cos(math.radians(pas * s)))
+    p.add("corps", pos=(0, 0, -creux), rot=(1.0 * onde(t, 2, 0.1), 3 * c, 2 * s))
+    for nom, sens in (("patte_av_G", 1), ("patte_ar_D", 1), ("patte_av_D", -1), ("patte_ar_G", -1)):
+        p.add(nom, rot=(pas * sens * s, 0, 0), pos=(0, 0, 0.035 * max(0.0, -sens * c)))
+    p.add("cou", rot=(-4 + 2 * onde(t, 2, -0.1), 0, -2 * s))
+    p.add("tete", rot=(4 - 3 * onde(t, 2, -0.2), -2 * c, -2 * s))
+    p.add("trompe", rot=(10 * onde(t, 2, -0.1), 0, 14 * onde(t, 1, 0.1)))
+    p.paire("oreille", rot=(-8 + 4 * onde(t, 2, -0.25), 0, 0))
+    p.add("queue", rot=(-6, 0, -10 * s))
+    return p
+
+
+def mange(t):
+    """Il baisse la tête jusqu'à l'herbe, le nez en avant, quelques bouchées qui font frémir la trompe, puis relève la tête."""
+    p = Pose()
+    leve = cloche(t, 0.84, 0.15)
+    bas = 1 - leve
+    coups = max(0.0, onde(t, 4)) ** 2 * bas
+    p.add("cou", rot=(40 * bas + 4 * coups, 0, 5 * leve))
+    p.add("tete", rot=(22 * bas + 6 * coups, -3 * leve, 12 * leve))
+    p.add("trompe", rot=(8 * coups - 10 * bas, 0, 6 * onde(t, 4) * bas))
+    p.paire("patte_av", rot=(-8 * bas, 0, 0))
+    p.paire("oreille", rot=(-6 * bas + 5 * leve, 0, 0))
+    p.add("queue", rot=(0, 0, -8 * onde(t, 2)))
+    p.ouvert = borne(1 - cloche(t, 0.70, 0.03))
+    return p
+
+
+def joie(t):
+    """Il bondit sur place les quatre pattes raides, comme les antilopes qui « pronkent », deux fois de suite, le nez qui
+    flotte, les oreilles en arrière, la queue en l'air."""
+    p = Pose()
+    tasse = cloche(t, 0.10, 0.10, False)
+    saut = max(0.0, onde(t, 2, -0.25)) * cloche(t, 0.58, 0.40, False)
+    vol = 0.30 * saut
+    salut = cloche(t, 0.88, 0.10, False)
+    p.add("corps", pos=(0, 0, -0.05 * tasse + vol), rot=(-6 * saut + 6 * tasse, 0, 0))
+    p.paire("patte_av", rot=(-8 * saut, 0, 0))
+    p.paire("patte_ar", rot=(10 * saut, 0, 0))
+    p.add("cou", rot=(-10 * saut + 12 * salut, 0, 0))
+    p.add("tete", rot=(-6 * saut, 0, 0))
+    p.add("trompe", rot=(-20 * saut + 6 * salut, 0, 8 * onde(t, 4) * saut))
+    p.paire("oreille", rot=(-20 * saut, 0, 0))
+    p.add("queue", rot=(-30 * saut, 0, 0))
+    return p
+
+
+def dort(t):
+    """Couché sur le flanc, pattes allongées, la tête reposée sur le sol de côté, le nez qui bat doucement."""
+    p = Pose()
+    r = onde(t, 1)
+    p.ouvert = 0.0
+    p.add("corps", pos=(0, 0, -0.30), rot=(0, 0, 0), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.paire("patte_av", rot=(-72, 0, 14))
+    p.paire("patte_ar", rot=(70, 0, 10))
+    p.add("cou", rot=(34, 0, 48))
+    p.add("tete", rot=(18, 6, 30))
+    p.add("trompe", rot=(10 + 4 * onde(t, 1, 0.1), 0, 0))
+    p.paire("oreille", rot=(-26, 0, 0))
+    p.add("oreille_D", rot=(0, 0, -12 * cloche(t, 0.60, 0.05)))
+    p.add("queue", rot=(10, 0, 12))
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}

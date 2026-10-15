@@ -1,7 +1,8 @@
-"""Le diable de Tasmanie en peluche de magasin (3e dessin) : un corps bas et massif posé sur des pattes courtes et
-écartées, un charbon profond, le plastron blanc en croissant et la tache blanche de croupe ; une tête PLUS LARGE QUE
-LES ÉPAULES, plate devant, taillée en coin, et deux mâchoires séparées, grandes ouvertes : une gueule rose, deux crocs
-en haut, deux en bas. Les oreilles rouge sang dressées. Il hurle : le museau levé, tout le corps ramassé et tendu.
+"""Le diable de Tasmanie en peluche de magasin (4e dessin, repris d'une autre base : un quadrupède trapu à la façon de
+la mouffette, pas un monstre à la bouche ouverte) : un petit fauve noir et ramassé, le dos arqué et la croupe basse, une
+TÊTE énorme, large et lourde portée bas, le museau court et la gueule fermée, de petits yeux, des oreilles rondes qui
+rougissent, de courtes pattes épaisses, une queue courte et grasse, et une barre blanche en travers de la poitrine. Il
+avance la tête basse, un œil sur nous : il a l'air de mauvaise humeur, c'est son métier.
 
     python diable_de_tasmanie.py        fabrique la fiche art/apercus/animaux/diable_de_tasmanie.png (peluche de magasin, palier 4)
 """
@@ -18,71 +19,101 @@ import atelier as A
 import matieres as M
 import peluche as K
 
+
+def propres(points, eps=2e-4):
+    """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""
+    sortie = []
+    for q in points:
+        if not sortie or (np.asarray(q, float) - np.asarray(sortie[-1], float)).dot(np.asarray(q, float) - np.asarray(sortie[-1], float)) > eps * eps:
+            sortie.append(q)
+    if len(sortie) < 2:
+        base = sortie[0] if sortie else Vector((0.0, 0.0, 0.0))
+        sortie = [base, Vector(base) + Vector((0.0, 0.0, 0.001))]
+    return sortie
+
+
 # le style B adoucit les couleurs (vers leur gris) : le noir reste noir, le blanc doit rester franc
-CHARBON = M.hexa("#3a3638")                   # la dominante : charbon profond
-BLANC = M.hexa("#fffaf2")                     # l'accent : le plastron, la tache de croupe, les crocs
-ROUGE = M.hexa("#ee3040")                     # les oreilles (rouge sang)
-ROSE = M.hexa("#f07888")                      # l'intérieur de la gueule
-CORPS = Vector((0.0, 0.200, 0.200))
-TETE = Vector((0.0, -0.250, 0.300))
-LACET = 18.0
+CHARBON = np.array(M.hexa("#3a3638"))         # la dominante : charbon profond
+BLANC = M.hexa("#fffaf2")                     # l'accent : la barre de la poitrine
+CENDRE = np.array(M.hexa("#7a7478"))          # le dessous du museau, le dessous des pattes
+OREILLE = M.hexa("#e0586a")                   # le dedans des oreilles : elles rougissent
+NEZ = M.hexa("#b8606c")
+LACET, PIQUE = 30.0, -6.0
+PAS = 0.006
+
+
+def lisser(r, n=5):
+    k = np.ones(n) / n
+    return np.convolve(np.pad(r, n // 2, mode="edge"), k, "valid")
+
+
+def fuseau(points, longueur, cotes=56, pas=PAS):
+    s = np.arange(pas, longueur - pas, pas)
+    f, r = zip(*points)
+    rayons = lisser(np.interp(s / longueur, f, r), 7)
+    return A.tour([(0.0, 0.0)] + [(float(ri), float(si)) for ri, si in zip(rayons, s)] + [(0.0, float(longueur))], cotes)
 
 
 def construire():
     a = K.Animal("diable_de_tasmanie")
-    a.taille = 0.90
+    a.taille = 0.75
 
-    # ----- le corps : bas, massif, large (plus étroit que la tête), le dos plat ; le plastron en croissant -----
-    def masse(v):
-        v = K.bosse(v, (0, -0.60, 0.40), 0.12, 0.45)
-        s = v * [0.200, 0.340, 0.170]
-        s[:, 2] = np.where(s[:, 2] < 0, s[:, 2] * 0.85, s[:, 2])
-        return s
-    a.piece("corps", A.boule(1.0, 56, 28).sculpte(masse), CHARBON, pos=CORPS)
-    a.rustine("plastron", "corps", CORPS + Vector((0, -0.060, 0.030)), (0, -0.96, 0.24),
-              lambda th: 0.32 + 0.26 * max(0.0, math.sin(th)), BLANC, 0.004, 0)
-    a.rustine("croupe", "corps", CORPS, (0.66, 0.62, 0.24), 0.26, BLANC, 0.004, 0)
+    # ----- le corps : un tonneau court et lourd, le dos arqué (le haut aux épaules), la croupe basse et large -----
+    fil = K.Fil([(0.0, y, z) for y, z in ((0.320, 0.150), (0.170, 0.205), (0.000, 0.240), (-0.150, 0.250), (-0.250, 0.225))], (1, 0, 0))
+    L = fil.long
+    corps = fuseau([(0.0, 0.0), (0.04, 0.090), (0.16, 0.130), (0.46, 0.145), (0.76, 0.142), (0.93, 0.118), (0.985, 0.075), (1.0, 0.0)], L, 72)
+    th = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
+    corps.teinte = np.where((th > 2.5)[:, None], CENDRE, CHARBON)
+    a.piece("corps", corps.sculpte(fil.couche), None)
+    # la barre blanche : une large bande en croissant en travers de la poitrine (devant, de flanc à flanc)
+    a.rustine("poitrine", "corps", Vector((0.0, -0.100, 0.190)), Vector((0.0, -0.90, -0.34)), 0.42, BLANC, 0.003, 0)
 
-    # ----- la tête : un coin large et PLAT devant (la mâchoire du haut), plus large que les épaules ; levée pour hurler -----
-    H = A.repere(TETE, (-26, 0, LACET))
-    H3 = H.to_3x3()
-
-    def coin(v):
-        s = K.emousse(v, 0.80)
-        s[:, 0] *= 1 + 0.20 * K.lisse((-v[:, 1] + 0.1) / 0.9)                      # s'élargit vers l'avant
-        s[:, 1] = np.where(v[:, 1] < 0, v[:, 1] * 0.66, v[:, 1])                    # plat devant
-        return s * [0.250, 0.200, 0.110]
-    a.piece("tete", A.boule(1.0, 56, 28).sculpte(coin), CHARBON, mat=H @ A.repere((0, 0, 0.040)))
-    a.piece("nez", A.boule(1.0, 24, 12).etire(0.040, 0.026, 0.020), M.hexa("#c07070"), mat=H @ A.repere((0, -0.150, 0.056)), poil=False)
-    a.tete = H @ Vector((0, -0.170, 0.000))
-
-    # ----- la mâchoire du bas : une pièce à part, abaissée loin, large ; entre les deux, la gueule rose ; deux crocs en haut,
-    #       deux en bas -----
-    bas = A.boule(1.0, 40, 20).sculpte(lambda v: K.emousse(v, 0.82) * [0.200, 0.150, 0.056])
-    a.piece("machoire", bas, CHARBON, mat=H @ A.repere((0, -0.090, -0.140), (34, 0, 0)))
-    a.piece("gueule", A.boule(1.0, 32, 16).etire(0.170, 0.120, 0.034), ROSE, mat=H @ A.repere((0, -0.090, -0.052), (18, 0, 0)), poil=False)
-    for c in (1, -1):
-        a.piece("croc_h_" + ("G" if c > 0 else "D"), A.tour(A.profil([(0, 0), (0.020, 0.004), (0.012, 0.040), (0.004, 0.066), (0, 0.074)], 5), 14),
-                BLANC, mat=H @ A.repere((c * 0.074, -0.140, -0.010), (178, 0, 0)), poil=False)
-        a.piece("croc_b_" + ("G" if c > 0 else "D"), A.tour(A.profil([(0, 0), (0.020, 0.004), (0.012, 0.040), (0.004, 0.066), (0, 0.074)], 5), 14),
-                BLANC, mat=H @ A.repere((c * 0.066, -0.150, -0.148), (-10, 0, 0)), poil=False)
-
-    # ----- les yeux : minuscules, serrés, sous une arcade ; les oreilles : deux feuilles rouge sang dressées -----
+    # ----- le cou fort et la TÊTE : large, lourde, portée bas ; le museau court, la gueule fermée -----
+    a.piece("cou", A.tube(A.courbe([(0.0, -0.200, 0.235), (0.0, -0.290, 0.225), (0.0, -0.350, 0.205)], 5), lambda t: 0.125 - 0.012 * t, 24), tuple(CHARBON))
+    T = A.cadre(Vector((0.0, -0.400, 0.215)), Vector((0.50, -1.0, -0.22)).normalized(), Vector((0, 0, 1)))
+    T3 = T.to_3x3()
+    tete = fuseau([(0.0, 0.0), (0.06, 0.082), (0.22, 0.118), (0.46, 0.114), (0.70, 0.094), (0.90, 0.074), (0.98, 0.048), (1.0, 0.0)], 0.290, 64, 0.005)
+    tete.v[:, 0] *= 1.10
+    tete.v[:, 1] *= 0.90
+    tt = np.tile(CHARBON, (len(tete.v), 1))
+    tt[(np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3) & (tete.v[:, 2] > 0.12)] = CENDRE
+    tete.teinte = tt
+    a.piece("tete", tete, None, mat=T @ A.repere((0, 0, -0.100)))
+    a.piece("nez", A.boule(1.0, 24, 12).etire(0.034, 0.024, 0.022), NEZ, mat=T @ A.repere((0.0, 0.010, 0.182)), poil=False)
+    a.tete = T @ Vector((0, 0.0, 0.140))
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation() + Vector((0, 0, 0.040)), H3 @ Vector((c * 0.58, -0.62, 0.50)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0140)
-        po = A.profil([(0, 0), (0.046, 0.010), (0.062, 0.046), (0.056, 0.086), (0.030, 0.116), (0, 0.132)], 6)
-        E = A.cadre(H @ Vector((c * 0.150, 0.050, 0.100)), H3 @ Vector((c * 0.34, 0.14, 0.92)), H3 @ Vector((c * 0.3, -0.9, 0.0)))
-        a.piece("oreille_" + nom, A.tour(po, 28).etire(1.0, 0.34, 1.0), CHARBON, mat=E)
-        a.piece("pavillon_" + nom, A.tour(po, 20).etire(0.72, 0.30, 0.82).pose((0, 0.008, 0.012)), ROUGE, mat=E, poil=False)
+        regard = T3 @ Vector((c * 0.62, 0.50, 0.50))
+        a.rustine("amande_" + nom, "tete", T @ Vector((0, 0.0, 0.020)), regard, 0.26, tuple(CENDRE), 0.003, 0)
+        p, n = a.surface("tete", T @ Vector((0, 0.0, 0.020)), regard)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0135)
+        # l'oreille : ronde, plantée haut sur le côté, le dedans qui rougit
+        po, no = a.surface("tete", T @ Vector((0, 0.0, 0.0)), T3 @ Vector((c * 0.66, 0.72, -0.28)))
+        face, dresse = T3 @ Vector((c * 0.55, 0.45, 0.70)), no + T3 @ Vector((0, 0.2, -0.9))
+        E = A.cadre(po + no * 0.010, face, dresse)
+        a.piece("oreille_" + nom, A.boule(1.0, 28, 14).etire(0.046, 0.052, 0.016), tuple(CHARBON), mat=E)
+        a.piece("dedans_" + nom, A.boule(1.0, 24, 12).etire(0.030, 0.036, 0.008), OREILLE, mat=E @ A.repere((0, -0.002, 0.011)), poil=False)
+    bouche = a.trace("tete", T @ Vector((0, 0.0, 0.110)), [T3 @ Vector(d) for d in ((0.30, -0.90, 0.30), (0.62, -0.72, 0.10), (0.84, -0.40, -0.02))], 0.004)
+    a.broderie("bouche", A.courbe(propres(bouche), 4), 0.0028, tuple(CENDRE))
 
-    # ----- les pattes : courtes, épaisses et écartées sur les côtés, les pieds posés à plat ; la queue : un bout court -----
-    for nom, x, y in (("av_G", 0.250, -0.080), ("av_D", -0.250, -0.080), ("ar_G", 0.240, 0.380), ("ar_D", -0.240, 0.380)):
-        c = 1 if x > 0 else -1
-        chemin = [(x * 0.70, y, 0.160), (x * 1.00, y - 0.010, 0.090), (x * 1.12, y - 0.030, 0.034)]
-        a.piece("patte_" + nom, A.tube(A.courbe(chemin, 5), 0.062, 16), CHARBON)
-        a.piece("pied_" + nom, A.boule(1.0, 24, 12).etire(0.062, 0.090, 0.030), CHARBON, pos=(x * 1.14, y - 0.070, 0.030), rot=(0, 0, c * 14))
-    a.piece("queue", A.boule(1.0, 24, 12).etire(0.044, 0.130, 0.044), CHARBON, pos=(0, 0.540, 0.150), rot=(-12, 0, 0))
+    # ----- les pattes : courtes, épaisses, l'épaule et la cuisse fondues dans le corps ; les postérieures plus coudées ;
+    #       de larges pieds ronds -----
+    def patte(pts, r0):
+        ft = K.Fil(pts, (1, 0, 0))
+        m = fuseau([(0.0, r0), (0.30, r0 * 0.84), (0.62, r0 * 0.66), (0.90, r0 * 0.60), (1.0, 0.0)], ft.long, 28, 0.006)
+        m.teinte = np.tile(CHARBON, (len(m.v), 1))
+        return m.sculpte(ft.couche)
+    for nom, c in (("G", 1), ("D", -1)):
+        av = [(c * 0.100, -0.170, 0.215), (c * 0.108, -0.190, 0.120), (c * 0.108, -0.200, 0.032)]
+        a.piece("patte_av_" + nom, patte(av, 0.074), None)
+        a.piece("pied_av_" + nom, A.boule(1.0, 24, 12).etire(0.054, 0.070, 0.030), tuple(CHARBON), pos=(c * 0.108, -0.222, 0.030))
+        ar = [(c * 0.110, 0.200, 0.205), (c * 0.130, 0.150, 0.120), (c * 0.118, 0.215, 0.036)]
+        a.piece("patte_ar_" + nom, patte(ar, 0.084), None)
+        a.piece("pied_ar_" + nom, A.boule(1.0, 24, 12).etire(0.054, 0.078, 0.030), tuple(CHARBON), pos=(c * 0.118, 0.195, 0.030))
+    # la queue : courte et grasse, qui se termine en pointe émoussée
+    qf = K.Fil([(0.0, 0.290, 0.170), (0.0, 0.370, 0.160), (0.0, 0.450, 0.130), (0.020, 0.510, 0.090)], (1, 0, 0))
+    queue = fuseau([(0.0, 0.066), (0.30, 0.060), (0.75, 0.044), (0.94, 0.028), (1.0, 0.0)], qf.long, 32, 0.006)
+    queue.teinte = np.tile(CHARBON, (len(queue.v), 1))
+    a.piece("queue", queue.sculpte(qf.couche), None)
     return a
 
 

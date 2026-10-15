@@ -24,14 +24,28 @@ _tube_origine = A.tube
 
 
 def _tube_sur(chemin, rayon, cotes=10):
-    ch = np.asarray(chemin, float)
-    garde_ = [0]
-    for i in range(1, len(ch)):
-        if np.linalg.norm(ch[i] - ch[garde_[-1]]) > 1e-4:
-            garde_.append(i)
-    ch = ch[garde_]
+    """A.tube sans division par zéro : points non finis écartés ; points confondus (à 0,1 mm) fondus en un ; pointes (un point
+    dont les deux voisins se confondent : l'aller-retour A, B, A) retirées ; jamais moins de deux points."""
+    ch = np.asarray(chemin, float).reshape(-1, 3)
+    ch = ch[np.isfinite(ch).all(axis=1)]
+    change = True
+    while change and len(ch) >= 2:
+        change = False
+        garde_ = [0]
+        for i in range(1, len(ch)):
+            if np.linalg.norm(ch[i] - ch[garde_[-1]]) > 1e-4:
+                garde_.append(i)
+        if len(garde_) != len(ch):
+            ch = ch[garde_]
+            change = True
+        for i in range(1, len(ch) - 1):
+            if np.linalg.norm(ch[i + 1] - ch[i - 1]) < 1e-4:
+                ch = np.delete(ch, i, axis=0)
+                change = True
+                break
     if len(ch) < 2:
-        ch = np.vstack([ch[0], ch[0] + np.array([0.0, 0.0, 1e-3])])
+        base = ch[0] if len(ch) else np.zeros(3)
+        ch = np.vstack([base, base + np.array([0.0, 0.0, 1e-3])])
     return _tube_origine(ch, rayon, cotes)
 
 

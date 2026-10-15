@@ -118,3 +118,108 @@ def construire():
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("fennec", styles.style_de("fennec"), sys.modules[__name__]), "Fennec")
+
+
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py fennec). Les mesures sont celles du modèle (couché comme un sphinx), avant a.taille.
+# Couché, il ne marche pas : il RAMPE, le ventre bas, une patte avant puis l'autre, et les oreilles tournent.
+
+from poses import Pose, borne, cloche, onde
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, 0.14, 0.09)),            # les hanches : il respire, roule, se couche autour
+    ("cou", "corps", (0.0, -0.12, 0.14)),
+    ("tete", "cou", (0.0, -0.19, 0.24)),               # la nuque
+    ("oreille_G", "tete", (0.045, -0.215, 0.30)),      # la base de l'oreille
+    ("patte_av_G", "corps", (0.056, -0.05, 0.14)),     # l'épaule
+    ("cuisse_G", "corps", (0.080, 0.14, 0.08)),        # la hanche : la cuisse et le pied arrière
+    ("queue", "corps", (0.0, 0.19, 0.08)),             # le panache, d'un seul os
+]
+
+PORTEURS = [("corps", "corps"), ("cou", "cou"), ("tete", "tete"), ("nez", "tete"), ("cerne", "tete"), ("oeil", "tete"),
+            ("amande", "tete"), ("oreille", "oreille", True), ("pavillon", "oreille", True), ("patte_av", "patte_av", True),
+            ("cuisse", "cuisse", True), ("pied_ar", "cuisse", True), ("queue", "queue"),
+            # les yeux sont posés un par un : leurs paupières s'appellent paupiere_0 et paupiere_1, chacune sur son os
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+
+def repos(t):
+    """Couché, il respire ; il tourne la tête d'un côté, puis de l'autre, une oreille puis l'autre qui pivotent ; le panache balance."""
+    p = Pose()
+    r = onde(t, 2)
+    g, d = cloche(t, 0.28, 0.16), cloche(t, 0.72, 0.12)
+    p.add("corps", ech=(1 + 0.010 * r, 1, 1 + 0.022 * r))
+    p.add("cou", rot=(2 * r, 0, 10 * g - 8 * d))
+    p.add("tete", rot=(3 * g, -6 * g + 4 * d, 18 * g - 14 * d))
+    p.add("oreille_G", rot=(0, 0, 26 * cloche(t, 0.50, 0.05) - 10 * g))
+    p.add("oreille_D", rot=(0, 0, -26 * cloche(t, 0.90, 0.05) + 8 * d))
+    p.add("queue", rot=(0, 0, -9 * onde(t, 1)))
+    p.ouvert = borne(1 - 0.35 * g - cloche(t, 0.08, 0.02) - cloche(t, 0.60, 0.02))
+    return p
+
+
+def avance(t):
+    """Il rampe : les pattes avant tirent chacune à son tour, la croupe suit, la tête reste basse, les oreilles couchées."""
+    p = Pose()
+    c, s = math.cos(math.tau * t), math.sin(math.tau * t)
+    p.add("corps", pos=(0, 0, 0.008 * abs(s)), rot=(0, 2 * c, 3 * s))
+    p.add("patte_av_G", rot=(-22 * max(0.0, s), 0, 0))
+    p.add("patte_av_D", rot=(-22 * max(0.0, -s), 0, 0))
+    p.add("cuisse_G", rot=(-9 * max(0.0, -s), 0, 0))
+    p.add("cuisse_D", rot=(-9 * max(0.0, s), 0, 0))
+    p.add("cou", rot=(6, 0, -3 * s))
+    p.add("tete", rot=(-4 + 2 * onde(t, 2), -2 * c, -3 * s))
+    p.paire("oreille", rot=(-10 + 4 * onde(t, 2, -0.25), 0, 0))
+    p.add("queue", rot=(0, 0, -16 * s))
+    return p
+
+
+def mange(t):
+    """Le museau au sable : il flaire, trois petites becquées, puis il relève la tête et mâche, les oreilles dressées."""
+    p = Pose()
+    leve = cloche(t, 0.84, 0.15)
+    bas = 1 - leve
+    coups = max(0.0, onde(t, 4)) ** 2 * bas
+    p.add("cou", rot=(28 * bas + 4 * coups, 0, 6 * leve))
+    p.add("tete", rot=(18 * bas + 8 * coups + 3 * leve * onde(t, 12), -4 * leve, 14 * leve))
+    p.paire("oreille", rot=(-8 * bas + 4 * leve, 0, 0))
+    p.add("queue", rot=(0, 0, -6 * onde(t, 2)))
+    p.ouvert = borne(1 - cloche(t, 0.70, 0.03))
+    return p
+
+
+def joie(t):
+    """Il se tasse, bondit droit en l'air toutes pattes repliées, les oreilles dressées, retombe, et fouette du panache."""
+    p = Pose()
+    tasse = cloche(t, 0.12, 0.12, False)
+    vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
+    salut = cloche(t, 0.70, 0.16, False)
+    fouet = onde(t, 6) * cloche(t, 0.78, 0.20, False)
+    p.add("corps", pos=(0, 0, -0.02 * tasse + 0.16 * vol), rot=(-14 * vol + 8 * salut, 0, 0))
+    p.paire("patte_av", rot=(-40 * vol, 0, 0))
+    p.paire("cuisse", rot=(-30 * vol, 0, 0))
+    p.add("cou", rot=(-8 * vol + 10 * tasse, 0, 0))
+    p.add("tete", rot=(-8 * vol, 0, 0))
+    p.paire("oreille", rot=(-30 * vol, 0, 0))
+    p.add("queue", rot=(-20 * vol, 0, -24 * fouet))
+    return p
+
+
+def dort(t):
+    """Roulé sur lui-même : la tête posée sur les pattes avant, une oreille rabattue, le panache ramené sur le museau."""
+    p = Pose()
+    r = onde(t, 1)
+    p.ouvert = 0.0
+    p.add("corps", pos=(0, 0, -0.012), ech=(1 + 0.014 * r, 1, 1 + 0.030 * r))
+    p.add("cou", rot=(24, 0, 48))
+    p.add("tete", rot=(6, 8, 36))
+    p.paire("oreille", rot=(-26, 0, 0))
+    p.add("oreille_D", rot=(0, 0, -16 * cloche(t, 0.55, 0.05)))
+    p.add("patte_av_G", rot=(0, 0, 10))
+    p.add("queue", rot=(0, 0, 78))
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}

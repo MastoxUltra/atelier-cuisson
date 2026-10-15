@@ -95,3 +95,95 @@ def construire():
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("koala", styles.style_de("koala"), sys.modules[__name__]), "Koala")
+
+
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py koala). Les mesures sont celles du modèle, avant a.taille.
+# Le dormeur : assis le dos rond, les bras serrés contre lui comme autour d'un tronc.
+
+from poses import Pose, borne, cloche, onde
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, 0.07, 0.15)),            # le bassin : il se penche, se dandine, se roule autour
+    ("tete", "corps", (0.0, -0.10, 0.40)),             # la nuque
+    ("oreille_G", "tete", (0.120, -0.10, 0.54)),       # la base du gros disque
+    ("bras_G", "corps", (0.130, -0.03, 0.33)),         # l'épaule : le bras et la main
+    ("cuisse_G", "corps", (0.110, -0.04, 0.12)),       # la hanche : la cuisse et le pied
+]
+
+PORTEURS = [("corps", "corps"), ("tete", "tete"), ("nez", "tete"), ("bouche", "tete"), ("oeil", "tete"), ("lourde", "tete"),
+            ("oreille", "oreille", True), ("fourrure", "oreille", True), ("bras", "bras", True), ("main", "bras", True),
+            ("cuisse", "cuisse", True), ("pied", "cuisse", True), ("queue", "corps"),
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+
+def repos(t):
+    """Assis le dos rond, il respire lentement, la tête dodeline, une oreille tressaille, les paupières lourdes."""
+    p = Pose()
+    r = onde(t, 2)
+    g, d = cloche(t, 0.30, 0.18), cloche(t, 0.74, 0.14)
+    p.add("corps", ech=(1 + 0.012 * r, 1, 1 + 0.020 * r))
+    p.add("tete", rot=(3 * d - 2 * g, -4 * g + 3 * d, 16 * g - 12 * d))
+    p.add("oreille_G", rot=(0, 0, 18 * cloche(t, 0.50, 0.05)))
+    p.add("oreille_D", rot=(0, 0, -18 * cloche(t, 0.88, 0.05)))
+    p.paire("bras", rot=(2 * r, 0, 0))
+    p.ouvert = borne(0.85 - 0.45 * g - cloche(t, 0.10, 0.03) - cloche(t, 0.62, 0.03))
+    return p
+
+
+def avance(t):
+    """Le dandinement du koala à terre : le corps roule d'un côté à l'autre, les bras et les jambes alternent, la tête suit."""
+    p = Pose()
+    c, s = math.cos(math.tau * t), math.sin(math.tau * t)
+    p.add("corps", pos=(0, 0, 0.012 * abs(s)), rot=(4, 7 * s, 3 * c))
+    p.add("bras_G", rot=(-20 * s, 0, 0))
+    p.add("bras_D", rot=(20 * s, 0, 0))
+    p.add("cuisse_G", rot=(18 * s, 0, 0))
+    p.add("cuisse_D", rot=(-18 * s, 0, 0))
+    p.add("tete", rot=(-3, -5 * s, -3 * c))
+    p.paire("oreille", rot=(-6 + 3 * onde(t, 2), 0, 0))
+    return p
+
+
+def mange(t):
+    """Il porte à sa bouche, des deux mains, une feuille d'eucalyptus, et mâche longuement, la tête qui roule."""
+    p = Pose()
+    haut = cloche(t, 0.5, 0.40)
+    mache = onde(t, 6) * haut
+    p.add("corps", rot=(-4 * haut, 0, 0))
+    p.paire("bras", rot=(-62 * haut, 0, 18 * haut))
+    p.add("tete", rot=(6 * haut + 4 * mache, 0, 4 * mache))
+    p.paire("oreille", rot=(-4 * mache, 0, 0))
+    p.ouvert = borne(1 - 0.4 * haut - cloche(t, 0.10, 0.03))
+    return p
+
+
+def joie(t):
+    """Il lève les deux bras très haut, se tortille de contentement, un petit sautillement, les oreilles qui battent."""
+    p = Pose()
+    haut = cloche(t, 0.45, 0.30, False)
+    saut = max(0.0, onde(t, 3)) * cloche(t, 0.55, 0.25, False)
+    p.add("corps", pos=(0, 0, 0.05 * saut), rot=(-6 * haut, 4 * onde(t, 3) * haut, 0))
+    p.paire("bras", rot=(-125 * haut, 0, 20 * haut))
+    p.paire("cuisse", rot=(-14 * saut, 0, 0))
+    p.add("tete", rot=(-10 * haut, 5 * onde(t, 3) * haut, 0))
+    p.paire("oreille", rot=(-18 * haut * (1 + onde(t, 6)) / 2, 0, 0))
+    return p
+
+
+def dort(t):
+    """Il s'affaisse sur lui-même, la tête enfoncée dans la poitrine, les bras serrés autour de lui."""
+    p = Pose()
+    r = onde(t, 1)
+    p.ouvert = 0.0
+    p.add("corps", rot=(22, 0, 0), ech=(1 + 0.012 * r, 1, 1 + 0.022 * r))
+    p.add("tete", rot=(30, 0, 14))
+    p.paire("bras", rot=(-30, 0, -10))
+    p.paire("oreille", rot=(-20, 0, 0))
+    p.add("oreille_G", rot=(0, 0, 12 * cloche(t, 0.55, 0.05)))
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}

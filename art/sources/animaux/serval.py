@@ -152,3 +152,118 @@ def construire():
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("serval", styles.style_de("serval"), sys.modules[__name__]), "Serval")
+
+
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py serval). Les mesures sont celles du modèle (assis très droit), avant a.taille.
+# Le tronc est d'une seule pièce, du bassin aux oreilles : il pivote autour des hanches (« corps »), la tête et les
+# oreilles s'articulent au bout. Les pattes avant se contre-tournent pour que les petites pattes restent au sol.
+
+from poses import Pose, borne, cloche, onde
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, 0.20, 0.15)),            # les hanches : il se penche, se cabre, se couche autour
+    ("tete", "corps", (0.0, -0.05, 1.06)),             # la nuque
+    ("oreille_G", "tete", (0.060, -0.06, 1.16)),       # la base de l'oreille
+    ("patte_av_G", "corps", (0.082, 0.10, 0.64)),      # l'épaule
+    ("cuisse_G", "corps", (0.120, 0.17, 0.18)),        # la hanche : la cuisse et le grand pied arrière
+    ("queue", "corps", (0.0, 0.33, 0.08)),
+]
+
+PORTEURS = [("corps", "corps"), ("tete", "tete"), ("truffe", "tete"), ("iris", "tete"), ("oeil", "tete"),
+            ("oreille", "oreille", True), ("tache", "oreille", True), ("dedans", "oreille", True),
+            ("patte_av", "patte_av", True), ("cuisse", "cuisse", True), ("pied_ar", "cuisse", True), ("queue", "queue"),
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+
+def pattes(p, rx):
+    """Le tronc pique de rx degrés autour des hanches : les pattes avant se contre-tournent, et restent plantées."""
+    p.paire("patte_av", rot=(-rx, 0, 0))
+
+
+def repos(t):
+    """Assis très droit, il écoute : les oreilles se tournent l'une après l'autre vers des bruits que lui seul entend ; la
+    tête se tend, un regard de côté ; le bout de la queue remue."""
+    p = Pose()
+    r = onde(t, 2)
+    g, d = cloche(t, 0.30, 0.17), cloche(t, 0.74, 0.13)
+    p.add("corps", ech=(1 + 0.008 * r, 1, 1 + 0.010 * r), rot=(0.6 * r, 0, 0))
+    p.add("tete", rot=(4 * g - 3 * d, -5 * g + 4 * d, 20 * g - 16 * d))
+    p.add("oreille_G", rot=(0, 0, 22 * cloche(t, 0.52, 0.05) - 10 * g))
+    p.add("oreille_D", rot=(0, 0, -22 * cloche(t, 0.90, 0.05) + 8 * d))
+    p.add("queue", rot=(0, 0, 14 * onde(t, 1)))
+    p.ouvert = borne(1 - 0.30 * g - cloche(t, 0.08, 0.02) - cloche(t, 0.62, 0.02))
+    return p
+
+
+def avance(t):
+    """Il avance par petits bonds, penché en avant, les pattes avant qui tendent le pas l'une après l'autre, la queue qui fouette."""
+    p = Pose()
+    c, s = math.cos(math.tau * t), math.sin(math.tau * t)
+    saut = max(0.0, s)
+    rx = 14 + 4 * onde(t, 2, 0.1)
+    p.add("corps", pos=(0, 0, 0.05 * saut), rot=(rx, 2 * c, 2 * s))
+    pattes(p, rx)
+    p.add("patte_av_G", rot=(-16 * max(0.0, s), 0, 0))
+    p.add("patte_av_D", rot=(-16 * max(0.0, -s), 0, 0))
+    p.paire("cuisse", rot=(-10 * saut, 0, 0))
+    p.add("tete", rot=(-10 + 3 * onde(t, 2, -0.2), -3 * c, -2 * s))
+    p.paire("oreille", rot=(-14, 0, 0))
+    p.add("queue", rot=(-10, 0, -18 * s))
+    return p
+
+
+def mange(t):
+    """Il se penche en avant jusqu'au sol, flaire, trois coups de dents, puis se redresse et mâche l'oreille en l'air."""
+    p = Pose()
+    leve = cloche(t, 0.84, 0.15)
+    bas = 1 - leve
+    coups = max(0.0, onde(t, 4)) ** 2 * bas
+    rx = 38 * bas + 3 * coups
+    p.add("corps", rot=(rx, 0, 0))
+    pattes(p, rx)
+    p.add("tete", rot=(18 * bas + 8 * coups + 3 * leve * onde(t, 12), -4 * leve, 12 * leve))
+    p.paire("oreille", rot=(-6 * bas + 6 * leve, 0, 0))
+    p.add("queue", rot=(-8 * bas, 0, -6 * onde(t, 2)))
+    p.ouvert = borne(1 - cloche(t, 0.70, 0.03))
+    return p
+
+
+def joie(t):
+    """Le bond du chasseur d'oiseaux : il se tasse, jaillit tout droit très haut, les pattes en croix, les oreilles dressées,
+    retombe sur les pattes avant et fouette de la queue."""
+    p = Pose()
+    tasse = cloche(t, 0.12, 0.12, False)
+    vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
+    salut = cloche(t, 0.72, 0.16, False)
+    fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
+    rx = 18 * tasse - 10 * vol + 14 * salut
+    p.add("corps", pos=(0, 0, -0.04 * tasse + 0.34 * vol), rot=(rx, 0, 0))
+    pattes(p, rx)
+    p.paire("patte_av", rot=(-24 * vol, 0, 14 * vol))
+    p.paire("cuisse", rot=(-30 * vol, 0, 0))
+    p.add("tete", rot=(-8 * vol + 8 * tasse, 0, 0))
+    p.paire("oreille", rot=(-16 * vol, 0, 0))
+    p.add("queue", rot=(-18 * vol, 0, -24 * fouet))
+    return p
+
+
+def dort(t):
+    """Il s'assoupit assis : le tronc glisse en avant, la tête tombe sur la poitrine, les pattes avant repliées, les
+    oreilles rabattues, la queue ramenée devant ; une oreille tressaille."""
+    p = Pose()
+    r = onde(t, 1)
+    p.ouvert = 0.0
+    rx = 42
+    p.add("corps", pos=(0, 0, -0.02), rot=(rx, 0, 6), ech=(1 + 0.010 * r, 1, 1 + 0.020 * r))
+    pattes(p, rx * 0.8)
+    p.add("tete", rot=(38, 0, 22))
+    p.paire("oreille", rot=(-30, 0, 0))
+    p.add("oreille_D", rot=(0, 0, -14 * cloche(t, 0.55, 0.05)))
+    p.add("queue", rot=(0, 0, 70))
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}

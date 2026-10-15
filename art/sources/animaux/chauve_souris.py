@@ -23,7 +23,7 @@ import outils_a as O                          # (garde-fous : aucun tube à segm
 GRIS = np.array(M.hexa("#6c6475"))            # la dominante (registre : gris souris sombre violacé #5c5560), un cran plus clair (cousu main)
 VENTRE = np.array(M.hexa("#8b8294"))          # le ventre
 MEMBRANE = np.array(M.hexa("#7d7388"))        # la membrane des ailes
-OS = np.array(M.hexa("#4f4859"))              # les doigts de l'aile
+OSSE = np.array(M.hexa("#4f4859"))              # les doigts de l'aile
 ROSE = np.array(M.hexa("#e6a0b0"))            # l'accent : l'intérieur des oreilles, la feuille nasale
 DENT = M.hexa("#f4ecd8")
 FIL = M.hexa("#2e2833")
@@ -87,7 +87,7 @@ def construire():
             p0 = Vector((0.080, -0.010, 0.0))
             p1 = Vector((tx, ty, 0.0))
             os_ = O.tube_r([tuple(R @ p0), tuple(R @ (p0 + (p1 - p0) * 0.5 + Vector((0, 0.006, 0)))), tuple(R @ p1)], [0.0075, 0.0060, 0.0042], 8)
-            a.piece("doigt_%s%d" % (nom, k), O.teinte(os_, OS), None, poil=False)
+            a.piece("doigt_%s%d" % (nom, k), O.teinte(os_, OSSE), None, poil=False)
         pouce = O.couche(O.teinte(O.griffe(0.034, 0.0085), np.array(DENT)),
                          A.cadre(R @ Vector((0.082, -0.018, 0.0)), R.to_3x3() @ Vector((0.25, -1.0, 0.0)), (0, 0, 1)))
         a.piece("pouce_" + nom, pouce, None, poil=False)
@@ -97,6 +97,12 @@ def construire():
         pied = A.boule(1.0, 18, 8).etire(0.022, 0.040, 0.010)
         a.piece("pied_" + nom, O.teinte(pied, VENTRE * 0.9), None, pos=(c * 0.040, -0.014, 0.011), rot=(0, 0, c * -8), poil=False)
     return a
+
+
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "oiseau")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
-"""La pieuvre en peluche : une grosse tête bombée brique sombre, deux yeux malins sous une paupière lourde, et huit bras
-qui s'enroulent sur le sable comme des cordes de marin. Elle se tient à demi dressée sur le dessus de la tête, un bras
-levé (elle vous fait signe de patienter), un autre en point d'interrogation ; les ventouses crème se voient sous les bras
-levés. Elle a l'air de préparer un coup, et elle y réussira.
+"""La pieuvre en peluche, deuxième dessin : une grosse tête bombée brique sombre, deux yeux malins sous une paupière lourde, et
+huit bras qui partent naturellement de DESSOUS la tête, rayonnent tout autour, s'étalent en S sur le sable et se
+recourbent au bout. Un seul se lève, devant à gauche, en point d'interrogation (elle vous fait signe de patienter) ; les
+ventouses crème se voient sous lui et sous deux bouts recourbés. Elle a l'air de préparer un coup, et elle y réussira.
+(le premier dessin, jugé le 15/10 par l'auteur : « les tentacules doivent partir du dessous de la tête et s'étaler »)
 
     python pieuvre.py        fabrique la fiche art/apercus/animaux/pieuvre.png (style du palier : C, velours ras)
 """
@@ -33,16 +34,24 @@ def couche(m, mat):
     return m
 
 
-def bras(depart, angle, long, tours=0.0, leve=0.0, rayon=0.062):
-    """Un bras : un tube peint qui part de dessous la tête, s'étale en spirale lâche sur le sable (tours > 0 : il s'enroule,
-    < 0 : dans l'autre sens) ; si leve > 0, il se dresse en l'air et se courbe au bout."""
+def trace_bras(th0, long, onde, boucle, leve=0.0, rayon=0.078, n=18):
+    """Le chemin d'un bras qui part de DESSOUS la tête (sa racine est sous le dôme, un peu au-dessus du sable), descend vers le
+    sable en moins du premier tiers, puis s'étale en S doux (onde) et se recourbe au bout (boucle). leve : de combien
+    le bras se dresse en l'air (il garde alors son S et sa boucle)."""
     pts = []
-    for t in np.linspace(0.0, 1.0, 14):
-        r = 0.10 + long * t
-        th = angle + tours * t ** 1.6
-        z = rayon * (1 - 0.9 * t) + 0.004 + leve * (t ** 1.3)
-        pts.append((r * math.cos(th) + depart[0], r * math.sin(th) + depart[1], z))
-    return A.tube(A.courbe(pts, 4), lambda t: rayon * (1 - t) ** 0.9 + 0.012, 14)
+    for t in np.linspace(0.0, 1.0, n):
+        r = 0.060 + long * t ** 0.92
+        th = th0 + onde * math.sin(2.0 * math.pi * 1.05 * t) + boucle * max(0.0, t - 0.55) ** 2 * 5.0
+        rr = rayon * (1.0 - t) ** 0.85 + 0.010
+        tombe = 0.150 * max(0.0, 1.0 - t / 0.30) ** 2                      # la descente de la racine vers le sable
+        z = rr * 0.95 + 0.002 + tombe + leve * t ** 1.4
+        pts.append((r * math.cos(th), 0.03 + r * math.sin(th), z))
+    return pts
+
+
+def bras(th0, long, onde, boucle, leve=0.0, rayon=0.078):
+    pts = trace_bras(th0, long, onde, boucle, leve, rayon)
+    return A.tube(A.courbe(pts, 4), lambda t: rayon * (1.0 - t) ** 0.85 + 0.010, 14), pts
 
 
 def construire():
@@ -74,33 +83,35 @@ def construire():
     a.broderie("sourire", A.courbe(a.trace("tete", centre, sourire, 0.004), 4), 0.0030, FIL)
     a.tete = centre + Vector((0.0, -0.18, 0.0))
 
-    # ----- les huit bras : à plat sur le sable, enroulés ; un levé, un en point d'interrogation -----
-    base = (0.0, 0.0)
-    config = [(-0.55, 0.30, +1.2, 0.0), (-1.35, 0.34, -0.9, 0.0), (0.30, 0.34, +0.6, 0.0), (1.20, 0.36, -1.1, 0.0),
-              (2.00, 0.34, +0.9, 0.0), (2.85, 0.32, -0.5, 0.0), (3.80, 0.34, 0.9, 0.0), (5.30, 0.30, -0.7, 0.0)]
-    # le bras levé (devant à gauche) et le bras en point d'interrogation (devant à droite)
-    levee = bras(base, math.radians(-50), 0.18, tours=0.4, leve=0.42)
-    a.piece("bras_leve", levee, tuple(BRIQUE))
-    point = bras(base, math.radians(-130), 0.20, tours=-0.5, leve=0.26)
-    a.piece("bras_point", point, tuple(BRIQUE))
-    for k, (ang, long, tours, leve) in enumerate(config):
-        if -2.0 < ang < -0.3 and k in (0, 1):
-            continue
-        a.piece("bras_%d" % k, bras(base, ang, long, tours, leve), tuple(BRIQUE))
-
-    # ----- les ventouses : une rangée de pastilles crème sous le bras levé et dans la boucle du point d'interrogation -----
+    # ----- les huit bras : ils partent du dessous de la tête, rayonnent tout autour, s'étalent en S sur le sable et se
+    #       recourbent au bout ; celui de devant à gauche se lève pour un signe (en gardant son S et sa boucle) -----
+    config = [(-0.78, 0.50, 0.30, +1.6, 0.34),                     # devant à gauche : levé, le bout en point d'interrogation
+              (-1.58, 0.46, -0.28, -1.2, 0.0), (-2.36, 0.50, 0.30, 1.0, 0.0), (-3.14, 0.52, -0.26, -1.4, 0.0),
+              (2.36, 0.52, 0.28, 1.3, 0.0), (1.58, 0.48, -0.30, -1.0, 0.0), (0.78, 0.50, 0.26, 1.5, 0.0), (0.00, 0.46, -0.28, -1.1, 0.0)]
     pastilles = None
-    for k, (ang, long, tours, leve) in enumerate(((math.radians(-50), 0.18, 0.4, 0.42), (math.radians(-130), 0.20, -0.5, 0.26))):
-        for tt in np.linspace(0.12, 0.85, 7):
-            r = 0.10 + long * tt
-            th = ang + tours * tt ** 1.6
-            z = 0.062 * (1 - 0.9 * tt) + 0.004 + leve * (tt ** 1.3)
-            rayon_ = 0.062 * (1 - tt) ** 0.9 + 0.012
-            p = Vector((r * math.cos(th), r * math.sin(th), z + rayon_ * 0.85))
-            m = couche(A.boule(1.0, 14, 8).etire(0.016 * (1 - 0.4 * tt), 0.016 * (1 - 0.4 * tt), 0.0065), A.cadre(p, Vector((0.0, -0.4, 1.0))))
-            pastilles = m if pastilles is None else pastilles + m
-    a.piece("ventouses", pastilles, CREME, poil=False)
+    for k, (th0, long, onde, boucle, leve) in enumerate(config):
+        m, pts = bras(th0, long, onde, boucle, leve)
+        a.piece("bras_%d" % k, m, tuple(BRIQUE))
+        # les ventouses : une rangée de pastilles crème sous le bras levé et sous les bouts qui se recourbent
+        if leve > 0.0 or k in (3, 5):
+            for tt in np.linspace(0.18, 0.88, 7):
+                r = 0.060 + long * tt ** 0.92
+                th = th0 + onde * math.sin(2.0 * math.pi * 1.05 * tt) + boucle * max(0.0, tt - 0.55) ** 2 * 5.0
+                rr = 0.078 * (1.0 - tt) ** 0.85 + 0.010
+                tombe = 0.150 * max(0.0, 1.0 - tt / 0.30) ** 2
+                z = rr * 0.95 + 0.002 + tombe + leve * tt ** 1.4
+                p = Vector((r * math.cos(th), 0.03 + r * math.sin(th), z + rr * 0.80))
+                pt = couche(A.boule(1.0, 14, 8).etire(0.016 * (1 - 0.4 * tt), 0.016 * (1 - 0.4 * tt), 0.0065), A.cadre(p, Vector((0.0, -0.4, 1.0))))
+                pastilles = pt if pastilles is None else pastilles + pt
+    if pastilles is not None:
+        a.piece("ventouses", pastilles, CREME, poil=False)
     return a
+
+
+# ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
+from rig_auto import rig
+if __name__ != "__main__":
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "fixe")
 
 
 if __name__ == "__main__":
