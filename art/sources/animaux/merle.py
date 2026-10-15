@@ -1,9 +1,10 @@
-"""(Troisième dessin, l'auteur, 15/10 : « ça fait pas trop corbeau ? » : plus petit, plus rond, la tête haute, le bec court, le cerne orange bien visible, la queue moins longue ; le deuxième : merle_ancien2.py.)
+"""(Quatrième dessin, 15/10 au soir, d'après le contrôleur : le troisième faisait poussin à lunettes ; le corps
+plus long, la tête plus petite, un cerne fin au lieu d'un disque, le bec en vrai cône, plus de rond cousu au flanc.
+Le troisième, l'auteur, 15/10 : « ça fait pas trop corbeau ? » ; le deuxième : merle_ancien2.py.)
 Le merle en peluche, deuxième dessin : l'écouteur de pelouse. Un long fuseau noir suie penché en avant, le poitrail
 vers l'herbe, la très longue queue dressée derrière comme un fléau de balance ; une patte avancée, arrêté net en pleine
 course. La tête basse, couchée sur le côté : il tend l'œil gauche vers le sol, il écoute le ver. Le bec orange vif
-pointé vers la terre, un fin cerne orange autour de l'œil ; un rapiéçage brun sur le poitrail, comme un merle qui aurait
-vécu.
+pointé vers la terre, un fin cerne orange autour de l'œil.
 
     python merle.py        fabrique la fiche art/apercus/animaux/merle.png
     (le premier dessin, jamais gardé : merle_ancien.py)
@@ -24,13 +25,12 @@ import peluche as K
 
 SUIE = M.hexa("#302d35")                      # un noir de suie, pas un noir pur : le relief doit se lire
 PLUME = M.hexa("#3d3a4a")                     # les ailes et la queue, un rien plus bleutées
-BRUN = M.hexa("#4a3a33")                      # le rapiéçage du poitrail
 FUMEE = M.hexa("#8c8796")                     # le fil des coutures
 ORANGE = M.hexa("#ff8a1a")                    # l'accent : le bec et le cerne de l'œil
 PATTE = M.hexa("#4b3a30")                     # les pattes, en feutrine brun sombre
 CORPS = Vector((0.0, 0.020, 0.128))
 TETE = Vector((0.004, -0.096, 0.158))
-RAYON = 0.046
+RAYON = 0.038                                  # une petite tête : la grosse tête faisait poussin
 PENCHE = A.repere(CORPS, (5, 0, 0))          # le corps : le poitrail vers le sol, le croupion en l'air
 ECOUTE = A.repere(TETE, (2, 30, -14))        # la tête : le bec vers la terre, couchée sur le côté pour tendre l'œil gauche
 
@@ -43,14 +43,14 @@ def vers(x, y, z):
 def construire():
     a = K.Animal("merle")
     a.taille = 0.31
-    a.tete = ECOUTE @ Vector((0.010, -0.044, -0.004))
+    a.tete = ECOUTE @ Vector((0.010, -0.036, -0.004))
 
     # ----- le corps : un long fuseau, le poitrail plein, des épaules, et qui s'effile vers la queue -----
     def coque(v):
         v = K.bosse(v, (0, -0.70, -0.45), 0.12, 0.30)       # le poitrail
         v = K.bosse(v, (0, -0.30, 0.90), 0.05, 0.30)        # les épaules
         arriere = K.lisse(v[:, 1])
-        s = v * [0.066, 0.088, 0.066]
+        s = v * [0.056, 0.100, 0.060]                # un fuseau, pas une boule
         s[:, 0] *= 1 - 0.50 * arriere
         s[:, 2] *= 1 - 0.45 * arriere
         return s
@@ -58,7 +58,6 @@ def construire():
     G.sillons(corps, [14], 0.004, 1.1)
     a.piece("corps", corps, SUIE, mat=PENCHE)
     a.couture("dos", "corps", 14, 0.55, 0.95, fil=FUMEE)
-    a.rustine("rapiecage", "corps", CORPS, PENCHE.to_3x3() @ Vector((0.62, -0.62, -0.48)), 0.32, BRUN, 0.003, 16, fil=FUMEE)
 
     # ----- la tête, basse et emmanchée sur le bout du corps, le front un peu bombé -----
     tete = A.boule(1.0, 56, 28).sculpte(lambda v: K.bosse(v, (0, -0.6, 0.6), 0.08, 0.3)).etire(RAYON, RAYON * 1.08, RAYON * 0.96)
@@ -68,13 +67,13 @@ def construire():
     # ----- les yeux : un œil vivant dans un fin cerne orange, posés un par un (la tête est couchée) -----
     for nom, cote in (("g", 1), ("d", -1)):
         regard = vers(0.86 * cote, -0.42, 0.20)
-        a.rustine("cerne_" + nom, "tete", TETE, regard, 0.56, ORANGE, 0.003, 0)
+        a.rustine("cerne_" + nom, "tete", TETE, regard, 0.30, ORANGE, 0.003, 0)     # un fin cerne, pas des lunettes
         p, n = a.surface("tete", TETE, regard)
-        a.oeil("oeil_" + nom, p + n * 0.0035, n, 0.0115)
+        a.oeil("oeil_" + nom, p + n * 0.0035, n, 0.0100)
 
-    # ----- le bec : un long cône de feutrine orange vif, pointé vers la terre -----
-    bec = A.tour(A.profil([(0, 0), (0.013, 0.004), (0.011, 0.014), (0.005, 0.030), (0, 0.038)], 5), 28).etire(1.0, 0.85, 1.0)
-    a.piece("bec", bec, ORANGE, pos=ECOUTE @ Vector((0, -0.042, -0.006)), rot=A.viser(vers(0, -1, -0.10)), poil=False)
+    # ----- le bec : un cône rond et fin de feutrine orange vif, pointé vers la terre -----
+    bec = A.tour(A.profil([(0, 0), (0.0095, 0.004), (0.0085, 0.012), (0.0040, 0.027), (0, 0.035)], 5), 28)
+    a.piece("bec", bec, ORANGE, pos=ECOUTE @ Vector((0, -0.034, -0.005)), rot=A.viser(vers(0, -1, -0.10)), poil=False)
 
     # ----- les ailes : deux longs galets serrés au corps, la pointe qui croise sur la queue -----
     def galet(v):

@@ -37,7 +37,8 @@ STYLES = {  # le titre, les yeux, des coutures ?, la longueur du poil, la vivaci
 STYLE_DU_PALIER = {1: "A", 2: "A", 3: "C", 4: "B", 5: "B"}
 STYLE_DE = {}        # une exception voulue pour une espèce : {"renard": "C"}
 LISTE = os.path.normpath(os.path.join(ICI, "..", "..", "docs", "animaux.md"))
-AUTRES_NOMS = {"mante": "mante_religieuse", "tortue_eau": "tortue_d_eau", "poisson_rouge": "poisson_rouge", "boeuf_musque": "bœuf_musque"}     # fichier -> nom dans la liste
+AUTRES_NOMS = {"mante": "mante_religieuse", "tortue_eau": "tortue_d_eau", "poisson_rouge": "poisson_rouge", "boeuf_musque": "bœuf_musque",
+               "chien_corgi": "chien", "chien_husky": "chien", "chien_berger": "chien", "chien_caniche": "chien", "chien_carlin": "chien"}   # les races : le palier du chien     # fichier -> nom dans la liste
 
 
 def _cle(nom):

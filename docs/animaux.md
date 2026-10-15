@@ -39,6 +39,8 @@
 | chevre | - | - | 2 | - |
 | chevreuil | - | - | 3 | - |
 | chien | - | - | 2 | - |
+| chien | - | - | 2 | - |
+| chien | - | - | 2 | - |
 | chouette | - | - | 2 | - |
 | cigale | - | - | 1 | - |
 | cloporte | - | - | 1 | - |
