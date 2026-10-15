@@ -1006,11 +1006,11 @@ def _pointes(X0, T, E, rayon, zmin):
         proche = np.array([j for _c, j, _d in arbre.find_range(apex.tolist(), rayon)], np.int64)
         axe = nrm[proche].sum(axis=0)
         axe /= max(np.linalg.norm(axe), 1e-12)
-        vu, file_ = {i}, deque([i])                                  # la région : de proche en proche, à moins de 6 rayons
+        vu, file_ = {i}, deque([i])                                  # la région : de proche en proche, à moins de 4 rayons
         while file_:
             j = file_.popleft()
             for k in voisins[debut[j]:debut[j + 1]].tolist():
-                if k not in vu and np.linalg.norm(X[k] - apex) < 6.0 * rayon:
+                if k not in vu and np.linalg.norm(X[k] - apex) < 4.0 * rayon:
                     vu.add(k)
                     file_.append(k)
         R = np.array(sorted(vu), np.int64)
@@ -1020,18 +1020,22 @@ def _pointes(X0, T, E, rayon, zmin):
         fait[R[np.linalg.norm(V, axis=1) < 2.0 * rayon]] = True
         pas = 0.25 * rayon
         s_c = None
-        for k in range(1, int(6.0 * rayon / pas)):
+        for k in range(1, int(3.5 * rayon / pas)):
             tranche = np.abs(s - k * pas) < 0.5 * pas
             if tranche.sum() >= 6 and float(np.median(rad[tranche])) >= rayon:
                 s_c = k * pas
                 break
         if s_c is None or s_c < 1.3 * rayon:                         # plus fine que le rayon partout, ou déjà ronde
             continue
+        if (rad[s < s_c - 0.5 * pas] > 1.2 * rayon).any():           # pas un bout de tube : un petit bout sur un gros (un doigt)
+            continue
         anneau = R[np.abs(s - s_c) < 0.5 * pas]
         rr = rad[np.abs(s - s_c) < 0.5 * pas]
-        if rr.min() < 0.55 * rr.max():                               # une section plate (une oreille) : pas de boule au bout
+        if rr.min() < 0.55 * rr.max() or rr.max() > 1.6 * rayon:     # une section plate (une oreille) ou qui déborde
             continue
         c = X[anneau].mean(axis=0)
+        if np.linalg.norm(c - (apex - axe * s_c)) > 0.5 * rayon:       # la section n'est pas autour de l'axe
+            continue
         rho = float(np.median(np.linalg.norm(X[anneau] - c, axis=1)))
         bout = R[(s < s_c) & (rad < 1.5 * rho)]
         d = X[bout] - c
