@@ -118,9 +118,10 @@ def construire():
     gauche = [(0.080, -0.070, 0.150), (0.115, -0.130, 0.090), (0.105, -0.205, 0.040)]
     a.piece("bras_G", A.tube(A.courbe(propres(gauche), 5), 0.030, 12), tuple(TAUPE))
     a.piece("main_G", main(gauche[-1], 8, 0.150), tuple(DOIGT), poil=False)
-    droite = [(-0.080, -0.060, 0.170), (-0.130, -0.110, 0.230), (-0.135, -0.190, 0.300)]
+    # la main droite posée sur le sol comme la gauche (plus de long doigt dressé qui sortait du dos comme un bâton)
+    droite = [(-0.080, -0.060, 0.150), (-0.115, -0.130, 0.090), (-0.105, -0.205, 0.040)]
     a.piece("bras_D", A.tube(A.courbe(propres(droite), 5), 0.030, 12), tuple(TAUPE))
-    a.piece("main_D", main((-0.135, -0.200, 0.305), -10, 0.150).pose((0, 0, 0), (-70, 0, 0)), tuple(DOIGT), poil=False)
+    a.piece("main_D", main(droite[-1], -8, 0.150), tuple(DOIGT), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         cu = A.boule(1.0, 24, 12).etire(0.060, 0.090, 0.060)
         cu.teinte = np.tile(TAUPE, (len(cu.v), 1))

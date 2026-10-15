@@ -444,4 +444,4 @@ ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange"
 
 
 if __name__ == "__main__":
-    K.planche(construire, "Husky")
+    K.planche(construire, "Hyène")

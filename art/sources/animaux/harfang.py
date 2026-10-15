@@ -97,15 +97,14 @@ def construire():
 
     # ----- les pieds : deux grosses pantoufles de plumes blanches, les griffes noires qui dépassent -----
     for nom, c in (("G", 1), ("D", -1)):
-        # un pied emplumé posé à plat : une semelle large et basse, trois lobes de plumes devant, les serres sombres qui dépassent
-        semelle = A.boule(1.0, 28, 14).etire(0.056, 0.090, 0.024)
+        # des pieds comme ceux du hibou gardé : trois doigts séparés qui dépassent sous le ventre, les serres sombres au bout
+        def doigt(degres):
+            t = math.radians(degres)
+            return A.boule(1.0, 16, 8).etire(0.017, 0.050, 0.014).pose((0.034 * math.sin(t), -0.034 * math.cos(t), 0.0), (0, 0, degres))
+        a.piece("pied_" + nom, doigt(-26) + doigt(0) + doigt(26), NEIGE, pos=(c * 0.060, -0.052, 0.016), poil=False)
         for k in (-1, 0, 1):
-            lobe = A.boule(1.0, 18, 10).etire(0.021, 0.038, 0.020).pose((k * 0.030, -0.078, 0.004), (0, 0, -k * 14))
-            semelle = semelle + lobe
-        a.piece("pied_" + nom, semelle, NEIGE, pos=(c * 0.060, -0.030, 0.026))
-        for k in (-1, 0, 1):
-            griffe = A.tour(A.profil([(0, 0), (0.010, 0.005), (0.007, 0.034), (0.003, 0.058), (0, 0.072)], 5), 14)
-            a.piece("griffe_%s%d" % (nom, k), griffe, BEC, mat=A.cadre(Vector((c * 0.060 + k * 0.030, -0.158, 0.020)), Vector((k * 0.25, -0.95, -0.25)), (0, 0, 1)), poil=False)
+            griffe = A.tour(A.profil([(0, 0), (0.008, 0.004), (0.006, 0.026), (0.003, 0.046), (0, 0.058)], 5), 14)
+            a.piece("griffe_%s%d" % (nom, k), griffe, BEC, mat=A.cadre(Vector((c * 0.060 + k * 0.036, -0.128, 0.012)), Vector((k * 0.30, -0.95, -0.20)), (0, 0, 1)), poil=False)
     return a
 
 
