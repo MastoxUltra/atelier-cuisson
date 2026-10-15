@@ -86,6 +86,13 @@ def construire():
         return v * [0.115, 0.105, 0.100]
     tete = chaines(A.boule(1.0, 48, 24), 3.0, 14.0, ventre=None)
     tete.teinte[(tete.v[:, 1] < -0.45) & (tete.v[:, 2] < 0.0)] = BLANC
+    # les marques du visage (photos de Commons), peintes à plat sur le poil, plus de tiges : deux barres sur chaque joue,
+    # deux traits sur le front
+    ax, ay, az = np.abs(tete.v[:, 0]), tete.v[:, 1], tete.v[:, 2]
+    barre_haute = (ax > 0.62) & (az > -0.02) & (az < 0.15) & (ay < 0.30)
+    barre_basse = (ax > 0.58) & (az > -0.40) & (az < -0.25) & (ay < 0.20)
+    front = (ay < -0.12) & (az > 0.50) & (((ax > 0.10) & (ax < 0.19)) | ((ax > 0.30) & (ax < 0.39)))
+    tete.teinte[barre_haute | barre_basse | front] = CHOCOLAT
     a.piece("tete", tete.sculpte(tete_f), None, mat=T)
     a.piece("museau", A.boule(1.0, 32, 16).etire(0.052, 0.046, 0.042), BLANC, mat=T @ A.repere((0, -0.096, -0.034)))
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.018, 0.012, 0.012), M.hexa("#d98a8a"), mat=T @ A.repere((0, -0.138, -0.016)), poil=False)
@@ -94,19 +101,6 @@ def construire():
         bouche = [T3 @ Vector(d) for d in ((c * 0.02, -0.55, -0.78), (c * 0.20, -0.64, -0.72), (c * 0.40, -0.58, -0.62))]
         a.broderie("bouche_" + ("G" if c > 0 else "D"),
                    A.courbe(propres(a.trace("museau", T @ Vector((0, -0.096, -0.034)), bouche, 0.004)), 4), 0.0026, CHOCOLAT)
-
-    # ----- les marques du visage (photos de Commons) : deux barres noires sur chaque joue, deux traits sur le front -----
-    centre_t = T.to_translation()
-    marques = (
-        ("a", ((0.86, -0.42, 0.02), (0.96, -0.05, -0.22), (0.86, 0.34, -0.40))),                 # la barre haute de la joue
-        ("b", ((0.80, -0.58, -0.22), (0.94, -0.18, -0.46), (0.80, 0.18, -0.62))),                # la barre basse
-        ("c", ((0.20, -0.82, 0.50), (0.22, -0.52, 0.80), (0.20, -0.14, 0.96))),                  # le trait du front
-        ("d", ((0.40, -0.76, 0.46), (0.46, -0.44, 0.74), (0.42, -0.08, 0.90))),                  # le second trait
-    )
-    for etiquette, pts in marques:
-        for c in (1, -1):
-            dirs = [T3 @ Vector((c * x, y, z)) for x, y, z in pts]
-            a.broderie("marque_" + etiquette + ("G" if c > 0 else "D"), A.courbe(propres(a.trace("tete", centre_t, dirs, 0.004)), 4), 0.0066, CHOCOLAT)
 
     # ----- les yeux : grands, ronds, d'ambre, au regard doux (plus de traits froncés) -----
     for nom, c in (("G", 1), ("D", -1)):
@@ -159,16 +153,14 @@ JAMBE = 0.344                                        # de l'épaule (ou de la ha
 OS = [
     ('racine', None, (0, 0, 0)),
     ('corps', 'racine', (0.000, 0.111, 0.133)),
-    ('tete', 'corps', (0.008, -0.044, 0.516)),
+    ('tete', 'corps', (0.008, -0.041, 0.517)),
     ('oreille_G', 'tete', (0.055, -0.012, 0.675)),
     ('patte_av_G', 'corps', (0.072, -0.118, 0.344)),
     ('queue', 'corps', (0.037, 0.184, 0.103)),
 ]
 
 PORTEURS = [
-    ('oeil_reflet', 'tete'), ('marque_aG', 'corps'), ('marque_aD', 'corps'), ('marque_bG', 'corps'),
-    ('marque_bD', 'corps'), ('marque_cG', 'corps'), ('marque_cD', 'corps'), ('marque_dG', 'corps'),
-    ('marque_dD', 'corps'), ('oreille', 'oreille', True), ('hanche', 'corps'), ('museau', 'tete'),
+    ('oeil_reflet', 'tete'), ('oreille', 'oreille', True), ('hanche', 'corps'), ('museau', 'tete'),
     ('truffe', 'corps'), ('bouche', 'tete'), ('corps', 'corps'), ('patte', 'patte_av', True), ('queue', 'queue'),
     ('tache', 'corps'), ('tete', 'tete'), ('pied', 'patte_av', True), ('iris', 'tete'), ('oeil', 'tete'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),

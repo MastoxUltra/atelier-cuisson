@@ -32,7 +32,7 @@ ROUGE = M.hexa("#f02a22")                     # le bout du bec, le dessous de la
 CIEL = M.hexa("#6fd0f2")                      # le cercle de l'œil
 CORPS = Vector((0.0, 0.040, 0.290))
 TETE = Vector((0.0, -0.045, 0.515))
-LACET = 62.0                                  # la tête de trois quarts : le bec se voit dans toute sa longueur
+LACET = 44.0                                  # de trois quarts : le bec se voit en long, les deux yeux restent visibles
 
 
 def construire():

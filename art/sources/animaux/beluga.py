@@ -39,7 +39,7 @@ def propres(points, eps=2e-4):
 
 # le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
 GLACIER = M.hexa("#cfe6fa")                   # la dominante : bleu glacier presque blanc
-MELON = M.hexa("#f3faff")                     # l'accent : le melon, plus clair
+MELON = M.hexa("#dcedfb")                     # l'accent : le melon, à peine plus clair (un renflement, plus un bonnet)
 NAGEOIRE = M.hexa("#9cc4e6")                  # les nageoires, la queue : un ton plus bas
 MARINE = M.hexa("#3a5a82")                    # le sourire
 # l'échine, de la queue (en l'air) à la tête : (avance vers l'arrière, hauteur)
