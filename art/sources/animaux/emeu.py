@@ -95,7 +95,7 @@ def construire():
         a.rustine("iris_" + nom, "tete", H.to_translation(), regard, 0.30, AMBRE, 0.003, 0)
         p, n = a.surface("tete", H.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0190)
-        a.piece("cils_" + nom, K.paupiere(0.0250, 0.58), CHARBON, mat=A.cadre(p + n * 0.004, n, H3 @ Vector((0, 0, 1))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
 
     # ----- les pattes : très longues, grises, le genou marqué, les gros pieds à trois doigts, plantées droites ; bien visibles -----
     for nom, c in (("G", 1), ("D", -1)):

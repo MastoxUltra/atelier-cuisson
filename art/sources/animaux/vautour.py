@@ -103,7 +103,7 @@ def construire():
         regard = H3 @ Vector((c * 0.70, -0.55, 0.30))
         p, n = a.surface("tete", H.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0135)
-        a.piece("arcade_" + nom, K.paupiere(0.020, 0.58), tuple(PEAU * 0.82), mat=A.cadre(p + n * 0.004, n, H3 @ Vector((0, 0, 1))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
 
     # ----- les pattes : des culottes de plumes, de grosses pattes grises, trois serres devant et une derrière -----
     for nom, c in (("G", 1), ("D", -1)):

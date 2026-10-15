@@ -72,7 +72,7 @@ def construire():
         p, n = a.surface("tete", TETE, regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0115)
         P = A.cadre(p + n * 0.005, n, H3 @ Vector((0, 0.15, 1)))
-        a.piece("lourde_" + nom, K.paupiere(0.0210, 0.58), FUME, mat=P, poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
 
     # ----- les oreilles : petites, arrondies, pointées vers le sol devant lui ; le dedans crème -----
     po = A.profil([(0, 0), (0.046, 0.014), (0.040, 0.044), (0.025, 0.072), (0.009, 0.088), (0, 0.094)], 6)

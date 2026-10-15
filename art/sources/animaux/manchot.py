@@ -88,7 +88,7 @@ def construire():
                   lambda th: 0.30 + 0.38 * max(0.0, math.sin(th)) ** 1.4, MANDARINE, 0.003, 0)
         p, n = a.surface("corps", C + Vector((0, 0, 0.012)), Vector((c * 0.78, -0.62, 0.12)))
         a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0150)
-        a.piece("lourde_" + nom, K.paupiere(0.0175, 0.58), TETE_C, mat=A.cadre(p + n * 0.005, n, Vector((0, 0, 1))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
 
     # ----- le bec : long, fin, recourbé vers le bas à la pointe ; le dessus noir, la mandibule mandarine dessous -----
     y = math.radians(YAW)

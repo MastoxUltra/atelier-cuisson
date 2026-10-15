@@ -95,7 +95,7 @@ def construire():
         regard = T3 @ Vector((c * 0.84, 0.36, 0.04))
         p, n = a.surface("tete", T @ Vector((0, 0.0, 0.040)), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0185)
-        a.piece("cils_" + nom, K.paupiere(0.0235, 0.58), tuple(FONCE), mat=A.cadre(p + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         po = A.profil([(0, 0), (0.026, 0.008), (0.032, 0.032), (0.024, 0.058), (0.009, 0.078), (0, 0.086)], 5)
         a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.45, 1.0), tuple(CARAMEL),
                 mat=A.cadre(T @ Vector((c * 0.046, 0.052, -0.020)), T3 @ Vector((c * 0.55, 0.62, -0.30)), T3 @ Vector((c * 0.3, 0.0, 1.0))))

@@ -93,7 +93,7 @@ def construire():
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.86, 0.34, 0.22)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0215)
         a.rustine("joue_" + nom, "tete", centre, T3 @ Vector((c * 0.62, -0.46, 0.70)), 0.30, CREME, 0.003, 0)       # la joue claire, bas sur le museau : loin de l'œil
-        a.piece("lourde_" + nom, K.paupiere(0.025, 0.58), AUBERGINE, mat=A.cadre(pos + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         po = A.profil([(0, 0), (0.048, 0.016), (0.062, 0.070), (0.056, 0.130), (0.034, 0.180), (0.010, 0.208), (0, 0.216)], 6)
         vers = (T3 @ Vector((c * 0.82, 0.26, 0.54))).normalized()
         E = A.cadre(T @ Vector((c * 0.050, 0.044, 0.028)) - vers * 0.014, vers, T3 @ Vector((c * 0.2, 0.9, -0.2)))

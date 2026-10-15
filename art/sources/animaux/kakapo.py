@@ -105,7 +105,7 @@ def construire():
         regard = H3 @ Vector((c * 0.46, -0.80, 0.22))
         p, n = a.surface("tete", H.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0135)
-        a.piece("cils_" + nom, K.paupiere(0.0180, 0.58), tuple(BRUN), mat=A.cadre(p + n * 0.005, n, H3 @ Vector((0, 0, 1))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         # les soies : trois courts poils raides de chaque côté du bec
         for k, (dz, ouvre) in enumerate(((0.022, 0.50), (0.000, 0.20), (-0.020, -0.15))):
             dep = H @ Vector((c * 0.026, -0.100, -0.032 + dz))

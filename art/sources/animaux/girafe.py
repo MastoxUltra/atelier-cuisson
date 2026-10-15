@@ -102,7 +102,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.040, 0.050)), T3 @ Vector((c * 0.84, 0.42, 0.06)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0155)
-        a.piece("cils_" + nom, K.paupiere(0.019, 0.58), BRUN, mat=A.cadre(pos + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.019, 0.070), (0.013, 0.130), (0, 0.150)], 5), 18)
         a.piece("ossicone_" + nom, oss, tuple(MIEL), mat=A.cadre(T @ Vector((c * 0.030, 0.092, -0.040)), Vector((c * 0.10, 0.20, 0.97)), (0, 1, 0)))
         a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.024, 0.024, 0.026), BRUN, pos=tuple(T @ Vector((c * 0.034, 0.108, -0.040)) + Vector((c * 0.012, 0.024, 0.116))))

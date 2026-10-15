@@ -85,7 +85,7 @@ def construire():
         regard = T3 @ Vector((c * 0.82, 0.38, 0.02))
         p, n = a.surface("tete", T.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0170)
-        a.piece("lourde_" + nom, K.paupiere(0.0215, 0.58), tuple(BLANC), mat=A.cadre(p + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         # la corne en vrille : un axe qui monte vers l'arrière, la tige qui tourne autour, deux tours et demi
         pts = []
         for i in range(0, 41):

@@ -100,7 +100,7 @@ def construire():
         a.rustine("face_" + nom, "tete", TETE, regard, lambda th: 0.30 + 0.07 * math.cos(2 * th), IVOIRE, 0.003, 0)
         p, n = a.surface("tete", TETE, regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0120)
-        a.piece("lourde_" + nom, K.paupiere(0.0140, 0.58), ECARLATE, mat=A.cadre(p + n * 0.005, n, H3 @ Vector((c * -0.30, 0.1, 1))), poil=False)
+        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         for k, dy in enumerate((0.12, 0.0, -0.12)):
             ride = [H3 @ Vector((c * (0.56 + 0.10 * t), -0.70 + 0.04 * t, 0.10 + dy + 0.05 * t * (1 if k != 1 else 0))) for t in np.linspace(0, 1, 4)]
             a.broderie("ride_%s%d" % (nom, k), propres(a.trace("tete", TETE, ride, 0.004)), 0.0014, CHARBON)
