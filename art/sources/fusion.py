@@ -87,7 +87,7 @@ TETE_NOMS = ("tete", "crane", "museau", "machoire", "bec", "mufle", "groin", "tr
              "babine", "cou", "nez", "truffe")          # gonflés comme le corps, jamais renforcés ni coupés en boule (l'okapi, 15/10)
 MEMBRES = ("bras", "jambe", "cuisse", "patte", "main", "mollet", "epaule", "coude", "genou", "canon", "paturon", "avant_bras")
                                                 # gonflés comme le corps, sans renfort (l'élan, le bras de la loutre, 15/10)
-JAMBES_LONGUES = 0.25           # le bas du corps plus haut que cette part de la bête (le cheval : 0,27) : haute sur pattes (cerf, élan,
+JAMBES_LONGUES = 0.25           # le bas du corps plus haut que cette part de la bête (0,28 : le cheval pas pris) : haute sur pattes (cerf, élan,
 JAMBES_LONGUES_REGLAGES = {"pression": 0.12, "fins": 0.0}   # cheval, girafe) : moins de pression, aucun renfort
 PAUPIERES_LOURDES = "retirer"   # sur la base gonflée, les paupières lourdes : « retirer » (Principal, 15/10 : leur trait sombre se
                                 # lit comme un sourcil triste) ou « fines » (refaites fines à COUPE_MIN)
