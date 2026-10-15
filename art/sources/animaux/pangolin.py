@@ -69,11 +69,12 @@ def construire():
     L = fil.long
     pts = [(0.0, 0.0), (0.014, 0.020), (0.030, 0.070), (0.050, 0.130), (0.074, 0.190), (0.100, 0.250), (0.150, 0.330),
            (0.180, 0.420), (0.180, 0.520), (0.160, 0.610), (0.130, 0.700), (0.100, 0.800), (0.070, 0.900), (0.040, 0.970), (0.0, 1.0)]
+    pts = [(r_ * float(np.interp(f_, [0.0, 0.12, 0.40, 1.0], [1.0, 1.0, 1.30, 1.18])), f_) for r_, f_ in pts]   # le tronc plus plein
     corps = fuseau([(f_, r_) for r_, f_ in pts], L, 64)
     x, y, z = corps.v[:, 0], corps.v[:, 1], corps.v[:, 2]
     f = z / L
     th = np.arctan2(x, y)
-    ecaille = (f > 0.20)                                                              # le museau et le cou sont en peau
+    ecaille = (f > 0.12)                                                              # le museau seul est en peau
     rang = z / 0.050
     k = np.floor(rang)
     frac = rang - k
@@ -90,7 +91,7 @@ def construire():
     t[sur & (frac > 0.78)] = DORE                                                      # le bout clair
     t[sur & ((cadre < 0.07) | (cadre > 0.93))] = TUILE_BRUN                            # les joints entre les écailles
     corps.teinte = t
-    a.piece("corps", corps.sculpte(fil.couche), None)
+    a.piece("corps", corps.sculpte(fil.couche), None, poil=False)                     # des tuiles lisses : l'armure se voit
     a.tete = Vector(fil.cadre(0.10 * L)[0])
 
     # ----- les yeux minuscules sur la tête ; le nez ; les pattes : courtes, la peau crème, de grandes griffes -----
@@ -101,10 +102,10 @@ def construire():
         a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0120)
     c2, av2, nq2 = fil.cadre(0.012 * L)
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.016, 0.012), CHARBON, pos=tuple(np.array(c2) + np.array(av2) * 0.006), poil=False)
-    for nom, x_, y_, av in (("av_G", 0.130, -0.260, -0.060), ("av_D", -0.130, -0.260, 0.020), ("ar_G", 0.130, 0.330, 0.0), ("ar_D", -0.130, 0.330, 0.0)):
+    for nom, x_, y_, av in (("av_G", 0.170, -0.260, -0.060), ("av_D", -0.170, -0.260, 0.020), ("ar_G", 0.170, 0.330, 0.0), ("ar_D", -0.170, 0.330, 0.0)):
         c = 1 if x_ > 0 else -1
-        ch = [(x_ * 0.80, y_, 0.200), (x_ * 1.05, y_ + av * 0.5, 0.110), (x_ * 1.10, y_ + av, 0.030)]
-        m = A.tube(A.courbe(propres(ch), 5), lambda t: 0.052 - 0.016 * t, 14)
+        ch = [(x_ * 0.80, y_, 0.220), (x_ * 1.05, y_ + av * 0.5, 0.120), (x_ * 1.10, y_ + av, 0.030)]
+        m = A.tube(A.courbe(propres(ch), 5), lambda t: 0.066 - 0.020 * t, 14)
         m.teinte = np.tile(CREME, (len(m.v), 1))
         a.piece("patte_" + nom, m, None)
         griffes = None
@@ -127,14 +128,14 @@ if __name__ == "__main__":
 
 from poses import Pose, borne, cloche, onde
 
-JAMBE = 0.188                                        # de l'épaule (ou de la hanche) au sol
+JAMBE = 0.208                                        # de l'épaule (ou de la hanche) au sol
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.738, 0.233)),
-    ('tete', 'corps', (0.009, -0.538, 0.151)),
-    ('patte_av_G', 'corps', (0.115, -0.269, 0.188)),
-    ('patte_ar_G', 'corps', (0.117, 0.330, 0.188)),
+    ('corps', 'racine', (0.000, 0.738, 0.250)),
+    ('tete', 'corps', (0.007, -0.539, 0.150)),
+    ('patte_av_G', 'corps', (0.153, -0.271, 0.208)),
+    ('patte_ar_G', 'corps', (0.153, 0.330, 0.208)),
 ]
 
 PORTEURS = [
@@ -187,7 +188,7 @@ def joie(t):
     vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
     salut = cloche(t, 0.72, 0.16, False)
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.056 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.062 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_av', rot=(-22 * vol, 0, 0))
     p.paire('patte_ar', rot=(18 * vol, 0, 0))
     p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
@@ -199,7 +200,7 @@ def dort(t):
     p = Pose()
     r = onde(t, 1)
     p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.103), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.add('corps', pos=(0, 0, -0.114), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
     p.paire('patte_av', rot=(-68, 0, 14))
     p.paire('patte_ar', rot=(66, 0, 10))
     p.add('tete', rot=(32, 4, 40))

@@ -62,8 +62,8 @@ def construire():
 
     # ----- le corps entier d'une pièce, du bout du museau au bout de la queue : le museau long et étroit, le crâne, le cou
     #       court, le tronc large et plat, la queue épaisse qui s'effile ; couché le long d'une courbe ; plat dessus-dessous -----
-    chemin = [(0.0, y, z) for y, z in ((-1.300, 0.100), (-1.000, 0.110), (-0.700, 0.120), (-0.420, 0.135), (-0.150, 0.150),
-                                       (0.200, 0.150), (0.550, 0.140), (0.900, 0.115), (1.250, 0.085), (1.600, 0.055))]
+    chemin = [(0.0, y, z) for y, z in ((-1.300, 0.140), (-1.000, 0.150), (-0.700, 0.165), (-0.420, 0.185), (-0.150, 0.200),
+                                       (0.200, 0.200), (0.550, 0.190), (0.900, 0.160), (1.250, 0.120), (1.600, 0.085))]
     # la queue ondule : le dernier tiers dévie sur le côté
     chemin = [(0.0 if y < 0.9 else 0.02 + 0.30 * (y - 0.9) ** 1.5, y, z) for _x, y, z in chemin]
     fil = K.Fil(chemin, (1, 0, 0))
@@ -71,6 +71,7 @@ def construire():
     pts = [(0.0, 0.0), (0.012, 0.040), (0.036, 0.100), (0.044, 0.200), (0.046, 0.260), (0.062, 0.330), (0.100, 0.380),
            (0.120, 0.420), (0.150, 0.500), (0.170, 0.600), (0.165, 0.680), (0.140, 0.760), (0.100, 0.850), (0.062, 0.930),
            (0.030, 0.985), (0.0, 1.0)]
+    pts = [(r_ * 1.55, f_) for r_, f_ in pts]                                           # un vrai gabarit : large et massif
     corps = fuseau([(f_, r_) for r_, f_ in pts], L, 52)
     x, y, z = corps.v[:, 0], corps.v[:, 1], corps.v[:, 2]
     f = z / L
@@ -90,7 +91,7 @@ def construire():
         r = float(np.interp(f_, [p[1] for p in pts], [p[0] for p in pts]))
         for dec in (-0.35, 0.35):
             lat = np.cross(np.array(av), np.array(nq))
-            e = A.boule(1.0, 10, 6).etire(0.020, 0.026, 0.012).pose(tuple(np.array(c_) + np.array(nq) * (r * 0.62 + 0.004) + lat * dec * r * 0.9))
+            e = A.boule(1.0, 10, 6).etire(0.028, 0.036, 0.018).pose(tuple(np.array(c_) + np.array(nq) * (r * 0.62 + 0.004) + lat * dec * r * 0.9))
             ecailles = e if ecailles is None else ecailles + e
     a.piece("ecailles", ecailles, tuple(BOUE))
 
@@ -98,12 +99,12 @@ def construire():
     c1, av1, nq1 = fil.cadre(0.255 * L)
     lat1 = np.cross(np.array(av1), np.array(nq1))
     for nom, c in (("G", 1), ("D", -1)):
-        pos = np.array(c1) + np.array(nq1) * 0.052 + lat1 * c * 0.052
-        a.piece("bosse_" + nom, A.boule(1.0, 20, 10).etire(0.034, 0.040, 0.026), tuple(OCRE), pos=tuple(pos))
-        a.oeil("oeil_" + nom, Vector(pos) + Vector(nq1) * 0.020 + Vector(av1) * -0.006, Vector((c * 0.55, -0.45, 0.70)).normalized(), 0.0150)
+        pos = np.array(c1) + np.array(nq1) * 0.078 + lat1 * c * 0.078
+        a.piece("bosse_" + nom, A.boule(1.0, 20, 10).etire(0.050, 0.058, 0.038), tuple(OCRE), pos=tuple(pos))
+        a.oeil("oeil_" + nom, Vector(pos) + Vector(nq1) * 0.030 + Vector(av1) * -0.008, Vector((c * 0.55, -0.45, 0.70)).normalized(), 0.0220)
         c2, av2, nq2 = fil.cadre(0.040 * L)
-        a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.010, 0.014, 0.008), CHARBON,
-                pos=tuple(np.array(c2) + np.array(nq2) * 0.020 + np.array([c * 0.014, 0.0, 0.0])), poil=False)
+        a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.014, 0.020, 0.011), CHARBON,
+                pos=tuple(np.array(c2) + np.array(nq2) * 0.030 + np.array([c * 0.020, 0.0, 0.0])), poil=False)
 
     # ----- les dents : une rangée de petites dents blanches inégales qui dépassent le long de la mâchoire fermée -----
     dents = None
@@ -112,24 +113,24 @@ def construire():
         r = float(np.interp(f_, [p[1] for p in pts], [p[0] for p in pts]))
         lat = np.cross(np.array(av), np.array(nq))
         for cote in (1, -1):
-            h = 0.016 + 0.010 * ((int(f_ * 1000) % 3) / 2.0)
-            d = A.tour(A.profil([(0, 0), (0.007, 0.002), (0.004, 0.012), (0, h)], 4), 8)
+            h = 0.022 + 0.014 * ((int(f_ * 1000) % 3) / 2.0)
+            d = A.tour(A.profil([(0, 0), (0.010, 0.003), (0.006, 0.016), (0, h)], 4), 8)
             d = d.pose((0, 0, 0), (180, 0, 0)).pose(tuple(np.array(c_) + lat * cote * r * 0.95 - np.array(nq) * r * 0.20 + np.array([0.0, 0.0, 0.0])))
             dents = d if dents is None else dents + d
     a.piece("dents", dents, DENT, poil=False)
 
     # ----- les pattes : quatre courtes pattes écartées, épaisses, aux orteils griffus ; le pied à plat -----
-    for nom, x_, y_, av in (("av_G", 0.190, -0.150, -0.060), ("av_D", -0.190, -0.150, -0.060), ("ar_G", 0.190, 0.400, 0.060), ("ar_D", -0.190, 0.400, 0.060)):
+    for nom, x_, y_, av in (("av_G", 0.260, -0.150, -0.070), ("av_D", -0.260, -0.150, -0.070), ("ar_G", 0.260, 0.400, 0.070), ("ar_D", -0.260, 0.400, 0.070)):
         c = 1 if x_ > 0 else -1
-        ch = [(x_ * 0.55, y_, 0.130), (x_ * 1.30, y_ + av * 0.4, 0.100), (x_ * 1.55, y_ + av, 0.030)]
-        m = A.tube(A.courbe(propres(ch), 5), lambda t: 0.060 - 0.016 * t, 14)
+        ch = [(x_ * 0.55, y_, 0.175), (x_ * 1.30, y_ + av * 0.4, 0.130), (x_ * 1.55, y_ + av, 0.040)]
+        m = A.tube(A.courbe(propres(ch), 5), lambda t: 0.085 - 0.022 * t, 14)
         m.teinte = np.tile(OCRE, (len(m.v), 1))
         a.piece("patte_" + nom, m, None)
         orteils = None
         for k in (-1, 0, 1):
-            o = A.boule(1.0, 12, 6).etire(0.014, 0.050, 0.012).pose((k * 0.030, -0.040, 0.0), (0, 0, k * 14))
+            o = A.boule(1.0, 12, 6).etire(0.020, 0.070, 0.016).pose((k * 0.042, -0.056, 0.0), (0, 0, k * 14))
             orteils = o if orteils is None else orteils + o
-        a.piece("orteils_" + nom, orteils, tuple(BOUE), pos=(x_ * 1.55, y_ + av - 0.030, 0.014), poil=False)
+        a.piece("orteils_" + nom, orteils, tuple(BOUE), pos=(x_ * 1.55, y_ + av - 0.040, 0.020), poil=False)
     return a
 
 
@@ -144,14 +145,14 @@ if __name__ == "__main__":
 
 from poses import Pose, borne, cloche, onde
 
-JAMBE = 0.170                                        # de l'épaule (ou de la hanche) au sol
+JAMBE = 0.231                                        # de l'épaule (ou de la hanche) au sol
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.875, 0.130)),
-    ('tete', 'corps', (0.010, -0.318, 0.146)),
-    ('patte_av_G', 'corps', (0.156, -0.158, 0.170)),
-    ('patte_ar_G', 'corps', (0.156, 0.408, 0.170)),
+    ('corps', 'racine', (0.000, 0.875, 0.179)),
+    ('tete', 'corps', (0.016, -0.318, 0.201)),
+    ('patte_av_G', 'corps', (0.216, -0.159, 0.231)),
+    ('patte_ar_G', 'corps', (0.216, 0.409, 0.231)),
 ]
 
 PORTEURS = [
@@ -204,7 +205,7 @@ def joie(t):
     vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
     salut = cloche(t, 0.72, 0.16, False)
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.051 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.069 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_av', rot=(-22 * vol, 0, 0))
     p.paire('patte_ar', rot=(18 * vol, 0, 0))
     p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
@@ -216,7 +217,7 @@ def dort(t):
     p = Pose()
     r = onde(t, 1)
     p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.094), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.add('corps', pos=(0, 0, -0.127), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
     p.paire('patte_av', rot=(-68, 0, 14))
     p.paire('patte_ar', rot=(66, 0, 10))
     p.add('tete', rot=(32, 4, 40))
