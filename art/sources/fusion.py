@@ -43,11 +43,12 @@ sys.path.insert(0, ICI)
 EXCLUS = ("oeil", "lourde", "paupiere", "cil", "cerne", "reflet", "pupille", "iris", "epingle", "couture_")
 VOXELS = 400            # le plus grand côté de la bête, en voxels (au plus fin)
 POINTS_MAX = 450000     # la peau remaillée ne dépasse pas ce nombre de points (sinon les voxels grossissent)
-CONGE = 0.30            # le rayon du congé : cette part de l'épaisseur du plus fin des deux morceaux
+DURS = ("griffe", "croc", "dent", "ongle")   # posés sur la peau fondue, pas fondus dedans (essai du 15/10 : des taches blanches)
+CONGE = 0.60            # le rayon du congé : cette part de l'épaisseur du plus fin des deux morceaux (0,30 : trop peu de gain, 15/10)
 CONGE_MIN = 1.5         # ... au moins ce nombre de voxels
-CONGE_MAX = 0.08        # ... au plus cette part de la bête
+CONGE_MAX = 0.12        # ... au plus cette part de la bête
 TROP_FIN = 2.5          # un morceau plus fin que ce nombre de voxels reste à part
-LISSAGE = 6             # passes de lissage
+LISSAGE = 18            # passes de lissage (6 : les formes restaient géométriques, 15/10)
 TRIANGLES = (20000, 120000)   # la peau finale : le nombre de triangles d'origine, entre ces bornes
 
 
@@ -497,6 +498,8 @@ def _choisir(a, h_essai, L):
                 pourquoi = "imprimée"
             elif nom.startswith(EXCLUS):
                 pourquoi = "œil ou épingle"
+            elif nom.startswith(DURS):
+                pourquoi = "griffe ou dent (sa couleur blanche bavait sur la peau)"
             elif str(p.get("groupe", "")).startswith(epingle.OS_LIBRES):
                 pourquoi = "épingle"
             else:

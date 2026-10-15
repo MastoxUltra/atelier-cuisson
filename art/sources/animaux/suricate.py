@@ -1,7 +1,8 @@
-"""Le suricate en peluche cousue main : un fauve sable, des rayures sombres en travers du dos, des taches noires
-autour des yeux, le ventre clair et nu, un museau pointu, de petites oreilles rondes et noires, une queue fine à bout
-noir. La sentinelle : debout sur ses pattes arrière et sa queue (un trépied), le torse droit, les petites mains sur le
-ventre, la tête haute et tournée vers nous, deux yeux grands ouverts qui surveillent le ciel.
+"""Le suricate en peluche cousue main (2e dessin, d'après photos : plus de nounours) : un fauve sable, des rayures
+sombres en travers du dos, un ventre nu et sombre, un corps mince et droit ; une petite tête en COIN, le museau pointu
+terminé d'un nez noir, de grandes TACHES NOIRES autour des yeux, de petites oreilles en croissant plantées bas sur les
+côtés ; des bras fins, de longs pieds étroits, une queue fine à bout noir. La sentinelle : debout sur ses pattes arrière
+et sa queue (un trépied), le torse droit, les mains sur le ventre, la tête haute tournée vers nous, l'œil grand ouvert.
 
     python suricate.py        fabrique la fiche art/apercus/animaux/suricate.png (cousu main, palier 2)
 """
@@ -15,7 +16,6 @@ import numpy as np
 from mathutils import Vector
 
 import atelier as A
-import garnitures as G
 import matieres as M
 import peluche as K
 
@@ -33,10 +33,11 @@ def propres(points, eps=2e-4):
 
 
 FAUVE = np.array(M.hexa("#f0cc90"))           # la dominante : fauve sable (le poil le fonce)
-CLAIR = np.array(M.hexa("#fff0d4"))           # le ventre, la gorge
+CLAIR = np.array(M.hexa("#fff0d4"))           # la gorge, le dessous du museau
 RAYURE = np.array(M.hexa("#8a6040"))          # l'accent : les rayures du dos
 NOIR = np.array(M.hexa("#2e2826"))            # les taches des yeux, les oreilles, le bout de la queue
-PAS = 0.007
+VENTRE = np.array(M.hexa("#b89480"))          # le ventre nu, plus sombre
+PAS = 0.006
 
 
 def lisser(r, n=5):
@@ -44,7 +45,7 @@ def lisser(r, n=5):
     return np.convolve(np.pad(r, n // 2, mode="edge"), k, "valid")
 
 
-def fuseau(points, longueur, cotes=56, pas=PAS):
+def fuseau(points, longueur, cotes=48, pas=PAS):
     s = np.arange(pas, longueur - pas, pas)
     f, r = zip(*points)
     rayons = lisser(np.interp(s / longueur, f, r), 7)
@@ -55,44 +56,49 @@ def construire():
     a = K.Animal("suricate")
     a.taille = 0.55
 
-    # ----- le corps : un long tronc debout, un peu penché en arrière ; les rayures sombres en travers du dos ; le ventre clair -----
-    fil = K.Fil([(0.0, y, z) for y, z in ((0.060, 0.080), (0.040, 0.220), (0.010, 0.360), (-0.020, 0.470))], (1, 0, 0))
+    # ----- le corps : un tronc mince et droit, un peu penché en arrière, le dos rayé, le ventre nu et sombre devant -----
+    fil = K.Fil([(0.0, y, z) for y, z in ((0.060, 0.080), (0.045, 0.200), (0.020, 0.340), (-0.010, 0.460))], (1, 0, 0))
     L = fil.long
-    corps = fuseau([(0.0, 0.0), (0.05, 0.085), (0.22, 0.115), (0.60, 0.100), (0.90, 0.078), (1.0, 0.0)], L, 56)
+    corps = fuseau([(0.0, 0.0), (0.05, 0.070), (0.20, 0.098), (0.55, 0.086), (0.86, 0.066), (1.0, 0.0)], L, 52)
     z = corps.v[:, 2]
     th = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     t = np.tile(FAUVE, (len(z), 1))
     t[(((z - 0.20 * L) / 0.060) % 1.0 < 0.34) & (th < 1.6) & (z > 0.18 * L) & (z < 0.85 * L)] = RAYURE
-    t[th > 2.3] = CLAIR
+    t[(th > 2.3) & (z > 0.10 * L) & (z < 0.82 * L)] = VENTRE
     corps.teinte = t
     a.piece("corps", corps.sculpte(fil.couche), None)
 
-    # ----- la tête : petite et pointue, le museau fin ; les taches noires autour des yeux ; les petites oreilles rondes -----
-    H = A.cadre(Vector((0.0, -0.040, 0.560)), Vector((0.34, -1.0, 0.04)).normalized(), Vector((0, 0, 1)))
+    # ----- la tête : un COIN mince, le front plat, le museau pointu et le nez noir ; les grandes taches noires autour des
+    #       yeux ; de petites oreilles en croissant, plantées bas sur les côtés -----
+    H = A.cadre(Vector((0.0, -0.030, 0.545)), Vector((0.34, -1.0, 0.04)).normalized(), Vector((0, 0, 1)))
     H3 = H.to_3x3()
-    tete = fuseau([(0.0, 0.0), (0.10, 0.060), (0.34, 0.068), (0.62, 0.050), (0.88, 0.034), (0.97, 0.026), (1.0, 0.0)], 0.200, 40, 0.005)
-    tete.teinte = np.where((tete.v[:, 2] > 0.70 * 0.200)[:, None], CLAIR, FAUVE)
-    a.piece("tete", tete, None, mat=H @ A.repere((0, 0, -0.040)))
-    a.piece("nez", A.boule(1.0, 16, 8).etire(0.014, 0.010, 0.010), tuple(NOIR), mat=H @ A.repere((0, 0.006, 0.152)), poil=False)
-    a.tete = H @ Vector((0, 0.0, 0.100))
+    tete = fuseau([(0.0, 0.0), (0.10, 0.052), (0.34, 0.060), (0.62, 0.042), (0.86, 0.026), (0.97, 0.017), (1.0, 0.0)], 0.210, 40, 0.005)
+    tete.v[:, 0] *= 0.82
+    tete.teinte = np.where((np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3)[:, None] | (tete.v[:, 2] > 0.74 * 0.210)[:, None], tuple(CLAIR), tuple(FAUVE))
+    a.piece("tete", tete, None, mat=H @ A.repere((0, 0, -0.045)))
+    a.piece("nez", A.boule(1.0, 16, 8).etire(0.013, 0.011, 0.012), tuple(NOIR), mat=H @ A.repere((0, 0.004, 0.166)), poil=False)
+    a.tete = H @ Vector((0, 0.0, 0.110))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.60, 0.24, 0.30))
-        a.rustine("tache_" + nom, "tete", H @ Vector((0, 0.0, 0.020)), regard, 0.30, tuple(NOIR), 0.003, 0)
-        p, n = a.surface("tete", H @ Vector((0, 0.0, 0.020)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0165)
-        po = A.profil([(0, 0), (0.020, 0.006), (0.026, 0.022), (0.020, 0.036), (0.008, 0.042), (0, 0.046)], 5)
-        a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.45, 1.0), tuple(NOIR),
-                mat=A.cadre(H @ Vector((c * 0.050, 0.050, -0.040)), H3 @ Vector((c * 0.50, 0.20, 0.84)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
+        regard = H3 @ Vector((c * 0.60, 0.20, 0.30))
+        a.rustine("tache_" + nom, "tete", H.to_translation(), regard, 0.42, tuple(NOIR), 0.003, 0)
+        p, n = a.surface("tete", H.to_translation(), regard)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0185)
+        po = A.profil([(0, 0), (0.016, 0.006), (0.021, 0.020), (0.016, 0.034), (0.006, 0.042), (0, 0.046)], 5)
+        a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.40, 1.0), tuple(NOIR),
+                mat=A.cadre(H @ Vector((c * 0.050, 0.020, -0.040)), H3 @ Vector((c * 0.86, 0.16, 0.10)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
 
-    # ----- les petits bras : les mains jointes sur le ventre ; les pattes : deux gros pieds, la queue : le troisième pied -----
+    # ----- les bras fins, les mains jointes sur le ventre ; les cuisses, de LONGS pieds étroits ; la queue : le troisième pied -----
     for nom, c in (("G", 1), ("D", -1)):
-        ch = [(c * 0.085, 0.000, 0.400), (c * 0.110, -0.040, 0.330), (c * 0.060, -0.080, 0.300), (c * 0.026, -0.082, 0.310)]
-        a.piece("bras_" + nom, A.tube(A.courbe(propres(ch), 5), lambda t: 0.020 - 0.006 * t, 12), tuple(FAUVE))
-        a.piece("main_" + nom, A.boule(1.0, 16, 8).etire(0.018, 0.022, 0.016), tuple(NOIR), pos=ch[-1])
-        a.piece("cuisse_" + nom, A.boule(1.0, 24, 12).etire(0.044, 0.070, 0.056), tuple(FAUVE), pos=(c * 0.070, 0.040, 0.070))
-        a.piece("pied_" + nom, A.boule(1.0, 24, 12).etire(0.036, 0.088, 0.022), tuple(NOIR), pos=(c * 0.074, -0.040, 0.022), rot=(0, 0, c * 8))
-    chemin = [(0.0, 0.100, 0.100), (0.0, 0.180, 0.050), (0.0, 0.250, 0.030), (0.030, 0.320, 0.026)]
-    a.piece("queue", K.tube_peint(A.courbe(chemin, 6), lambda t: 0.032 - 0.016 * t, [(0.80, tuple(FAUVE)), (1, tuple(NOIR))], 12), None)
+        ch = [(c * 0.072, 0.004, 0.400), (c * 0.092, -0.030, 0.330), (c * 0.058, -0.066, 0.296), (c * 0.026, -0.070, 0.306)]
+        m = A.tube(A.courbe(propres(ch), 5), lambda t: 0.016 - 0.005 * t, 12)
+        m.teinte = np.tile(FAUVE, (len(m.v), 1))
+        a.piece("bras_" + nom, m, None)
+        a.piece("main_" + nom, A.boule(1.0, 16, 8).etire(0.014, 0.020, 0.012), tuple(NOIR), pos=ch[-1])
+        a.piece("cuisse_" + nom, A.boule(1.0, 24, 12).etire(0.040, 0.066, 0.056), tuple(FAUVE), pos=(c * 0.062, 0.040, 0.082))
+        a.piece("pied_" + nom, A.boule(1.0, 24, 12).etire(0.020, 0.100, 0.014), tuple(FAUVE), pos=(c * 0.066, -0.030, 0.016), rot=(0, 0, c * 6))
+        a.piece("orteils_" + nom, A.boule(1.0, 16, 8).etire(0.016, 0.034, 0.010), tuple(NOIR), pos=(c * 0.070, -0.118, 0.012), rot=(0, 0, c * 6), poil=False)
+    chemin = [(0.0, 0.090, 0.100), (0.0, 0.180, 0.054), (0.0, 0.260, 0.032), (0.030, 0.330, 0.024)]
+    a.piece("queue", K.tube_peint(A.courbe(propres(chemin), 6), lambda t: 0.028 - 0.016 * t, [(0.80, tuple(FAUVE)), (1, tuple(NOIR))], 12), None)
     return a
 
 
@@ -101,30 +107,30 @@ if __name__ == "__main__":
     K.planche(lambda: styles.construire("suricate", styles.style_de("suricate"), sys.modules[__name__]), "Suricate")
 
 
-
 # ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
 # (voir usine.py : python usine.py suricate). Généré d'après la géométrie du modèle (pivots : haut des pattes, base des
 # oreilles, nuque, racine de la queue) ; les gestes sont réglés sur la longueur de ses pattes. Mesures avant a.taille.
 
 from poses import Pose, borne, cloche, onde
 
-JAMBE = 0.258                                        # de l'épaule (ou de la hanche) au sol
+JAMBE = 0.261                                        # de l'épaule (ou de la hanche) au sol
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.089, 0.158)),
-    ('tete', 'corps', (0.007, -0.046, 0.501)),
-    ('oreille_G', 'tete', (0.042, -0.018, 0.608)),
-    ('patte_av_G', 'corps', (0.090, -0.006, 0.391)),
-    ('patte_ar_G', 'corps', (0.072, 0.048, 0.124)),
-    ('queue', 'corps', (0.001, 0.120, 0.115)),
+    ('corps', 'racine', (0.000, 0.086, 0.155)),
+    ('tete', 'corps', (0.004, -0.032, 0.494)),
+    ('oreille_G', 'tete', (0.047, 0.011, 0.565)),
+    ('patte_av_G', 'corps', (0.077, -0.003, 0.387)),
+    ('patte_ar_G', 'corps', (0.064, 0.047, 0.136)),
+    ('queue', 'corps', (0.001, 0.109, 0.114)),
 ]
 
 PORTEURS = [
-    ('oeil_reflet', 'tete'), ('oreille', 'oreille', True), ('cuisse', 'patte_ar', True), ('corps', 'corps'),
-    ('queue', 'queue'), ('tache', 'corps'), ('tete', 'tete'), ('main', 'patte_av', True), ('pied', 'patte_av', True),
-    ('oeil', 'tete'), ('bras', 'patte_av', True), ('nez', 'tete'), ('paupiere_0', 'paupiere_0'),
-    ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
+    ('oeil_reflet', 'tete'), ('oreille', 'oreille', True), ('orteils', 'patte_av', True),
+    ('cuisse', 'patte_ar', True), ('corps', 'corps'), ('queue', 'queue'), ('tache', 'corps'), ('tete', 'tete'),
+    ('bras', 'patte_av', True), ('main', 'patte_av', True), ('oeil', 'tete'), ('pied', 'patte_av', True),
+    ('nez', 'tete'), ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'),
+    ('cil_1', 'paupiere_1'),
 ]
 
 def repos(t):
@@ -178,7 +184,7 @@ def joie(t):
     vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
     salut = cloche(t, 0.72, 0.16, False)
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.077 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.078 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_av', rot=(-22 * vol, 0, 0))
     p.paire('patte_ar', rot=(18 * vol, 0, 0))
     p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
