@@ -28,7 +28,7 @@ FIL = M.hexa("#7a2c40")
 
 # du bout de la queue au bout du nez : la queue-rame qui s'enroule, le corps aplati, la tête large qui se relève
 CHEMIN = [(0.20, 0.50, 0.026), (0.22, 0.40, 0.034), (0.15, 0.30, 0.046), (0.05, 0.20, 0.058), (-0.02, 0.08, 0.066), (-0.02, -0.04, 0.070),
-          (0.02, -0.15, 0.072), (0.04, -0.25, 0.072), (0.01, -0.33, 0.072), (-0.04, -0.40, 0.072), (-0.09, -0.45, 0.070)]
+          (0.02, -0.15, 0.072), (0.04, -0.25, 0.082), (0.01, -0.33, 0.108), (-0.04, -0.40, 0.136), (-0.09, -0.45, 0.150)]
 CORPS = O.interp([(0.0, 0.0), (0.02, 0.010), (0.10, 0.024), (0.28, 0.046), (0.45, 0.066), (0.62, 0.074), (0.76, 0.072),
                   (0.84, 0.068), (0.90, 0.078), (0.96, 0.076), (0.99, 0.052), (1.0, 0.0)])
 
@@ -67,9 +67,9 @@ def construire():
 
     # ----- le visage : deux points noirs, le grand sourire qui remonte aux joues -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.945 * L, 0.20, c * 0.85, 0.55)
+        centre, direction = fil.vise(0.950 * L, 0.55, c * 0.50, 0.55)                   # sur le dessus du museau : deux yeux de face
         pos, n = a.surface("corps", centre, direction)
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0115)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0135)
         pts_b = []
         for u_ in np.linspace(0.0, 1.0, 9):
             cc, dd = fil.vise((0.992 - 0.074 * u_) * L, 0.0, c * 1.0, -0.20 + 0.40 * u_ ** 1.6)

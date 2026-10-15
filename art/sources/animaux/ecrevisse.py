@@ -64,13 +64,8 @@ def construire():
         bras = O.tube_r([(c * 0.075, -0.180, 0.100), (c * 0.150, -0.260, 0.130), (c * 0.170, -0.340, 0.190), (c * 0.120, -0.380, 0.270)],
                         [0.030, 0.027, 0.024, 0.022], 14)
         a.piece("bras_" + nom, bras, tuple(LAQUE), poil=True)
-        paume = A.boule(1.0, 28, 14).etire(0.040, 0.075, 0.034)
-        a.piece("paume_" + nom, paume, ORANGE, mat=A.cadre(Vector((c * 0.118, -0.405, 0.300)), (c * 0.15, -0.35, 0.95), (0, 1, 0)))
-        for k, s in enumerate((-1, 1)):
-            doigt = A.tour(A.profil([(0.020, 0), (0.017, 0.030), (0.009, 0.062), (0, 0.085)], 3), 14)
-            doigt = doigt.etire(1.0, 0.6, 1.0)
-            d = Vector((c * (0.15 + 0.35 * s), -0.45, 0.88)).normalized()
-            a.piece("doigt_%s%d" % (nom, k), O.couche(doigt, A.cadre(Vector((c * 0.112, -0.436, 0.325)), d, (0, 1, 0))), ORANGE, poil=False)
+        p = O.pince(0.190, 0.100, 30.0, np.asarray(ORANGE, float), np.asarray(NOIR, float))
+        a.piece("pince_" + nom, p, None, mat=A.cadre(Vector((c * 0.116, -0.395, 0.290)), (c * 0.14, -0.55, 0.85), (0, 1, 0)), poil=False)
 
     # ----- les antennes : deux longs fouets qui partent du front ; les yeux perlés sur deux tiges -----
     for nom, c in (("G", 1), ("D", -1)):

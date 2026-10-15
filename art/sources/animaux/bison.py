@@ -33,7 +33,7 @@ LAINE = M.hexa("#5a3e30")                   # la masse de l'avant : laine brune 
 NOIRBR = M.hexa("#2e2420")                  # la tête, la barbe
 CORNE = M.hexa("#2a2624")                   # les cornes
 LARGE, LONG, HAUT = 0.180, 0.280, 0.165     # les demi-mesures du tonneau
-NUQUE = Vector((-0.020, -0.330, 0.410))     # l'arrière du crâne : plus bas que la bosse, devant elle
+NUQUE = Vector((0.0, -0.330, 0.410))     # l'arrière du crâne : plus bas que la bosse, devant elle
 LACET, PIQUE, PENCHE = 0.0, 18.0, 0.0     # la tête basse mais en vue : le mufle vers le bas, presque de face
 
 

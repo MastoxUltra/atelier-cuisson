@@ -425,3 +425,26 @@ def points_lumineux(pts_normales, rayon, couleur):
         d = couche(teinte(A.boule(1.0, 10, 6).etire(rayon, rayon, rayon * 0.45), couleur), A.cadre(p, n, up))
         m = d if m is None else m + d
     return m
+
+
+def pince(long, large, ouverture=34.0, couleur=None, bout=None):
+    """Une pince dessinée (crabe, écrevisse, bernard) : la paume bombée, puis DEUX doigts qui s'effilent et se courbent l'un
+    vers l'autre, séparés par un jour ; la pince regarde vers +Z (le doigt fixe en bas, le mobile ouvert de `ouverture`°).
+    À poser avec couche(m, A.cadre(pos, direction, haut)). Pas de boule : la paume est aplatie, les doigts finissent en pointe."""
+    L, W = long, large
+    paume = A.boule(1.0, 28, 14).sculpte(lambda v: K.emousse(v, 0.88)).etire(0.52 * W, 0.34 * W, 0.40 * L).pose((0.0, 0.0, 0.26 * L))
+
+    def doigt(sens):
+        prof = A.profil([(0.19 * W, 0), (0.17 * W, 0.18 * L), (0.12 * W, 0.40 * L), (0.065 * W, 0.58 * L), (0.02 * W, 0.70 * L), (0, 0.74 * L)], 4)
+        d = A.tour(prof, 18).etire(0.82, 1.0, 1.0)
+        # le doigt se courbe vers l'autre : le bout rentre
+        d = d.sculpte(lambda v: np.stack([v[:, 0] - sens * 0.10 * W * (v[:, 2] / (0.74 * L)) ** 2, v[:, 1], v[:, 2]], axis=1))
+        ang = math.radians(ouverture) * 0.5
+        dirv = Vector((sens * math.sin(ang), 0.0, math.cos(ang)))
+        return couche(d, A.cadre(Vector((sens * 0.20 * W, 0.0, 0.40 * L)), dirv, (0, 1, 0)))
+    m = paume + doigt(1.0) + doigt(-1.0)
+    if couleur is not None:
+        m.teinte = np.tile(np.asarray(couleur, float), (len(m.v), 1))
+        if bout is not None:                                    # le bout des doigts d'une autre couleur
+            m.teinte[m.v[:, 2] > 0.92 * L] = np.asarray(bout, float)
+    return m

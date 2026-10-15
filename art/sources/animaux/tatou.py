@@ -87,7 +87,7 @@ def construire():
     a.piece("corps", corps.sculpte(fil.couche), None)
 
     # ----- la tête : un coin, le museau pointu ; deux yeux petits mais nets ; de longues oreilles en tuyau fermé -----
-    H = A.cadre(Vector((0.0, -0.320, 0.150)), Vector((0.30, -1.0, -0.30)).normalized(), Vector((0, 0, 1)))
+    H = A.cadre(Vector((0.0, -0.320, 0.150)), Vector((0.0, -1.0, -0.30)).normalized(), Vector((0, 0, 1)))
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.056), (0.22, 0.070), (0.46, 0.056), (0.74, 0.038), (0.95, 0.026), (1.0, 0.0)], 0.300, 48, 0.005)
     tete.v[:, 1] *= 0.80
@@ -97,9 +97,9 @@ def construire():
     a.piece("nez", A.boule(1.0, 20, 10).etire(0.018, 0.014, 0.014), tuple(JOINT), mat=H @ A.repere((0, 0.004, 0.252)), poil=False)
     a.tete = H @ Vector((0, 0.0, 0.140))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.78, 0.32, 0.10))
+        regard = H3 @ Vector((c * 0.58, 0.40, 0.46))                         # sur l'avant de la tête : les deux yeux de face
         p, n = a.surface("tete", H @ Vector((0, 0.0, 0.050)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0140)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0190)
         po = A.profil([(0, 0), (0.020, 0.008), (0.026, 0.050), (0.020, 0.100), (0.010, 0.128), (0, 0.138)], 6)
         a.piece("oreille_" + nom, A.tour(po, 24).etire(1.0, 0.60, 1.0), tuple(CUIR),
                 mat=A.cadre(H @ Vector((c * 0.052, 0.040, -0.030)), H3 @ Vector((c * 0.60, 0.55, 0.30)), H3 @ Vector((c * 0.3, -0.9, 0.0))))

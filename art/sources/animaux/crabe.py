@@ -58,13 +58,8 @@ def construire():
     for nom, c, ouv in (("G", 1, 24.0), ("D", -1, 2.0)):
         bras = O.tube_r([(c * 0.170, -0.090, 0.120), (c * 0.250, -0.140, 0.160), (c * 0.270, -0.215, 0.230)], [0.030, 0.026, 0.024], 12)
         a.piece("bras_" + nom, O.teinte(bras, PATTE), None)
-        palme = A.boule(1.0, 28, 14).etire(0.048, 0.062, 0.046)
-        a.piece("palme_" + nom, O.teinte(palme, TOMATE), None, pos=(c * 0.268, -0.250, 0.262))
-        for k, s in enumerate((-1, 1)):
-            doigt = A.tour(A.profil([(0.028, 0), (0.022, 0.030), (0.012, 0.058), (0.0045, 0.080), (0, 0.090)], 3), 14).etire(0.8, 1.0, 1.0)
-            d = Vector((c * 0.10 * s * (1 + ouv / 12.0), -0.35, 1.0)).normalized()
-            m = O.couche(doigt, A.cadre(Vector((c * 0.268 + c * 0.012 * s, -0.272, 0.292)), d, (0, 1, 0)))
-            a.piece("doigt_%s%d" % (nom, k), m, tuple(NOIR) if False else NOIR, poil=False)
+        p = O.pince(0.165, 0.125, 8.0 + ouv * 1.4, np.asarray(TOMATE, float), np.asarray(NOIR, float))
+        a.piece("pince_" + nom, p, None, mat=A.cadre(Vector((c * 0.268, -0.245, 0.250)), (c * 0.12, -0.40, 1.0), (0, 1, 0)), poil=False)
 
     # ----- les six pattes : trois de chaque côté, repliées en genou vers le haut puis posées de travers -----
     for k in range(3):

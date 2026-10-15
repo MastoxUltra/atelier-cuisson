@@ -47,7 +47,7 @@ def construire():
         f = m.v[:, 2] / L
         t[f > 0.965] = AMBRE * 0.82                                  # le dessus du museau, un peu plus sombre
         return t
-    fil, L = O.fil_corps(a, "corps", CHEMIN, rayon, peint, None, cotes=32, flanc=(1.0, 0.0, 0.0))
+    fil, L = O.fil_corps(a, "corps", CHEMIN, rayon, peint, None, cotes=40, pas=24, flanc=(1.0, 0.0, 0.0))        # un seul fuseau lisse
 
     # ----- la nageoire en ourlet : un mince ruban le long du dos, de la nuque jusqu'au bout de la queue -----
     pts = []
@@ -61,7 +61,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         centre, direction = fil.vise(0.962 * L, 0.35, c * 0.95, 0.20)
         pos, n = a.surface("corps", centre, direction)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0165, couleur=OR)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0175)                       # un vrai œil vivant, plus de pièce de monnaie
     pts = []
     for u_ in np.linspace(0.0, 1.0, 7):
         cc, dd = fil.vise((0.998 - 0.040 * u_) * L, 0.0, 1.0, -0.40 + 0.10 * u_)

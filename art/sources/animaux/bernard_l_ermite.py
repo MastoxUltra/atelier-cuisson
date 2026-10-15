@@ -65,11 +65,11 @@ def construire():
 
     grosse = O.tube_r([(0.070, -0.090, 0.060), (0.130, -0.135, 0.058), (0.150, -0.185, 0.062)], [0.024, 0.022, 0.020], 12)
     a.piece("bras_gros", O.teinte(grosse, FONCE), None, poil=False)
-    pince = A.boule(1.0, 24, 12).etire(0.050, 0.070, 0.030)
-    a.piece("pince_grosse", O.teinte(pince, ABRICOT), None, pos=(0.150, -0.235, 0.062), rot=(0, 0, 14))
+    pince = O.pince(0.120, 0.082, 30.0, ABRICOT)                                   # une vraie pince : paume et deux doigts
+    a.piece("pince_grosse", pince, None, mat=A.cadre(Vector((0.150, -0.180, 0.062)), (0.30, -1.0, 0.04), (0, 0, 1)), poil=False)
     petit = O.tube_r([(-0.070, -0.090, 0.060), (-0.100, -0.125, 0.050), (-0.108, -0.150, 0.044)], [0.014, 0.013, 0.012], 10)
     a.piece("bras_petit", O.teinte(petit, FONCE), None, poil=False)
-    a.piece("pince_petite", O.teinte(A.boule(1.0, 16, 8).etire(0.020, 0.030, 0.014), ABRICOT), None, pos=(-0.108, -0.172, 0.044), poil=False)
+    a.piece("pince_petite", O.pince(0.060, 0.040, 26.0, ABRICOT), None, mat=A.cadre(Vector((-0.108, -0.150, 0.044)), (-0.25, -1.0, 0.02), (0, 0, 1)), poil=False)
 
     # ----- quatre petites pattes, deux de chaque côté, à plat sur le sable -----
     for k in range(2):
