@@ -33,8 +33,8 @@ GORGE = M.hexa("#5a2f3a")                     # le fond de la gueule
 MUSEAU = M.hexa("#4a4040")                    # le museau et la crinière sombres
 TOURNE = 0                                    # -30 pour la fiche, posé de biais (on lit sa longueur) ; 0 pour le jeu
 CORPS = Vector((0.0, 0.040, 0.300))
-LARGE, LONG, HAUT = 0.090, 0.250, 0.094       # les demi-mesures du corps
-TETE = Vector((0.0, -0.300, 0.590))
+LARGE, LONG, HAUT = 0.100, 0.285, 0.102       # les demi-mesures du corps
+TETE = Vector((0.0, -0.320, 0.560))
 PORT = A.repere(TETE, (10, 0, 0))             # la tête basse et DROITE : le museau en avant, les deux yeux de face
 OEIL = (0.48, -0.76, 0.30)                    # la direction de l'œil gauche, dans le repère de la tête
 
@@ -85,7 +85,8 @@ def construire():
         k = boudin / rond
         s = np.stack([v[:, 0] * k, y, v[:, 2] * k], axis=1)
         s = K.bosse(s, (0, -0.70, -0.55), 0.26, 0.22)                 # le poitrail bombé
-        s = K.bosse(s, (0, 0.80, 0.35), 0.08, 0.22)                   # la croupe
+        s = K.bosse(s, (0, 0.80, 0.35), 0.04, 0.22)                   # la croupe : basse
+        s = K.bosse(s, (0, -0.55, 0.78), 0.22, 0.34)                  # le garrot : une bosse d'épaules hautes
         s = K.bosse(K.bosse(s, (0.85, -0.50, -0.10), 0.05, 0.10), (-0.85, -0.50, -0.10), 0.05, 0.10)   # les épaules
         avant = K.lisse((-s[:, 1] - 0.1) / 0.8)
         arriere = K.lisse((s[:, 1] + 0.1) / 0.9)
@@ -112,18 +113,18 @@ def construire():
                     r = rayon * (0.65 + 0.70 * al(134775813))
                     dedans |= (al(1103515245) < proba) & (np.linalg.norm(v - centre, axis=1) < r)
         return dedans
-    corps.teinte = np.where((taches(cv, 0.070, 0.026, 7) & ~dessous)[:, None], np.asarray(ARDOISE), corps.teinte)
+    corps.teinte = np.where((taches(cv, 0.058, 0.025, 7, 0.86) & ~dessous)[:, None], np.asarray(ARDOISE), corps.teinte)
     a.piece("corps", corps, None, pos=CORPS, rot=(-26, 0, 0))       # le dos qui descend FRANCHEMENT vers la croupe basse
     # la crinière : une courte brosse hérissée le long de l'échine, de la nuque au milieu du dos
     crin = None
     for yy in np.linspace(-0.24, 0.02, 12):
         zz = 0.300 + 0.094 * math.cos(math.radians(26)) + (0.040 - yy) * math.sin(math.radians(26)) + 0.006
-        e = A.boule(1.0, 10, 6).etire(0.011, 0.020, 0.040).pose((0.0, float(yy), float(zz)))
+        e = A.boule(1.0, 10, 6).etire(0.020, 0.034, 0.072).pose((0.0, float(yy), float(zz)))
         crin = e if crin is None else crin + e
     a.piece("criniere", crin, MUSEAU, poil=False)
 
     # ----- le cou : épais comme une collerette, ardoise sur la nuque, blanc devant -----
-    fil_cou = K.Fil([(0.0, -0.140, 0.390), (0.003, -0.215, 0.490), (0.008, -0.265, 0.565)], flanc=(1, 0, 0))
+    fil_cou = K.Fil([(0.0, -0.150, 0.400), (0.003, -0.230, 0.470), (0.008, -0.290, 0.535)], flanc=(1, 0, 0))
     cou = A.tour(A.profil([(0, -0.02), (0.084, 0.0), (0.082, 0.07), (0.072, 0.14), (0.064, 0.19), (0, 0.225)], 5), 32)
     cou.teinte = np.where((cou.v[:, 1] < -0.015)[:, None], np.asarray(BLANC), np.asarray(ARDOISE))
     a.piece("cou", cou.sculpte(fil_cou.couche), None)

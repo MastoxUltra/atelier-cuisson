@@ -45,10 +45,10 @@ def construire():
     haut = Vector(T @ Vector((0, 0, 0.545)))
 
     # ----- le cou en S sur le jabot, la tête petite, le bec énorme posé sur la poitrine, la poche qui pend dessous -----
-    cou = O.tube_r([haut + Vector((0, 0.02, 0.00)), haut + Vector((0, 0.04, 0.12)), haut + Vector((0, -0.04, 0.24)),
-                    haut + Vector((0, -0.12, 0.26)), haut + Vector((0, -0.14, 0.18))], [0.115, 0.095, 0.082, 0.075, 0.070], 20)
+    cou = O.tube_r([haut + Vector((0, 0.02, 0.00)), haut + Vector((0, 0.04, 0.12)), haut + Vector((0, -0.06, 0.26)),
+                    haut + Vector((0, -0.20, 0.32)), haut + Vector((0, -0.30, 0.30))], [0.115, 0.095, 0.082, 0.075, 0.070], 20)
     a.piece("cou", O.teinte(cou, BLANC), None)
-    H = haut + Vector((0.0, -0.150, 0.150))
+    H = haut + Vector((0.0, -0.320, 0.280))      # la tête loin devant la poitrine : le bec et la poche pendent dans le vide
     tete = A.boule(1.0, 40, 20).etire(0.075, 0.095, 0.080)
     a.piece("tete", O.teinte(tete, BLANC), None, pos=tuple(H), rot=(20, 0, 0))
     a.tete = H + Vector((0.0, -0.20, -0.04))

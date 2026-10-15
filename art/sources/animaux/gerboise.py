@@ -59,8 +59,9 @@ def construire():
     H3 = H.to_3x3()
     tete = A.boule(1.0, 48, 24)
     tete.teinte = np.where((tete.v[:, 2] > 0.35)[:, None], DOS, SABLE)
+    tete.teinte[(tete.v[:, 1] < -0.32) & (tete.v[:, 2] < 0.18) & (tete.v[:, 2] > -0.75)] = CLAIR      # le museau clair est PEINT sur la tête, plus un bloc collé
     a.piece("tete", tete.etire(0.070, 0.066, 0.062), None, mat=H)
-    a.piece("museau", A.boule(1.0, 28, 14).etire(0.032, 0.036, 0.030), tuple(CLAIR), mat=H @ A.repere((0.0, -0.058, -0.014)))
+    a.piece("museau", A.boule(1.0, 28, 14).etire(0.022, 0.026, 0.020), tuple(CLAIR), mat=H @ A.repere((0.0, -0.066, -0.014)))   # un petit bout de museau, fondu dans la tête
     a.piece("nez", A.boule(1.0, 20, 10).etire(0.012, 0.010, 0.010), ROSE, mat=H @ A.repere((0.0, -0.092, -0.008)), poil=False)
     a.tete = H @ Vector((0.0, -0.080, -0.010))
     for nom, c in (("G", 1), ("D", -1)):
