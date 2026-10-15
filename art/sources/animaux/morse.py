@@ -76,7 +76,7 @@ def construire():
         p, n = a.surface("tete", TETE, H3 @ Vector((c * 0.62, -0.62, 0.42)))
         a.bouton("oeil_" + nom, p + n * 0.002, n, 0.015)
         P = A.cadre(p + n * 0.004, n, H3 @ Vector((0, 0, 1)))
-        a.piece("lourde_" + nom, K.paupiere(0.017, 0.05), CANNELLE, mat=P)
+        a.piece("lourde_" + nom, K.paupiere(0.017, 0.58), CANNELLE, mat=P)
 
     # ----- les nageoires de devant : larges, plantées au sol de part et d'autre du poitrail, qui le tiennent dressé -----
     for nom, c in (("G", 1), ("D", -1)):

@@ -63,7 +63,7 @@ def construire():
         a.rustine("cerne_" + nom, "tete", TETE, regard, 0.40, CIEL, 0.003, 0)
         p, n = a.surface("tete", TETE, regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0160)
-        a.piece("lourde_" + nom, K.paupiere(0.021, 0.20), NOIR, mat=A.cadre(p + n * 0.005, n, H3 @ Vector((0, 0, 1))), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.021, 0.58), NOIR, mat=A.cadre(p + n * 0.005, n, H3 @ Vector((0, 0, 1))), poil=False)
 
     # ----- le bec : une énorme gouttière tournée, bandée jaune, orange, rouge, la pointe noire ; un peu courbe -----
     B = A.cadre(H @ Vector((0, -0.075, -0.014)), H3 @ Vector((0, -0.97, -0.20)), H3 @ Vector((0, 0.2, 0.98)))

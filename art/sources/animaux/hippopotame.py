@@ -62,7 +62,7 @@ def construire():
         a.piece("globe_" + n, A.boule(1.0, 24, 12).etire(0.080, 0.080, 0.068), PRUNE, mat=H @ A.repere((c * 0.230, -0.150, 0.280)))
         p, nn = a.surface("globe_" + n, H @ Vector((c * 0.230, -0.150, 0.280)), H3 @ Vector((c * 0.50, -0.70, 0.50)))
         a.oeil("oeil_" + n, p + nn * 0.004, nn, 0.0340)
-        a.piece("lourde_" + n, K.paupiere(0.040, 0.02), PRUNE, mat=A.cadre(p + nn * 0.006, nn, H3 @ Vector((0, 0, 1))), poil=False)
+        a.piece("lourde_" + n, K.paupiere(0.040, 0.58), PRUNE, mat=A.cadre(p + nn * 0.006, nn, H3 @ Vector((0, 0, 1))), poil=False)
         # les petites oreilles rondes derrière
         po = A.profil([(0, 0), (0.044, 0.010), (0.050, 0.032), (0.038, 0.054), (0.014, 0.064), (0, 0.068)], 5)
         a.piece("oreille_" + n, A.tour(po, 24).etire(1.0, 0.45, 1.0), PRUNE,

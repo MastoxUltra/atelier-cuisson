@@ -125,3 +125,83 @@ def construire():
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("anaconda", styles.style_de("anaconda"), sys.modules[__name__]), "Anaconda")
+
+
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py anaconda). Généré d'après la géométrie du modèle (pivots : haut des pattes, base des
+# oreilles, nuque, racine de la queue) ; les gestes sont réglés sur la longueur de ses pattes. Mesures avant a.taille.
+
+from poses import Pose, borne, cloche, onde
+
+JAMBE = 0.158                                        # de l'épaule (ou de la hanche) au sol
+
+OS = [
+    ('racine', None, (0, 0, 0)),
+    ('corps', 'racine', (0.000, 0.273, 0.158)),
+    ('tete', 'corps', (-0.034, 0.119, 0.249)),
+]
+
+PORTEURS = [
+    ('fourche', 'tete'), ('narine', 'tete'), ('langue', 'tete'), ('corps', 'corps'), ('bille', 'corps'),
+    ('tete', 'tete'), ('oeil', 'tete'), ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'),
+    ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
+]
+
+def repos(t):
+    """Il respire, tourne la tête d'un côté puis de l'autre, une oreille bouge, un clignement."""
+    p = Pose()
+    r = onde(t, 2)
+    g, d = cloche(t, 0.28, 0.16), cloche(t, 0.72, 0.13)
+    p.add('corps', ech=(1 + 0.010 * r, 1, 1 + 0.018 * r))
+    p.add('tete', rot=(3 * g - 2 * d, -4 * g + 3 * d, 16 * g - 12 * d))
+    p.ouvert = borne(1 - 0.3 * g - cloche(t, 0.08, 0.02) - cloche(t, 0.62, 0.02))
+    return p
+
+
+def avance(t):
+    """Sa marche : les pattes alternent, le corps oscille, la tête dodeline."""
+    p = Pose()
+    c, s = math.cos(math.tau * t), math.sin(math.tau * t)
+    pas = 26.0
+    creux = JAMBE * (1 - math.cos(math.radians(pas * s))) * 0.5
+    p.add('corps', pos=(0, 0, -creux), rot=(1.0 * onde(t, 2, 0.1), 3 * c, 2.5 * s))
+    p.add('tete', rot=(-3 + 2 * onde(t, 2, -0.1), 0, -2 * s))
+    return p
+
+
+def mange(t):
+    """Il baisse la tête vers le sol, quelques bouchées, puis la relève et mâche."""
+    p = Pose()
+    leve = cloche(t, 0.84, 0.15)
+    bas = 1 - leve
+    coups = max(0.0, onde(t, 4)) ** 2 * bas
+    p.add('corps', rot=(5 * bas, 0, 0))
+    p.add('tete', rot=(40 * bas + 8 * coups + 3 * leve * onde(t, 12), -3 * leve, 12 * leve))
+    p.ouvert = borne(1 - cloche(t, 0.70, 0.03))
+    return p
+
+
+def joie(t):
+    """Il se tasse, bondit, retombe, et fête ça : les oreilles, la queue, les ailes."""
+    p = Pose()
+    tasse = cloche(t, 0.12, 0.12, False)
+    vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
+    salut = cloche(t, 0.72, 0.16, False)
+    fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.047 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
+    return p
+
+
+def dort(t):
+    """Il s'affaisse, la tête repose de côté, les yeux fermés, une respiration lente."""
+    p = Pose()
+    r = onde(t, 1)
+    p.ouvert = 0.0
+    p.add('corps', pos=(0, 0, -0.087), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.add('tete', rot=(32, 4, 40))
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}
