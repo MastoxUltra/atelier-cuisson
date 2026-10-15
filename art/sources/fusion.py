@@ -43,7 +43,9 @@ sys.path.insert(0, ICI)
 EXCLUS = ("oeil", "lourde", "paupiere", "cil", "cerne", "reflet", "pupille", "iris", "epingle", "couture_")
 VOXELS = 400            # le plus grand côté de la bête, en voxels (au plus fin)
 POINTS_MAX = 450000     # la peau remaillée ne dépasse pas ce nombre de points (sinon les voxels grossissent)
-DURS = ("griffe", "croc", "dent", "ongle")   # posés sur la peau fondue, pas fondus dedans (essai du 15/10 : des taches blanches)
+DURS = ("griffe", "croc", "dent", "ongle", "nez", "truffe", "ourlet", "interieur", "dedans_")
+# posés sur la peau fondue, pas fondus dedans, et recollés d'un seul geste (essais du 15/10 : des taches blanches aux griffes,
+# la truffe du raton tombée sous la bouche, l'intérieur des oreilles froissé comme du papier par les voxels)
 CONGE = 0.60            # le rayon du congé : cette part de l'épaisseur du plus fin des deux morceaux (0,30 : trop peu de gain, 15/10)
 CONGE_MIN = 1.5         # ... au moins ce nombre de voxels
 CONGE_MAX = 0.12        # ... au plus cette part de la bête
@@ -499,7 +501,7 @@ def _choisir(a, h_essai, L):
             elif nom.startswith(EXCLUS):
                 pourquoi = "œil ou épingle"
             elif nom.startswith(DURS):
-                pourquoi = "griffe ou dent (sa couleur blanche bavait sur la peau)"
+                pourquoi = "pièce posée (griffe, dent, truffe, ourlet)"
             elif str(p.get("groupe", "")).startswith(epingle.OS_LIBRES):
                 pourquoi = "épingle"
             else:
@@ -758,21 +760,40 @@ def _recoller(a, peau, ancienne):
     # les yeux : un geste rigide pour l'œil et tout ce qui le touche
     deja = set()
     for nom, pos, vers, r, paire in list(a._boutons):
+        cotes_ = []
         for signe in ((1.0, -1.0) if paire else (1.0,)):
             c = np.array(pos) * e * [signe, 1.0, 1.0]
-            v = np.array(vers) * [signe, 1.0, 1.0]
             dist, q, n = vieille_surface(c[None], portee)
             if abs(dist[0]) >= portee:
                 continue
-            de = ecart(q, n, portee)[0]
-            if abs(de) < 0.05 * h:
-                continue
+            cotes_.append((signe, c, n[0], ecart(q, n, portee)[0]))
+        if not cotes_:
+            continue
+        de = float(np.mean([x[3] for x in cotes_]))                     # une paire bouge d'autant des deux côtés : des yeux égaux
+        if abs(de) < 0.05 * h:
+            continue
+        for signe, c, nn, _de in cotes_:
             groupe_ = [p for p in a._toutes() if not p.get("fusion") and id(p) not in deja and
                        np.linalg.norm(p["monde"].mean(axis=0) - c) < 1.8 * r * e and np.ptp(p["monde"], axis=0).max() < 4.5 * r * e]
             for p in groupe_:
-                p["monde"] = p["monde"] + n[0] * de
+                p["monde"] = p["monde"] + nn * de
                 deja.add(id(p))
             bouges.append("%s %+.1f mm" % (nom + ("_D" if signe < 0 else ""), 1000 * de))
+    # les pièces posées (truffe, griffes, dents, ourlets) : chacune d'un seul geste, le long de la peau sous elle
+    posees = []
+    for p in a._toutes():
+        if p.get("fusion") or id(p) in deja or not p["nom"].lower().startswith(DURS):
+            continue
+        X = p["monde"]
+        c = X.mean(axis=0)
+        dist, q, n = vieille_surface(c[None], portee + 0.5 * float(np.ptp(X, axis=0).max()))
+        if abs(dist[0]) >= portee + 0.5 * float(np.ptp(X, axis=0).max()) or not n[0].any():
+            continue
+        de = ecart(q, n, portee)[0]
+        if abs(de) >= 0.05 * h:
+            p["monde"] = X + n[0] * de
+            posees.append("%s %+.1f mm" % (p["nom"], 1000 * de))
+        deja.add(id(p))
     # les détails cousus : point par point
     details = 0
     for p in a._toutes():
@@ -788,7 +809,7 @@ def _recoller(a, peau, ancienne):
         if np.abs(de).max() > 0.05 * h:
             p["monde"] = X + n * de[:, None]
             details += 1
-    _dire("recollés : yeux %s ; %d détails cousus suivent la peau" % (", ".join(bouges) or "en place", details))
+    _dire("recollés : yeux %s ; posées %s ; %d détails cousus suivent la peau" % (", ".join(bouges) or "en place", ", ".join(posees) or "en place", details))
 
 
 # ---------------------------------------------------------------- 3. le soudage du maillage du jeu (usine.monter_bas)
