@@ -14,7 +14,8 @@ Ce qu'elle fait, une fois l'animal bâti (le fichier de la bête ne change pas) 
    de trois quarts) est remise en miroir dans le repère de cette pièce. Une paire déjà symétrique dans ce repère, ou
    qui n'est symétrique dans aucun des deux (une asymétrie voulue), n'est pas touchée.
 2. fusionner(a), une fois l'animal à sa taille (et ses os donnés, dans l'usine) : les volumes de tissu (corps, tête,
-   museau, membres, queue, oreilles, nez, dents, griffes, bec...) deviennent une seule peau :
+   museau, membres, queue, oreilles, nez, dents, griffes, bec...) deviennent une seule peau (une bête d'une seule pièce
+   aussi, quand le gonflage est demandé : remaillée, lissée et gonflée comme les autres, 16/10) :
      - remaillage en voxels (le modificateur Remesh de Blender) : l'union, sans faces enfouies ;
      - à chaque jonction de deux morceaux qui se touchent, un congé arrondi : union douce de leurs distances signées
        (rayon : CONGE fois l'épaisseur du plus fin des deux) ; deux morceaux qui ne se touchent pas ne sont pas soudés ;
@@ -629,7 +630,9 @@ def fusionner(a, gonfle=None, reglages=None):
     bas, haut = a.boite()
     L = float(max(haut - bas))
     pris, apart = _choisir(a, None, L)
-    if len(pris) < 2:
+    # une bête d'une seule pièce (un maillage réel remaillé, 16/10) passe quand même par les voxels, le lissage et le
+    # gonflage quand le gonflage est demandé : sans lui, elle restait à facettes (l'hippopotame du 16/10)
+    if not pris or (len(pris) < 2 and not gonfle):
         _dire("rien à fondre (%d pièce)" % len(pris))
         return 0
     morceaux = [m for p, cle in pris for m in _morceaux(p, cle)]
@@ -639,9 +642,11 @@ def fusionner(a, gonfle=None, reglages=None):
     M = [m for m in morceaux if m.epais >= TROP_FIN * h]
     for m in fins:
         apart.setdefault(m.p["nom"], "trop fine (%.1f mm)" % (1000 * m.epais))
-    if len(M) < 2:
+    if not M or (len(M) < 2 and not gonfle):
         _dire("rien à fondre (%d morceau assez épais)" % len(M))
         return 0
+    if len(M) == 1:
+        _dire("un seul morceau (« %s ») : remaillé, lissé et gonflé quand même" % M[0].p["nom"])
     tris_avant = sum(len(m.tris) for m in M)
     _dire("%d pièces, %d morceaux à fondre (%d triangles) ; voxel %.1f mm ; à part : %s" % (
         len({id(m.p) for m in M}), len(M), tris_avant, 1000 * h,
