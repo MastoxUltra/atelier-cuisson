@@ -95,6 +95,10 @@ def construire():
         a.piece("aile_" + nom, etoffe(contour, 0.0050), MARINE, mat=rep, poil=False, paire=True)
         a.piece("panneau_" + nom, etoffe(panneau, 0.0030, base), None, mat=rep @ A.repere((0, 0, 0.0036)), poil=False, paire=True)
         a.piece("perles_" + nom, perles(semis, 0.0060, 0.0030), K.CREME, mat=rep, poil=False, paire=True)
+        # le revers des ailes, lui aussi orange (un vrai papillon se lit de dessous) : de face, en jeu, la caméra voit le
+        # dessous des ailes ; sans lui, elles sortent marine et le papillon passe pour un moustique (Artiste, 15/10)
+        a.piece("panneau_" + nom + "_revers", etoffe(panneau, 0.0030, base), None, mat=rep @ A.repere((0, 0, -0.0036)), poil=False, paire=True)
+        a.piece("perles_" + nom + "_revers", perles(semis, 0.0060, -0.0030), K.CREME, mat=rep, poil=False, paire=True)
         for k, ligne in enumerate(nervures):
             a.broderie("nervure%d_%s" % (k, nom), [rep @ Vector((u, w, 0.0056)) for u, w in A.courbe(ligne, 4)], 0.0017, MARINE, paire=True)
         if nom == "arriere":
