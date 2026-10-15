@@ -5,6 +5,11 @@ d'étagère : assis bien droit, le dos tendu, les pattes de devant serrées, la 
 penchée de côté, qui nous observe de très haut, sans un bruit.
 
     python ocelot.py        fabrique la fiche art/apercus/animaux/ocelot.png (peluche de magasin, palier 4)
+
+Les 5 traits de l'espèce (relus sur 12 photos de Commons le 15/10) : 1. un félin mince et long, la tête ronde aux petites
+oreilles rondes tachées de blanc derrière ; 2. le pelage sable chargé de chaînes d'ovales bruns cernés ; 3. le visage :
+deux barres noires sur chaque joue, deux traits sur le front, le museau blanc, la truffe rose ; 4. la queue annelée de brun ;
+5. les pattes tachetées, les grands pieds.
 """
 import math
 import os
@@ -18,6 +23,8 @@ from mathutils import Vector
 import atelier as A
 import matieres as M
 import peluche as K
+
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
 
 
 def propres(points, eps=2e-4):
@@ -88,6 +95,19 @@ def construire():
         a.broderie("bouche_" + ("G" if c > 0 else "D"),
                    A.courbe(propres(a.trace("museau", T @ Vector((0, -0.096, -0.034)), bouche, 0.004)), 4), 0.0026, CHOCOLAT)
 
+    # ----- les marques du visage (photos de Commons) : deux barres noires sur chaque joue, deux traits sur le front -----
+    centre_t = T.to_translation()
+    marques = (
+        ("a", ((0.86, -0.42, 0.02), (0.96, -0.05, -0.22), (0.86, 0.34, -0.40))),                 # la barre haute de la joue
+        ("b", ((0.80, -0.58, -0.22), (0.94, -0.18, -0.46), (0.80, 0.18, -0.62))),                # la barre basse
+        ("c", ((0.20, -0.82, 0.50), (0.22, -0.52, 0.80), (0.20, -0.14, 0.96))),                  # le trait du front
+        ("d", ((0.40, -0.76, 0.46), (0.46, -0.44, 0.74), (0.42, -0.08, 0.90))),                  # le second trait
+    )
+    for etiquette, pts in marques:
+        for c in (1, -1):
+            dirs = [T3 @ Vector((c * x, y, z)) for x, y, z in pts]
+            a.broderie("marque_" + etiquette + ("G" if c > 0 else "D"), A.courbe(propres(a.trace("tete", centre_t, dirs, 0.004)), 4), 0.0042, CHOCOLAT)
+
     # ----- les yeux : grands, ronds, d'ambre, au regard doux (plus de traits froncés) -----
     for nom, c in (("G", 1), ("D", -1)):
         regard = T3 @ Vector((c * 0.50, -0.82, 0.18))
@@ -139,18 +159,19 @@ JAMBE = 0.344                                        # de l'épaule (ou de la ha
 OS = [
     ('racine', None, (0, 0, 0)),
     ('corps', 'racine', (0.000, 0.111, 0.133)),
-    ('tete', 'corps', (0.008, -0.041, 0.517)),
+    ('tete', 'corps', (0.008, -0.044, 0.516)),
     ('oreille_G', 'tete', (0.055, -0.012, 0.675)),
     ('patte_av_G', 'corps', (0.072, -0.118, 0.344)),
     ('queue', 'corps', (0.037, 0.184, 0.103)),
 ]
 
 PORTEURS = [
-    ('oeil_reflet', 'tete'), ('oreille', 'oreille', True), ('sourcil', 'tete'), ('hanche', 'corps'),
-    ('museau', 'tete'), ('truffe', 'corps'), ('bouche', 'tete'), ('corps', 'corps'), ('patte', 'patte_av', True),
-    ('queue', 'queue'), ('tache', 'corps'), ('tete', 'tete'), ('pied', 'patte_av', True), ('iris', 'tete'),
-    ('oeil', 'tete'), ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'),
-    ('cil_1', 'paupiere_1'),
+    ('oeil_reflet', 'tete'), ('marque_aG', 'corps'), ('marque_aD', 'corps'), ('marque_bG', 'corps'),
+    ('marque_bD', 'corps'), ('marque_cG', 'corps'), ('marque_cD', 'corps'), ('marque_dG', 'corps'),
+    ('marque_dD', 'corps'), ('oreille', 'oreille', True), ('hanche', 'corps'), ('museau', 'tete'),
+    ('truffe', 'corps'), ('bouche', 'tete'), ('corps', 'corps'), ('patte', 'patte_av', True), ('queue', 'queue'),
+    ('tache', 'corps'), ('tete', 'tete'), ('pied', 'patte_av', True), ('iris', 'tete'), ('oeil', 'tete'),
+    ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
 def repos(t):
