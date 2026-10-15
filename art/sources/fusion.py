@@ -88,6 +88,8 @@ TETE_NOMS = ("tete", "crane", "museau", "machoire", "bec", "mufle", "groin", "tr
              "babine", "cou", "nez", "truffe")          # gonflés comme le corps, jamais renforcés ni coupés en boule (l'okapi, 15/10)
 MEMBRES = ("bras", "jambe", "cuisse", "patte", "main", "mollet", "epaule", "coude", "genou", "canon", "paturon", "avant_bras")
                                                 # gonflés comme le corps, sans renfort (l'élan, le bras de la loutre, 15/10)
+NAGEOIRES = ("nageoire", "pectorale", "dorsale", "anale", "caudale", "pelvienne", "ventrale", "voile")   # des plaques : ni
+                                                # renforcées (un boudin) ni coupées en boule (la queue du dauphin, 15/10)
 JAMBES_LONGUES = 0.25           # le bas du corps plus haut que cette part de la bête (0,28 : le cheval pas pris) : haute sur pattes (cerf, élan,
 JAMBES_LONGUES_REGLAGES = {"pression": 0.12, "fins": 0.0}   # cheval, girafe) : moins de pression, aucun renfort
 PAUPIERES_LOURDES = "retirer"   # sur la base gonflée, les paupières lourdes : « retirer » (Principal, 15/10 : leur trait sombre se
@@ -840,6 +842,17 @@ def _habiller(a, P, Q, M, h, L, liens=None, origine=None):
     # une pièce par (tissu, longueur de poil) : la face prend le tissu de la majorité de ses points
     niveaux = sorted(set(np.round(poil_k, 3).tolist()))
     code = zone * 100 + np.searchsorted(niveaux, np.round(poil_k, 3))
+    uc, ci = np.unique(code, return_inverse=True)                    # chaque point prend le tissu de la majorité de ses voisins :
+    if len(uc) > 1:                                                  # pas d'îlots de poil dans la feutrine (la baudroie, 15/10)
+        ci = ci.ravel()
+        Ev = _aretes(Q)
+        for _ in range(3):
+            votes = np.zeros((n, len(uc)))
+            np.add.at(votes, (Ev[:, 0], ci[Ev[:, 1]]), 1.0)
+            np.add.at(votes, (Ev[:, 1], ci[Ev[:, 0]]), 1.0)
+            votes[np.arange(n), ci] += 1.5
+            ci = np.argmax(votes, axis=1)
+        code = uc[ci]
     face_code = np.array([np.bincount(code[list(f)]).argmax() for f in Q])
     sorties = {}
     for c in np.unique(face_code):
@@ -1288,13 +1301,15 @@ def gonfler(P, F, L, h, reglages=None, noms=None, base=None):
     sol = np.nonzero(P[:, 2] <= zmin + 0.004 * L)[0]                  # posés au sol : ils y restent
     tete = np.zeros(n, bool)                                         # les points venus de la tête, du cou, des membres
     membre = np.zeros(n, bool)
+    plaque = np.zeros(n, bool)                                       # ... des nageoires
     if noms is not None and len(noms) == n:
         tete = np.array([str(s).lower().startswith(TETE_NOMS) for s in noms], bool)
-        membre = np.array([str(s).lower().startswith(MEMBRES) for s in noms], bool)
+        membre = np.array([str(s).lower().startswith(MEMBRES + NAGEOIRES) for s in noms], bool)
+        plaque = np.array([str(s).lower().startswith(NAGEOIRES) for s in noms], bool)
     P0, faites = P, []
     if r["pointes"] > 0:                                             # d'abord les bouts pointus : coupés et fermés en boule
         try:
-            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin, 3.0 * h, tete)
+            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin, 3.0 * h, tete | plaque)
         except Exception:
             import traceback
             traceback.print_exc()
