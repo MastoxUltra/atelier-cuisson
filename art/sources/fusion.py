@@ -68,6 +68,7 @@ LISSAGE = 18            # passes de lissage (6 : les formes restaient géométri
 TRIANGLES = (20000, 120000)   # la peau finale : le nombre de triangles d'origine, entre ces bornes
 GONFLAGE = {                    # le gonflage (3.) : ses réglages
     "methode": "ressorts",      # « ressorts » (numpy) ou « tissu » (le simulateur de tissu de Blender)
+    "pointes": 0.020,           # un bout plus pointu qu'une demi-boule de ce rayon est fermé en boule, en part de la bête (0 : non)
     "arrondi": 0.030,           # le rayon de l'arrondi : ce qui est plus aigu s'arrondit, en part de la bête (0 : pas d'arrondi)
     "pression": 0.3,            # le gonflage g : une boule de rayon r s'élargit d'environ g r / L, un tube de 2 à 3 fois
                                 # plus, un fond plat bombe (0 : pas de pression)
@@ -1192,12 +1193,12 @@ def gonfler(P, F, L, h, reglages=None):
     X[:, 2] = np.maximum(X[:, 2], zmin)
     if not np.isfinite(X).all():
         _dire("GONFLAGE : des points perdus (NaN) ; la peau reste comme fondue")
-        return P.copy(), "raté"
-    u = X - P
-    un = np.einsum("ij,ij->i", u, n0)
-    lu = np.linalg.norm(u, axis=1)
-    v0, v1 = abs(_volume(P, T)), abs(_volume(X, T))
-    infos = ("arrondi %.0f mm (%d passes) ; %s g=%.2f%s ; volume %+.1f %% ; déplacement moyen %.1f mm, max %.1f mm "
+        return P0.copy(), "raté"
+    un = np.einsum("ij,ij->i", X - P, n0)
+    lu = np.linalg.norm(X - P0, axis=1)
+    v0, v1 = abs(_volume(P0, T)), abs(_volume(X, T))
+    infos = ("pointes %s ; " % (("%.0f mm : " % (1000 * r["pointes"] * L) + (", ".join(faites) or "aucune")) if r["pointes"] > 0 else "non") +
+             "arrondi %.0f mm (%d passes) ; %s g=%.2f%s ; volume %+.1f %% ; déplacement moyen %.1f mm, max %.1f mm "
              "(sorti jusqu'à %.1f, rentré jusqu'à %.1f) ; bornés : %d %% dedans, %d %% dehors ; épaisseur médiane %.0f mm (%.1f s + %.1f s)" % (
                  1000 * r["arrondi"] * L, passes, methode if r["pression"] > 0 else "sans pression", r["pression"],
                  (" (%d pas)" % pas_faits) if pas_faits else "", 100 * (v1 / v0 - 1),

@@ -4,6 +4,11 @@ sombre. Un timide aux aguets : le corps de profil, la tête retournée par-dessu
 dressées, une patte avant levée au bord du pas : il va disparaître dans la forêt, mais il voulait vous voir une fois.
 
     python okapi.py        fabrique la fiche art/apercus/animaux/okapi.png (peluche de magasin, palier 4)
+
+Les 5 traits de l'espèce (relus sur 12 photos de Commons le 15/10) : 1. la silhouette d'une girafe basse, le dos qui
+descend vers la croupe, le cou long, les jambes fines ; 2. le corps uni d'un brun chocolat, les rayures blanc et noir
+seulement sur la croupe et les jambes ; 3. la tête étroite et longue, le museau sombre, la joue et le front plus clairs ;
+4. de très grandes oreilles larges tenues de côté ; 5. de courtes cornes de peau (ossicônes) et une queue courte à pinceau.
 """
 import math
 import os
@@ -17,6 +22,8 @@ from mathutils import Matrix, Vector
 import atelier as A
 import matieres as M
 import peluche as K
+
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
 
 # le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
 AUBERGINE = M.hexa("#7a3a4e")                 # la dominante : brun aubergine
@@ -84,7 +91,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.86, 0.34, 0.22)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0185)
-        a.rustine("joue_" + nom, "tete", centre, T3 @ Vector((c * 0.70, -0.30, 0.62)), 0.30, CREME, 0.003, 0)       # la joue claire
+        a.rustine("joue_" + nom, "tete", centre, T3 @ Vector((c * 0.70, -0.30, 0.62)), 0.44, CREME, 0.003, 0)       # la joue claire, bien visible
         a.piece("lourde_" + nom, K.paupiere(0.021, 0.58), AUBERGINE, mat=A.cadre(pos + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
         po = A.profil([(0, 0), (0.048, 0.016), (0.062, 0.070), (0.056, 0.130), (0.034, 0.180), (0.010, 0.208), (0, 0.216)], 6)
         vers = (T3 @ Vector((c * 0.82, 0.26, 0.54))).normalized()
