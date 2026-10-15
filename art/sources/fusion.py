@@ -747,6 +747,15 @@ def fusionner(a, gonfle=None, reglages=None):
             _dire("paupières, moustaches : RATÉ (voir l'erreur au-dessus)")
     if gonflee is not None:
         _suivre(a, liens, P, gonflee, Q, h, L)
+    if gonfle:                                                       # l'intérieur des oreilles, dans le pelage et creusé
+        try:
+            oreilles = _oreilles_douces(a, liens, gonflee if gonflee is not None else P, Q)
+            if oreilles:
+                _dire("intérieur des oreilles peint et creusé : " + ", ".join(oreilles))
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            _dire("intérieur des oreilles : RATÉ (voir l'erreur au-dessus)")
     _dire("fini en %.1f s" % (time.time() - t0))
     return len(fondues)
 
@@ -1310,7 +1319,18 @@ def gonfler(P, F, L, h, reglages=None, noms=None, base=None):
         if methode == "ressorts":
             facteur = 1.0
             if r["fins"] > 0:                                        # une queue, une oreille, un pied plat : gonflés eux aussi
-                rapport = np.maximum(float(np.median(t)) / t, 1.0) ** r["fins"]
+                # l'épaisseur prise sur un diamètre autour : le bout d'une queue qui s'effile garde l'épaisseur de ce qui le porte
+                # et ne gonfle pas en pompon (Principal, 15/10, le raton) ; une oreille, un pied plat restent fins tout autour
+                from mathutils.kdtree import KDTree
+                t_med = float(np.median(t))
+                kd = KDTree(n)
+                for i_, x_ in enumerate(P.tolist()):
+                    kd.insert(x_, i_)
+                kd.balance()
+                t_eff = t.copy()
+                for i_ in np.nonzero(t < t_med / 1.1)[0].tolist():
+                    t_eff[i_] = max(t[j_] for _c, j_, _d in kd.find_range(P[i_].tolist(), float(t[i_])))
+                rapport = np.maximum(t_med / t_eff, 1.0) ** r["fins"]
                 facteur = np.clip(1.0 + r["renfort"] * (rapport - 1.0), 1.0, 25.0)
                 facteur[tete | membre] = 1.0                         # un museau long n'est pas une queue (l'okapi en boule, 15/10)
                 for _ in range(4):                                   # sans saut d'un point à l'autre (des pics au bout de la queue, v3)
@@ -1448,7 +1468,7 @@ def _paupieres_ouvertes(a):
             yeux.append((np.vstack([p["monde"] for p in ps]).mean(axis=0), z / max(np.linalg.norm(z), 1e-12), float(r) * e))
     faites = []
     if not yeux:
-        return faites
+        return sourcils
     boule = A.boule(1.0, 32, 16)
     for p in toutes:
         if not p["nom"].lower().startswith("lourde") or not len(p["monde"]):
@@ -1471,7 +1491,7 @@ def _paupieres_ouvertes(a):
         p["faces"] = [tuple(int(i) for i in f) for f in boule.f]
         _repeser(p, len(s))
         faites.append("%s %.2f -> %.2f" % (p["nom"], avant, coupe))
-    return faites
+    return sourcils + faites
 
 
 def _moustaches(a, peau):
