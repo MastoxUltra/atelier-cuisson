@@ -85,7 +85,7 @@ def construire():
     queue = A.decoupe(croissant, 0.036, 0.012)
     queue.teinte = np.tile(NAGEOIRE, (len(queue.v), 1))
     bout = Vector(FIL.cadre(L)[0])
-    a.piece("queue", queue, None, pos=tuple(bout + Vector((0, 0.01, 0.0))), rot=(-24, 0, 0), poil=False)
+    a.piece("caudale", queue, None, pos=tuple(bout + Vector((0, 0.01, 0.0))), rot=(-24, 0, 0), poil=False)
 
     # ----- la nageoire du dos : un croissant dressé, en pointe vers l'arrière ; deux pectorales vers l'avant-bas -----
     dorsale = A.decoupe([(0, 0), (0.04, 0.09), (0.11, 0.17), (0.20, 0.22), (0.20, 0.15), (0.17, 0.08), (0.23, 0.0)], 0.036, 0.011)

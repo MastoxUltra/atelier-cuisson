@@ -74,7 +74,7 @@ def construire():
     # ----- les yeux : petits, enfoncés, sous une paupière lourde : il toise -----
     for nom, c in (("G", 1), ("D", -1)):
         p, n = a.surface("tete", TETE, H3 @ Vector((c * 0.62, -0.62, 0.42)))
-        a.bouton("oeil_" + nom, p + n * 0.002, n, 0.015)
+        a.bouton("oeil_" + nom, p + n * 0.005, n, 0.026)               # de vrais yeux visibles : plus gros, un peu sortis du poil
         P = A.cadre(p + n * 0.004, n, H3 @ Vector((0, 0, 1)))
         # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
 

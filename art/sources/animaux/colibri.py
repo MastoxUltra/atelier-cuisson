@@ -104,6 +104,7 @@ if __name__ == "__main__":
 # oreilles, nuque, racine de la queue) ; les gestes sont réglés sur la longueur de ses pattes. Mesures avant a.taille.
 
 from poses import Pose, borne, cloche, onde
+GONFLAGE = True      # gardée par l'auteur sur la base GONFLÉE (planche 17, 15/10) : toujours gonflée
 
 JAMBE = 0.130                                        # de l'épaule (ou de la hanche) au sol
 
