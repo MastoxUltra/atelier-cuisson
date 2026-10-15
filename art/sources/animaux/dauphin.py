@@ -76,8 +76,7 @@ def construire():
         s[:, 1] += np.where(v[:, 1] > 0, 0.062 * bosse, 0.0)
         s[:, 0] *= 1.0 + 0.10 * bosse
         return s
-    a.piece("corps", fuseau(F_BEC - 0.010, 1.0, 110).sculpte(melon).sculpte(FIL.couche), None)
-    a.piece("bec", fuseau(0.0, F_BEC + 0.012, 24).sculpte(melon).sculpte(FIL.couche), None, poil=False)
+    a.piece("corps", fuseau(0.0, 1.0, 130).sculpte(melon).sculpte(FIL.couche), None)          # une seule peau, bec compris : plus de coque lisse collée
 
     # ----- la queue : un croissant horizontal, posé au bout du fil, un peu relevé -----
     croissant = [(-0.31, 0.10), (-0.23, 0.04), (-0.11, -0.04), (-0.03, -0.07), (0.03, -0.07), (0.11, -0.04), (0.23, 0.04), (0.31, 0.10),
@@ -108,12 +107,12 @@ def construire():
         s = 0.205 * L
         centre, direction = FIL.vise(s, 0.35, -c * 0.92, 0.25)
         pos, n = a.surface("corps", centre, direction)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0245)
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0340)                       # un vrai œil, plus gros
         bouche = []
         for u in np.linspace(0.0, 1.0, 7):
             ss = (0.030 + 0.105 * u) * L                    # la bouche s'arrête bien avant l'œil
             cc, dd = FIL.vise(ss, 0.0, -c * 1.0, -0.30 + 0.10 * u)
-            q = a.trace("bec", cc, [dd], 0.002)
+            q = a.trace("corps", cc, [dd], 0.002)
             if q:
                 bouche.append(q[0])
         a.broderie("sourire_" + nom, A.courbe(bouche, 4), 0.0040, ROSE)

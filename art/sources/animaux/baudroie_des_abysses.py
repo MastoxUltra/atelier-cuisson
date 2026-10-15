@@ -138,8 +138,8 @@ def construire():
 
     # ----- les yeux : tout petits, haut sur le côté, l'air pas content ; les nageoires moignons -----
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("corps", Vector((0.0, 0.0, 0.250)), Vector((c * 0.74, -0.60, 0.62)))
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0175)
+        pos, n = a.surface("corps", Vector((0.0, 0.0, 0.250)), Vector((c * 0.80, -0.62, 0.34)))      # sur les flancs de la tête, bien visibles
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0340)
         feuille = O.nageoire([(0.0, 0.0), (0.04, 0.030), (0.10, 0.044), (0.17, 0.030), (0.21, 0.0), (0.17, -0.030), (0.10, -0.040), (0.04, -0.028)],
                              0.012, GRIS, 0.004)
         ex = Vector((c * 0.25, 0.78, -0.50))
