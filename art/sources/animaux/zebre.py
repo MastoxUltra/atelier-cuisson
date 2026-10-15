@@ -103,8 +103,8 @@ def construire():
     a.piece("tete", tete.sculpte(lambda v: v * [0.86, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.060, -0.050), (0, 0, 0)))
     a.tete = T @ Vector((0, 0.060, 0.200))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.80, 0.22, 0.40)))
-        a.rustine("cerne_" + nom, "tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.80, 0.22, 0.40)), 0.30, tuple(CHARBON), 0.003, 0)
+        pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.64, 0.34, 0.52)))
+        a.rustine("cerne_" + nom, "tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.64, 0.34, 0.52)), 0.30, tuple(CHARBON), 0.003, 0)
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0200)
         po = A.profil([(0, 0), (0.026, 0.012), (0.036, 0.050), (0.028, 0.092), (0.010, 0.120), (0, 0.130)], 6)
         vers = Vector((c * 0.22, 0.22, 0.95)).normalized()

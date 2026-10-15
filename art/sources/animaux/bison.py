@@ -91,7 +91,7 @@ def construire():
                             (0.080, 0.200), (0, 0.216)], 6), 48).etire(1.0, 0.80, 1.0)
     G.sillons(tete, [12], 0.004, 1.1)
     a.piece("tete", tete, NOIRBR, mat=T)
-    a.couture("chanfrein", "tete", 12, 0.44, 0.70)                       # le côté 12 de la pièce est le milieu du front
+    # (la couture du chanfrein est retirée : elle se lisait comme une cicatrice)
 
     # ----- le cou : un gros boudin court qui descend du garrot jusque derrière le crâne -----
     cou = A.courbe([CORPS + Vector((0, -0.150, 0.030)), CORPS + Vector((-0.005, -0.265, -0.025)), T @ Vector((0, -0.030, 0.035))], 8)
@@ -112,7 +112,7 @@ def construire():
     # ----- les yeux : deux yeux vivants, grands ouverts, sur l'avant de la tête (visibles de face) -----
     for nom, c in (("G", 1), ("D", -1)):
         pos, vers = a.surface("tete", T @ Vector((0, 0, 0.080)), T3 @ Vector((c * 0.64, 0.58, 0.40)))
-        a.oeil("oeil_" + nom, pos + vers * 0.004, vers, 0.026)
+        a.oeil("oeil_" + nom, pos + vers * 0.010, vers, 0.030)
 
     # ----- les petites cornes crème, les oreilles charbon doublées de rose, et le toupet qui retombe sur le front -----
     def feuille(v):                                       # une oreille : ronde à l'attache, plus étroite au bout

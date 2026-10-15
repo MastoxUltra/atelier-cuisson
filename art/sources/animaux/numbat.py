@@ -69,9 +69,9 @@ def construire():
     a.piece("nez", A.boule(1.0, 20, 10).etire(0.015, 0.011, 0.011), CHARBON, mat=H @ A.repere((0, -0.176, -0.010)), poil=False)
     a.tete = H @ Vector((0, -0.140, -0.010))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.74, -0.58, 0.14))
+        regard = H3 @ Vector((c * 0.50, -0.80, 0.28))
         p, n = a.surface("tete", H @ Vector((0, 0.020, -0.010)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0125)
+        a.oeil("oeil_" + nom, p + n * 0.005, n, 0.0190)
         # (le trait charbon à travers l'œil est retiré : il se lisait comme un sourcil fâché)
         po = A.profil([(0, 0), (0.024, 0.006), (0.030, 0.022), (0.022, 0.038), (0.008, 0.046), (0, 0.050)], 5)
         E = A.cadre(H @ Vector((c * 0.046, 0.060, 0.026)), H3 @ Vector((c * 0.40, 0.20, 0.90)), H3 @ Vector((c * 0.3, -0.9, 0.0)))

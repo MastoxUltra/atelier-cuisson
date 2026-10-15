@@ -87,13 +87,13 @@ def construire():
     # la collerette : un anneau de longs poils qui retombent sur les épaules et la nuque
     rng = np.random.default_rng(5)
     poils = None
-    for i in range(22):
-        ang = 2 * math.pi * i / 22
+    for i in range(30):
+        ang = 2 * math.pi * i / 30
         if math.sin(ang) < -0.35:
             continue                                                                 # rien devant : la face reste dégagée
         base = np.array(TETE) + np.array([0.060 * math.cos(ang), 0.050 * math.sin(ang) + 0.004, -0.030])
-        l = 0.060 + 0.030 * rng.random()
-        m = A.boule(1.0, 10, 8).etire(0.024, 0.024, l).pose(tuple(base + np.array([0.0, 0.0, -l * 0.7])), (10 * math.sin(ang), -12 * math.cos(ang), 0))   # des mèches rondes, plus de rabats plats
+        l = 0.034 + 0.018 * rng.random()
+        m = A.boule(1.0, 10, 8).etire(0.016, 0.016, l).pose(tuple(base + np.array([0.0, 0.0, -l * 0.7])), (10 * math.sin(ang), -12 * math.cos(ang), 0))   # des mèches rondes, plus de rabats plats
         poils = m if poils is None else poils + m
     a.piece("collerette", poils, tuple(CLAIR))
 

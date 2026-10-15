@@ -75,9 +75,9 @@ def construire():
 
     # ----- l'œil de chaque côté, et la rangée de sept trous branchiaux -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.945 * L, 0.18, -c * 0.95, 0.24)
+        centre, direction = fil.vise(0.925 * L, 0.35, -c * 0.60, 0.65)
         pos, n = a.surface("corps", centre, direction)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0170)
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0280)                  # un vrai œil, gros, sur le dessus de la tête
         trous = None
         for k in range(7):
             cc, dd = fil.vise((0.925 - 0.026 * k) * L, 0.0, -c * 1.0, 0.18)

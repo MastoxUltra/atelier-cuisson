@@ -38,7 +38,7 @@ def touffes(maille, nb, longueur, rayon, graine, couleur, dos_seul=True, sens=(0
     centre = v.mean(axis=0)
     choisis = np.nonzero(v[:, 2] > centre[2] + (0.0 if dos_seul else -9.0))[0]
     choisis = rng.choice(choisis, size=min(nb, len(choisis)), replace=False)
-    profil = A.profil([(0, 0), (rayon, 0.004), (rayon * 0.75, longueur * 0.45), (rayon * 0.36, longueur * 0.80), (0, longueur)], 4)
+    profil = A.profil([(0, 0), (rayon, 0.004), (rayon * 0.95, longueur * 0.40), (rayon * 0.78, longueur * 0.78), (rayon * 0.42, longueur * 0.95), (0, longueur)], 4)
     cone = A.tour(profil, 8)
     cone.teinte = np.stack([np.array(couleur(z / longueur)) for z in cone.v[:, 2]])
     sortie = None

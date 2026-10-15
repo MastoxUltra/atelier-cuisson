@@ -112,16 +112,16 @@ def construire():
         for k, ang in enumerate((-30, -12, 12, 30)):
             t = math.radians(ang)
             l = long_doigt if k == 1 else 0.052
-            d = A.tube([(0.0, -0.020, 0.0), (l * math.sin(t) * 0.5, -0.020 - l * 0.5, 0.0), (l * math.sin(t), -0.020 - l, 0.0)], 0.0072 if k == 1 else 0.0085, 8)
+            d = A.tube([(0.0, -0.020, 0.0), (l * math.sin(t) * 0.5, -0.020 - l * 0.5, 0.0), (l * math.sin(t), -0.020 - l, 0.0)], 0.0105 if k == 1 else 0.0100, 8)
             m = m + d
         return m.pose(tuple(centre), (0, 0, cap))
     gauche = [(0.080, -0.070, 0.150), (0.115, -0.130, 0.090), (0.105, -0.205, 0.040)]
     a.piece("bras_G", A.tube(A.courbe(propres(gauche), 5), 0.030, 12), tuple(TAUPE))
-    a.piece("main_G", main(gauche[-1], 8, 0.150), tuple(DOIGT), poil=False)
+    a.piece("main_G", main(gauche[-1], 8, 0.085), tuple(DOIGT), poil=False)
     # la main droite posée sur le sol comme la gauche (plus de long doigt dressé qui sortait du dos comme un bâton)
     droite = [(-0.080, -0.060, 0.150), (-0.115, -0.130, 0.090), (-0.105, -0.205, 0.040)]
     a.piece("bras_D", A.tube(A.courbe(propres(droite), 5), 0.030, 12), tuple(TAUPE))
-    a.piece("main_D", main(droite[-1], -8, 0.150), tuple(DOIGT), poil=False)
+    a.piece("main_D", main(droite[-1], -8, 0.085), tuple(DOIGT), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         cu = A.boule(1.0, 24, 12).etire(0.060, 0.090, 0.060)
         cu.teinte = np.tile(TAUPE, (len(cu.v), 1))

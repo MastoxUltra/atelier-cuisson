@@ -56,11 +56,11 @@ def construire():
     # le bec : un long fer plat, légèrement courbé vers le bas au bout, qui part du front en s'abaissant vers la poitrine
     bec = A.tour(A.profil([(0.058, 0), (0.060, 0.080), (0.054, 0.200), (0.040, 0.300), (0.026, 0.360), (0.010, 0.388), (0, 0.396)], 4), 28)
     bec = bec.etire(1.0, 0.46, 1.0).sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.14 * (v[:, 2] / 0.396) ** 3, v[:, 2]], axis=1))
-    a.piece("bec", O.couche(O.teinte(bec, BEC), A.cadre(H + Vector((0.0, -0.075, -0.030)), (0.0, -0.55, -1.0), (0, 1.0, 0))), None, poil=False)
+    a.piece("bec", O.couche(O.teinte(bec, BEC), A.cadre(H + Vector((0.0, -0.075, -0.030)), (0.0, -1.0, -0.38), (0, 1.0, 0))), None, poil=False)
     # la poche : une besace qui pend, large en haut contre le bec, ronde et lourde en bas (plus un bloc plat)
     poche = A.tour(A.profil([(0, 0), (0.030, 0.012), (0.062, 0.070), (0.082, 0.140), (0.074, 0.215), (0.044, 0.272), (0, 0.300)], 5), 32).etire(1.0, 0.80, 1.0)
     poche.teinte = np.tile(np.asarray(POCHE, float), (len(poche.v), 1))
-    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.130, -0.030)), (0.0, -0.30, -1.0), (0, 1.0, 0)))
+    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.140, -0.052)), (0.0, -0.55, -1.0), (0, 1.0, 0)))
     O.paire_yeux(a, "tete", H, (0.88, -0.30, 0.30), 0.0175, decolle=0.002)
 
     # ----- les ailes repliées en toit, le bout sombre ; la queue courte ; les pattes courtes, orange -----

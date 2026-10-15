@@ -112,8 +112,8 @@ def construire():
     tt[((tete.v[:, 2] > 0.170) & (tete.v[:, 1] < 0.012)) | (np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3)] = CREME
     # les larmes noires, peintes à plat : de l'œil, elles descendent sur la joue jusqu'au coin de la gueule
     ang_ = np.arctan2(np.abs(tete.v[:, 0]), tete.v[:, 1])
-    u_ = np.clip((tete.v[:, 2] - 0.115) / 0.090, 0.0, 1.0)
-    tt[(tete.v[:, 2] > 0.110) & (tete.v[:, 2] < 0.210) & (np.abs(ang_ - (1.30 + 0.80 * u_)) < 0.22)] = NOIR
+    u_ = np.clip((tete.v[:, 2] - 0.150) / 0.060, 0.0, 1.0)
+    tt[(tete.v[:, 2] > 0.150) & (tete.v[:, 2] < 0.212) & (np.abs(ang_ - (1.62 + 0.55 * u_)) < 0.17)] = NOIR      # sous l'œil, pas dessus
     tete.teinte = tt
     a.piece("tete", tete, None, mat=T @ A.repere((0, 0, -0.060)))
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.022, 0.016, 0.014), CHARBON, mat=T @ A.repere((0, 0.006, 0.148)), poil=False)

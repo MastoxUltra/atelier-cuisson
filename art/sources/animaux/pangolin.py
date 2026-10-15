@@ -100,7 +100,7 @@ def construire():
     c1, av1, nq1 = fil.cadre(0.085 * L)
     lat1 = np.cross(np.array(av1), np.array(nq1))
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("corps", Vector(c1), Vector(lat1 * c * 0.80 + np.array(nq1) * 0.55))
+        p, n = a.surface("corps", Vector(c1), Vector((c * 0.85, 0.05, 0.45)))
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0215)       # deux yeux bien visibles, de chaque côté de la tête conique
     c2, av2, nq2 = fil.cadre(0.012 * L)
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.016, 0.012), CHARBON, pos=tuple(np.array(c2) + np.array(av2) * 0.006), poil=False)

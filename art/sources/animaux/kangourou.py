@@ -71,9 +71,9 @@ def construire():
 
     # ----- les yeux : grands et doux, sous un long cil ; les oreilles : de grandes feuilles dressées, le bout brun -----
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.74, -0.52, 0.34)))
+        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.80, -0.55, 0.08)))
         a.oeil("oeil_" + nom, p + n * 0.010, n, 0.0270)                     # ronds, ouverts, sortis du poil
-        a.piece("lourde_" + nom, K.paupiere(0.0270, 0.60), ROUX, mat=A.cadre(p + n * 0.013, n, H3 @ Vector((0, 0, 1))), poil=False)
+        # (la paupière est retirée : elle faisait une fente ; l'œil reste rond et ouvert)
         po = A.profil([(0, 0), (0.036, 0.012), (0.056, 0.070), (0.054, 0.140), (0.036, 0.205), (0.014, 0.248), (0, 0.262)], 6)
         vers = (H3 @ Vector((c * 0.42, 0.18, 0.88))).normalized()
         E = A.cadre(H @ Vector((c * 0.058, 0.082, 0.004)) - vers * 0.030, vers, H3 @ Vector((c * 0.3, 0.9, -0.1)))   # plantées sur le crâne
