@@ -685,7 +685,12 @@ def fusionner(a, gonfle=None, reglages=None):
     # ce que la peau reprend des morceaux d'origine
     liens, origine = [], []
     nouvelles = _habiller(a, P, Q, M, h, L, liens, origine)
-    base = reglages_bete(a, M, P, L, reglages) if (gonfle or ESPION is not None) else {}
+    base = {}
+    if gonfle or ESPION is not None:
+        try:
+            base = reglages_bete(a, M, P, L, reglages)
+        except Exception as e:
+            _dire("réglage de la bête illisible, je prends le réglage commun : %s" % str(e)[:120])
     if ESPION is not None:
         ESPION(a, P, Q, L, h, origine, base)
 
