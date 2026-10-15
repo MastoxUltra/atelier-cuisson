@@ -40,7 +40,7 @@ def construire():
         t[(ang > 2.35)] = CLAIR
         t[(ang < 0.85)] = SABLE * 0.92
         return t
-    rayon = O.interp([(0.0, 0.0), (0.04, 0.115), (0.15, 0.178), (0.40, 0.205), (0.68, 0.200), (0.88, 0.178), (0.96, 0.140), (1.0, 0.040)])
+    rayon = O.interp([(0.0, 0.0), (0.04, 0.115), (0.15, 0.178), (0.40, 0.205), (0.68, 0.205), (0.88, 0.195), (0.96, 0.168), (1.0, 0.070)])
     O.corps_h(a, "corps", (0.0, 0.42, 0.340), 0.82, rayon, peint, None, cotes=52, pitch=-2.0,
               deforme=O.gabarit(poitrail=0.06, taille=0.0, croupe=0.04, garrot=0.04, ventre=0.0))
 
@@ -70,7 +70,7 @@ def construire():
     for sgn, nom in ((1, "G"), (-1, "D")):
         O.jambe(a, "avant_" + nom, (sgn * 0.120, -0.230, 0.320), (sgn * 0.124, -0.265, 0.044), 0.088, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
                 sorte="av", plie=0.020, pied_dim=(0.054, 0.082, 0.026), griffes=0)
-        O.jambe(a, "arriere_" + nom, (sgn * 0.125, 0.580, 0.330), (sgn * 0.130, 0.610, 0.044), 0.100, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
+        O.jambe(a, "arriere_" + nom, (sgn * 0.112, 0.560, 0.300), (sgn * 0.118, 0.590, 0.044), 0.094, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
                 sorte="ar", plie=0.045, pied_dim=(0.056, 0.086, 0.026), griffes=0)
     return a
 

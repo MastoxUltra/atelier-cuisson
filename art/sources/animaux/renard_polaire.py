@@ -1,11 +1,11 @@
-"""Le renard polaire en peluche, dans sa robe d'été : un brun fumé chocolaté, les joues crème qui lui font une
-collerette, le dessous du museau crème, le bas des pattes plus sombre, un panache énorme au bout crème, et des yeux
+"""Le renard polaire en peluche, dans sa robe d'hiver : un blanc de neige (c'est ce qu'on attend de lui), les joues blanc
+bleuté qui lui font une collerette, le dessous du museau pâle, le bas des pattes gris clair, un panache énorme au bout crème, et des yeux
 ambre. Tout le contraire du renard roux : compact et rond, les oreilles petites et arrondies, le museau court. Un
 chasseur à l'affût : il écoute ce qui gratte sous la neige, la tête penchée, les oreilles pointées vers le sol devant
 lui, la patte avant gauche repliée, prête au bond ; le panache dressé derrière lui.
 
     python renard_polaire.py        fabrique la fiche art/apercus/animaux/renard_polaire.png (velours ras, palier 3)
-    (l'hiver lui donne sa seconde robe, blanche)
+    (sa robe d'été, brun fumé, est sa seconde robe)
 """
 import math
 import os
@@ -20,9 +20,9 @@ import atelier as A
 import matieres as M
 import peluche as K
 
-FUME = M.hexa("#8a6f5e")                      # la dominante : brun fumé chocolaté
-SOMBRE = M.hexa("#5c463b")                    # le bas des pattes
-CREME = M.hexa("#fbf3e2")                     # les joues, le dessous du museau, le bout du panache, le dedans des oreilles
+FUME = M.hexa("#fffdfa")                      # la dominante : blanc de neige (le poil le fonce à peine)
+SOMBRE = M.hexa("#d9d4de")                    # le bas des pattes : gris pâle
+CREME = M.hexa("#f2eef6")                     # les joues, le dessous du museau, le bout du panache, le dedans des oreilles : blanc bleuté
 AMBRE = M.hexa("#ffb12a")                     # l'accent : les yeux
 CHARBON = M.hexa("#2b2626")                   # la truffe
 CORPS = Vector((0.0, 0.03, 0.200))
