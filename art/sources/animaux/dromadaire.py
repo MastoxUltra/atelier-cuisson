@@ -82,7 +82,7 @@ def construire():
     bout = Vector(centre)
 
     # ----- la tête : petite, un long museau qui descend ; la lèvre qui pend ; les narines en fentes ; tournée vers nous -----
-    T = A.cadre(bout + Vector((0.0, -0.020, 0.030)), Vector((0.40, -1.0, -0.30)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(bout + Vector((0.0, -0.020, 0.030)), Vector((0.0, -1.0, -0.30)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.060), (0.22, 0.082), (0.46, 0.068), (0.72, 0.058), (0.90, 0.060), (0.97, 0.046), (1.0, 0.0)], 0.360, 52, 0.005)
     tete.teinte = np.where((tete.v[:, 2] > 0.20)[:, None], tuple(CARAMEL * 0.96), tuple(CARAMEL))

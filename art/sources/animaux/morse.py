@@ -28,7 +28,7 @@ SOMBRE = M.hexa("#9a5a44")                    # le bout des nageoires
 ECHINE = [(0.56, 0.085), (0.40, 0.135), (0.20, 0.205), (0.02, 0.330), (-0.11, 0.450), (-0.19, 0.548)]
 GALBE = [(0.0, 0.0), (0.03, 0.060), (0.15, 0.150), (0.30, 0.215), (0.48, 0.262), (0.66, 0.252), (0.82, 0.205), (0.94, 0.165), (1.0, 0.0)]
 TETE = Vector((0.0, -0.250, 0.628))
-MENTON, LACET = -18.0, 22.0                   # le menton levé, la tête tournée vers nous
+MENTON, LACET = -18.0, 0.0                   # le menton levé, la tête tournée vers nous
 
 
 def construire():

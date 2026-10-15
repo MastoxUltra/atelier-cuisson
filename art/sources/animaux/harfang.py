@@ -97,10 +97,15 @@ def construire():
 
     # ----- les pieds : deux grosses pantoufles de plumes blanches, les griffes noires qui dépassent -----
     for nom, c in (("G", 1), ("D", -1)):
-        a.piece("pied_" + nom, A.boule(1.0, 28, 14).etire(0.054, 0.082, 0.046), NEIGE, pos=(c * 0.060, -0.030, 0.042))
+        # un pied emplumé posé à plat : une semelle large et basse, trois lobes de plumes devant, les serres sombres qui dépassent
+        semelle = A.boule(1.0, 28, 14).etire(0.056, 0.090, 0.024)
         for k in (-1, 0, 1):
-            griffe = A.tour(A.profil([(0, 0), (0.007, 0.004), (0.005, 0.022), (0, 0.034)], 4), 14)
-            a.piece("griffe_%s%d" % (nom, k), griffe, BEC, mat=A.cadre(Vector((c * 0.060 + k * 0.022, -0.108, 0.026)), Vector((k * 0.15, -0.9, -0.45)), (0, 0, 1)), poil=False)
+            lobe = A.boule(1.0, 18, 10).etire(0.021, 0.038, 0.020).pose((k * 0.030, -0.078, 0.004), (0, 0, -k * 14))
+            semelle = semelle + lobe
+        a.piece("pied_" + nom, semelle, NEIGE, pos=(c * 0.060, -0.030, 0.026))
+        for k in (-1, 0, 1):
+            griffe = A.tour(A.profil([(0, 0), (0.010, 0.005), (0.007, 0.034), (0.003, 0.058), (0, 0.072)], 5), 14)
+            a.piece("griffe_%s%d" % (nom, k), griffe, BEC, mat=A.cadre(Vector((c * 0.060 + k * 0.030, -0.158, 0.020)), Vector((k * 0.25, -0.95, -0.25)), (0, 0, 1)), poil=False)
     return a
 
 

@@ -57,7 +57,8 @@ sys.path.insert(0, ICI)
 EXCLUS = ("oeil", "lourde", "paupiere", "cil", "cerne", "reflet", "pupille", "iris", "epingle", "couture_")
 VOXELS = 400            # le plus grand côté de la bête, en voxels (au plus fin)
 POINTS_MAX = 450000     # la peau remaillée ne dépasse pas ce nombre de points (sinon les voxels grossissent)
-DURS = ("griffe", "croc", "dent", "ongle", "nez", "truffe", "ourlet", "interieur", "dedans_", "bois", "corne", "sabot")
+DURS = ("griffe", "croc", "dent", "ongle", "nez", "truffe", "ourlet", "interieur", "dedans_", "bois", "corne", "sabot",
+        "bec", "defense", "piquant", "epine", "casque")   # 15/10 22 h 45 : le bec du perroquet fondu et gonflé perdait son crochet
 # posés sur la peau fondue, pas fondus dedans, et recollés d'un seul geste (essais du 15/10 : des taches blanches aux griffes,
 # la truffe du raton tombée sous la bouche, l'intérieur des oreilles froissé comme du papier par les voxels)
 CONGE = 0.60            # le rayon du congé : cette part de l'épaisseur du plus fin des deux morceaux (0,30 : trop peu de gain, 15/10)
@@ -1631,7 +1632,7 @@ def _suivre(a, liens, P, X, Q, h, L):
             continue
         Xp = p["monde"]
         dist = np.array([(arbre.find_nearest(x)[3] or 0.0) for x in Xp.tolist()])
-        if np.percentile(dist, 80) < colle:
+        if np.percentile(dist, 80) < colle or float(np.ptp(Xp, axis=0).max()) > 0.15 * L:   # une grande pièce (les piquants)
             p["monde"] = Xp + champ(Xp)
             suit += 1
         else:

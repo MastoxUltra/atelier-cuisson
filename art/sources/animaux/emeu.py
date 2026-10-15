@@ -40,7 +40,7 @@ CHARBON = M.hexa("#3a3036")
 PATTE = np.array(M.hexa("#8a7a78"))
 BEC = M.hexa("#6a5a5c")
 CORPS = Vector((0.0, 0.080, 0.640))
-LACET = 20.0
+LACET = 0.0                                   # la tête droite : le corps symétrique, les deux yeux de face
 
 
 def construire():

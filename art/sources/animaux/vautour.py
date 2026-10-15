@@ -73,9 +73,14 @@ def construire():
     # ----- les ailes : deux capes repliées sur les flancs, les couvertures claires en haut, les longues plumes noires qui
     #       descendent et croisent la queue -----
     for nom, c in (("G", 1), ("D", -1)):
-        cape = A.boule(1.0, 36, 18)
-        cape.teinte = np.where((cape.v[:, 2] > 0.35)[:, None], tuple(PLUME), tuple(BRUN))
-        a.piece("aile_" + nom, cape.etire(0.085, 0.230, 0.165), None, pos=(c * 0.150, 0.080, 0.360), rot=(-18, 0, c * 3))
+        # une aile repliée : un long fuseau plaqué contre le flanc, large à l'épaule, qui s'effile en pointe vers la queue
+        aile = A.tour(A.profil([(0, 0), (0.046, 0.030), (0.074, 0.100), (0.080, 0.200), (0.064, 0.300), (0.038, 0.380), (0.014, 0.440),
+                                (0, 0.470)], 6), 36)
+        zz = aile.v[:, 2]
+        aile.teinte = np.where((zz > 0.31)[:, None], tuple(CHARBON), np.where((zz < 0.16)[:, None], tuple(PLUME), tuple(BRUN)))
+        depart = Vector((c * 0.150, -0.050, 0.470))
+        vers = Vector((c * 0.030, 1.0, -0.62)).normalized()
+        a.piece("aile_" + nom, aile.etire(0.62, 1.0, 1.0), None, mat=A.cadre(depart, vers, Vector((0, 0, 1))))
         a.piece("plumes_" + nom, A.boule(1.0, 24, 12).etire(0.040, 0.230, 0.046), tuple(CHARBON), pos=(c * 0.100, 0.310, 0.200), rot=(-36, 0, c * -5))
     a.piece("queue", A.boule(1.0, 24, 12).etire(0.070, 0.030, 0.150), tuple(BRUN), pos=(0.0, 0.290, 0.150), rot=(38, 0, 0))
 
@@ -139,14 +144,14 @@ OS = [
     ('cou', 'corps', (-0.002, -0.074, 0.559)),
     ('tete', 'cou', (-0.004, -0.225, 0.808)),
     ('patte_av_G', 'corps', (0.080, -0.004, 0.167)),
-    ('aile_G', 'corps', (0.151, 0.053, 0.527)),
+    ('aile_G', 'corps', (0.151, 0.003, 0.486)),
     ('queue', 'corps', (-0.000, 0.169, 0.318)),
 ]
 
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('collerette', 'corps'), ('culotte', 'corps'), ('plumes', 'queue'),
-    ('serres', 'patte_av', True), ('arcade', 'tete'), ('corps', 'corps'), ('patte', 'patte_av', True),
-    ('queue', 'queue'), ('aile', 'aile', True), ('tete', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('bec', 'tete'),
+    ('serres', 'patte_av', True), ('corps', 'corps'), ('patte', 'patte_av', True), ('queue', 'queue'),
+    ('aile', 'aile', True), ('tete', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('bec', 'tete'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 

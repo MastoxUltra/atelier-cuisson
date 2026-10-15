@@ -71,7 +71,7 @@ def construire():
     a.piece("cou", A.tube(A.courbe([(0.0, -0.250, 0.920), (0.0, -0.390, 0.900), (0.0, -0.490, 0.830)], 5), lambda t: 0.150 - 0.052 * t, 24), tuple(BLANC))
     a.piece("collier", A.boule(1.0, 40, 20).etire(0.152, 0.152, 0.075), tuple(BRUN), mat=A.cadre(Vector((0.0, -0.345, 0.865)), Vector((0.0, -1.0, -0.20)), Vector((0, 0, 1))))
     a.piece("barbe", A.boule(1.0, 24, 12).etire(0.060, 0.040, 0.110), tuple(BRUN), pos=(0.0, -0.470, 0.700), rot=(-18, 0, 0))
-    T = A.cadre(Vector((0.0, -0.600, 0.790)), Vector((0.42, -1.0, -0.34)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(Vector((0.0, -0.600, 0.790)), Vector((0.0, -1.0, -0.34)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.07, 0.078), (0.26, 0.096), (0.52, 0.084), (0.78, 0.072), (0.95, 0.060), (1.0, 0.0)], 0.320, 52, 0.006)
     tt = np.tile(BLANC, (len(tete.v), 1))

@@ -104,7 +104,7 @@ def construire():
     bout = Vector(centre)
 
     # ----- la tête : lourde, le museau large, la grosse lèvre ; le front frisé ; tournée vers nous -----
-    T = A.cadre(bout + Vector((0.0, -0.030, 0.020)), Vector((0.36, -1.0, -0.12)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(bout + Vector((0.0, -0.030, 0.020)), Vector((0.0, -1.0, -0.12)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.066), (0.22, 0.092), (0.46, 0.078), (0.72, 0.068), (0.90, 0.070), (0.97, 0.052), (1.0, 0.0)], 0.330, 52, 0.005)
     tete.teinte = np.where((tete.v[:, 2] > 0.20)[:, None], tuple(CLAIR), tuple(LAINE))

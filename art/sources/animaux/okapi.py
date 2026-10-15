@@ -33,7 +33,7 @@ CORNE = M.hexa("#3a2c2c")                     # les sabots
 CROUPE = Vector((0.0, 0.44, 0.620))           # le bout arrière du corps
 BASE = Vector((0.0, -0.300, 0.800))           # le pied du cou
 # le cou : chaque point (avance, monte) depuis la base ; long, qui s'incline un peu vers l'avant
-ARC = [(0.0, 0.0), (0.045, 0.160), (0.090, 0.340), (0.115, 0.520), (0.130, 0.680)]     # long : la girafe basse
+ARC = [(0.0, 0.0), (0.042, 0.130), (0.082, 0.270), (0.105, 0.410), (0.118, 0.530)]     # ni court ni cou de lama : celui de l'okapi
 COU = math.radians(10)
 AVANT = Vector((math.sin(COU), -math.cos(COU), 0.0))
 FLANC = np.array([math.cos(COU), math.sin(COU), 0.0])
@@ -81,9 +81,12 @@ def construire():
     bout = Vector(enc.cadre(L)[0])
     T = A.repere(bout - T.to_3x3() @ Vector((0, -0.010, 0.070))) @ T
     T3 = T.to_3x3()
-    tete = A.tour(A.profil([(r * 0.86, z) for r, z in ((0, 0), (0.044, 0.008), (0.062, 0.040), (0.060, 0.090), (0.050, 0.150),
+    tete = A.tour(A.profil([(r * 1.00, z) for r, z in ((0, 0), (0.044, 0.008), (0.062, 0.040), (0.060, 0.090), (0.050, 0.150),
                             (0.042, 0.200), (0.046, 0.240), (0.038, 0.268), (0, 0.285))], 6), 48)
     K.bandes(tete, [(0.205, AUBERGINE), (9, SOMBRE)])
+    zt = tete.v[:, 2]
+    joue = (zt > 0.080) & (zt < 0.215) & (tete.v[:, 1] < 0.010)                       # les joues et la mâchoire, pâles comme sur les photos
+    tete.teinte[joue] = np.asarray(tete.teinte[joue], float) * 0.45 + np.asarray(CREME, float) * 0.55
     a.piece("tete", tete.etire(0.86, 1.0, 1.0), None, mat=T)
     a.tete = T @ Vector((0, 0.040, 0.150))
 
@@ -144,21 +147,21 @@ JAMBE = 0.599                                        # de l'épaule (ou de la ha
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.218, 0.630)),
-    ('cou', 'corps', (-0.002, -0.205, 0.855)),
-    ('tete', 'cou', (0.014, -0.419, 1.442)),
-    ('oreille_G', 'tete', (0.051, -0.389, 1.549)),
+    ('corps', 'racine', (0.000, 0.221, 0.961)),
+    ('cou', 'corps', (-0.002, -0.200, 0.885)),
+    ('tete', 'cou', (0.010, -0.403, 1.285)),
+    ('oreille_G', 'tete', (0.049, -0.377, 1.399)),
     ('patte_av_D', 'corps', (-0.088, -0.215, 0.604)),
     ('patte_ar_G', 'corps', (0.099, 0.383, 0.604)),
     ('patte_av_G', 'corps', (0.084, -0.213, 0.588)),
-    ('queue', 'corps', (-0.001, 0.461, 0.683)),
+    ('queue', 'corps', (-0.000, 0.468, 0.700)),
 ]
 
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True),
     ('pavillon', 'oreille', True), ('ossicone', 'corps'), ('sabot_av', 'patte_av', True),
-    ('sabot_ar', 'patte_ar', True), ('oreille', 'oreille', True), ('pinceau', 'queue'), ('lourde', 'tete'),
-    ('corps', 'corps'), ('queue', 'queue'), ('tete', 'tete'), ('oeil', 'tete'), ('joue', 'tete'), ('cou', 'cou'),
+    ('sabot_ar', 'patte_ar', True), ('oreille', 'oreille', True), ('pinceau', 'queue'), ('corps', 'corps'),
+    ('queue', 'queue'), ('tete', 'tete'), ('oeil', 'tete'), ('joue', 'tete'), ('cou', 'cou'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
@@ -181,7 +184,7 @@ def avance(t):
     """Sa marche : les pattes alternent, le corps oscille, la tête dodeline."""
     p = Pose()
     c, s = math.cos(math.tau * t), math.sin(math.tau * t)
-    pas = 18.0
+    pas = 26.0
     creux = JAMBE * (1 - math.cos(math.radians(pas * s))) * 0.5
     p.add('corps', pos=(0, 0, -creux), rot=(1.0 * onde(t, 2, 0.1), 3 * c, 2.5 * s))
     for nom, sens in [('patte_av_G', 1), ('patte_ar_D', 1), ('patte_av_D', -1), ('patte_ar_G', -1)]:
@@ -199,9 +202,9 @@ def mange(t):
     leve = cloche(t, 0.84, 0.15)
     bas = 1 - leve
     coups = max(0.0, onde(t, 4)) ** 2 * bas
-    p.add('corps', rot=(34 * bas + 3 * coups, 0, 0))
-    p.paire('patte_av', rot=(-30 * bas, 0, 0))
-    p.add('tete', rot=(16 * bas + 6 * coups + 3 * leve * onde(t, 12), -3 * leve, 12 * leve))
+    p.add('corps', rot=(5 * bas, 0, 0))
+    p.add('cou', rot=(34 * bas + 4 * coups, 0, 5 * leve))
+    p.add('tete', rot=(18 * bas + 6 * coups + 3 * leve * onde(t, 12), -3 * leve, 12 * leve))
     p.paire('oreille', rot=(-6 * bas + 5 * leve, 0, 0))
     p.add('queue', rot=(0, 0, -7 * onde(t, 2)))
     p.ouvert = borne(1 - cloche(t, 0.70, 0.03))
@@ -229,8 +232,9 @@ def dort(t):
     p = Pose()
     r = onde(t, 1)
     p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.02), rot=(36, 0, 6), ech=(1 + 0.010 * r, 1, 1 + 0.020 * r))
-    p.paire('patte_av', rot=(-30, 0, 0))
+    p.add('corps', pos=(0, 0, -0.329), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.paire('patte_av', rot=(-68, 0, 14))
+    p.paire('patte_ar', rot=(66, 0, 10))
     p.add('cou', rot=(30, 0, 44))
     p.add('tete', rot=(14, 4, 28))
     p.paire('oreille', rot=(-24, 0, 0))
