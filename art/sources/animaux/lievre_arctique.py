@@ -1,7 +1,8 @@
-"""Le lièvre arctique en peluche, cousu main : une boule de neige lilas pâle, ronde comme un pain de campagne, les
-oreilles courtes à la pointe charbon, et surtout ses pieds : d'énormes raquettes qui dépassent le ventre. Tout le
-contraire du lièvre de l'île, sec et dressé : lui est vautré, le menton rentré, une oreille à moitié rabattue sous
-la paupière lourde, un bâilleur qui ne bougera pas avant la fin de l'hiver.
+"""Le lièvre arctique en peluche cousue main (2e dessin : un vrai LIÈVRE, plus la boule lilas) : le lilas pâle de la
+robe d'été, le ventre et le pompon de la queue blancs ; assis HAUT sur l'arrière-train, la croupe et les cuisses
+énormes, les très longs pieds arrière à plat devant lui, le dos qui monte en pente vers des épaules étroites, de fines
+pattes avant, une petite tête de lièvre aux yeux sombres, et deux LONGUES oreilles dressées, bien plus longues que la
+tête, noires au bout. Il guette : il est prêt à bondir, un œil sur nous.
 
     python lievre_arctique.py        fabrique la fiche art/apercus/animaux/lievre_arctique.png (cousu main, palier 2)
 """
@@ -15,14 +16,12 @@ import numpy as np
 from mathutils import Vector
 
 import atelier as A
-import garnitures as G
 import matieres as M
 import peluche as K
 
 
 def propres(points, eps=2e-4):
-    """Les points d'un tracé sans doublons consécutifs (un tube dont deux points se suivent à l'identique se déforme en NaN) ;
-    au moins deux points, écartés d'un millimètre au pire."""
+    """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""
     sortie = []
     for q in points:
         if not sortie or (np.asarray(q, float) - np.asarray(sortie[-1], float)).dot(np.asarray(q, float) - np.asarray(sortie[-1], float)) > eps * eps:
@@ -32,81 +31,78 @@ def propres(points, eps=2e-4):
         sortie = [base, Vector(base) + Vector((0.0, 0.0, 0.001))]
     return sortie
 
-LILAS = M.hexa("#e1d6f8")                     # la dominante : lilas pâle (le poil la dore : on la prend nettement plus claire)
-OMBRE = M.hexa("#c7b8ec")                     # le dessous des pattes, les paupières, un ton plus bas
-CHARBON = M.hexa("#2d2831")                   # le bout des oreilles (l'accent), la truffe
-NEIGE = M.hexa("#fffaf4")                     # le ventre, la queue
-LACET = 22.0                                  # la tête tournée vers nous (vers sa gauche)
-CORPS = Vector((0.0, 0.045, 0.190))
-TETE = Vector((0.0, -0.185, 0.285))
+
+LILAS = np.array(M.hexa("#e1d6f8"))           # la dominante : lilas pâle (le poil la dore : on la prend nettement plus claire)
+OMBRE = np.array(M.hexa("#c7b8ec"))           # le dos, le dessous des pattes, un ton plus bas
+CHARBON = np.array(M.hexa("#2d2831"))         # le bout des oreilles (l'accent), la truffe
+NEIGE = np.array(M.hexa("#fffaf4"))           # le ventre, le pompon, le museau
+JAUNE = M.hexa("#e8d070")                     # les yeux
+PAS = 0.006
+
+
+def lisser(r, n=5):
+    k = np.ones(n) / n
+    return np.convolve(np.pad(r, n // 2, mode="edge"), k, "valid")
+
+
+def fuseau(points, longueur, cotes=56, pas=PAS):
+    s = np.arange(pas, longueur - pas, pas)
+    f, r = zip(*points)
+    rayons = lisser(np.interp(s / longueur, f, r), 7)
+    return A.tour([(0.0, 0.0)] + [(float(ri), float(si)) for ri, si in zip(rayons, s)] + [(0.0, float(longueur))], cotes)
 
 
 def construire():
     a = K.Animal("lievre_arctique")
     a.taille = 0.80
 
-    # ----- le corps : un pain rond, large du bas, le dos voûté ; le ventre posé sur le sol -----
-    def pain(v):
-        v = K.bosse(v, (0, -0.8, -0.3), 0.10, 0.5)
-        s = v * [0.175, 0.215, 0.185]
-        s[:, 2] = np.where(s[:, 2] < 0, s[:, 2] * 0.92, s[:, 2])
-        s[:, 0] *= 1 + 0.10 * K.lisse((-v[:, 2] + 0.2) / 1.0)
-        return s
-    corps = A.boule(1.0, 56, 28).sculpte(pain)
-    G.sillons(corps, [14], 0.005, 1.1)
-    a.piece("corps", corps, LILAS, pos=CORPS)
-    a.couture("dos", "corps", 14, 0.28, 0.96)
-    a.rustine("ventre", "corps", CORPS + Vector((0, -0.03, 0.0)), (0, -0.85, -0.50),
-              lambda th: 0.56 - 0.10 * math.cos(2 * th), NEIGE, 0.003, 26)
+    # ----- le corps : un tronc qui monte en pente de la croupe basse aux épaules étroites ; le dos plus sombre, le ventre blanc -----
+    fil = K.Fil([(0.0, y, z) for y, z in ((0.200, 0.095), (0.110, 0.200), (0.000, 0.300), (-0.070, 0.370))], (1, 0, 0))
+    L = fil.long
+    corps = fuseau([(0.0, 0.0), (0.05, 0.100), (0.22, 0.150), (0.50, 0.140), (0.80, 0.105), (0.96, 0.070), (1.0, 0.0)], L, 64)
+    th = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
+    corps.teinte = np.where((th > 2.3)[:, None], NEIGE, np.where((th < 1.0)[:, None], OMBRE, LILAS))
+    a.piece("corps", corps.sculpte(fil.couche), None)
 
-    # ----- la tête : ronde, les joues larges, le museau court ; tournée vers nous, le menton rentré dans le poitrail -----
-    H = A.repere(TETE, (0, 0, LACET))
-    H3 = H.to_3x3()
-
-    def joufflue(v):
-        for cote in (1, -1):
-            v = K.bosse(v, (cote * 0.85, -0.30, -0.40), 0.20, 0.30)
-        return v * [0.112, 0.108, 0.104]
-    a.piece("tete", A.boule(1.0, 48, 24).sculpte(joufflue), LILAS, mat=H)
-    a.couture("crane", "tete", 14, 0.55, 0.98)
-    a.piece("museau", A.boule(1.0, 32, 16).etire(0.058, 0.062, 0.050), NEIGE, mat=H @ A.repere((0, -0.082, -0.030)))
-    a.piece("truffe", A.boule(1.0, 20, 10).etire(0.016, 0.010, 0.011), CHARBON, mat=H @ A.repere((0, -0.140, -0.016)), poil=False)
-    a.tete = H @ Vector((0, -0.100, 0.0))
-    # la bouche : une petite moue qui descend de la truffe en deux traits
-    bouche = [H3 @ Vector(d) for d in ((0.0, -0.60, -0.52), (0.18, -0.70, -0.62), (0.34, -0.60, -0.56))]
-    a.broderie("bouche", A.courbe(propres(a.trace("museau", H @ Vector((0, -0.082, -0.030)), bouche, 0.003)), 4), 0.0022, CHARBON)
-
-    # ----- les yeux : vivants, mi-clos sous une paupière lourde : il somnole -----
+    # ----- les cuisses : énormes, fondues dans la croupe ; les longs pieds arrière, à plat devant elles -----
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", TETE, H3 @ Vector((c * 0.70, -0.62, 0.22)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.019)
-        P = A.cadre(p + n * 0.004, n, H3 @ Vector((0, 0, 1)))
-        a.piece("lourde_" + nom, K.paupiere(0.022, 0.05), OMBRE, mat=P, poil=False)
+        cu = A.boule(1.0, 36, 18)
+        cu.teinte = np.tile(LILAS, (len(cu.v), 1))
+        a.piece("cuisse_" + nom, cu.etire(0.074, 0.130, 0.120), None, mat=A.cadre(Vector((c * 0.108, 0.135, 0.150)), Vector((c * 0.10, -0.90, 0.30)), (0, 0, 1)))
+        pd = A.boule(1.0, 24, 12)
+        pd.teinte = np.where((pd.v[:, 2] < 0.0)[:, None], tuple(OMBRE), tuple(LILAS))
+        a.piece("pied_ar_" + nom, pd.etire(0.040, 0.170, 0.030), None, pos=(c * 0.112, 0.020, 0.030), rot=(0, 0, c * 6))
 
-    # ----- les oreilles : courtes et rondes, la pointe charbon ; la gauche à demi dressée, la droite rabattue sur le côté -----
-    po = A.profil([(0, 0), (0.030, 0.012), (0.042, 0.052), (0.040, 0.096), (0.028, 0.130), (0.010, 0.153), (0, 0.160)], 6)
-    for nom, c, vers in (("G", 1, (0.30, 0.55, 0.78)), ("D", -1, (-0.80, 0.30, 0.30))):
-        vers = (H3 @ Vector(vers)).normalized()
-        E = A.cadre(H @ Vector((c * 0.052, 0.040, 0.075)) - vers * 0.014, vers, H3 @ Vector((c * 0.4, -0.9, 0.0)))
-        oreille = K.bandes(A.tour(po, 40).etire(1.0, 0.36, 1.0), [(0.110, LILAS), (9, CHARBON)])
-        a.piece("oreille_" + nom, oreille, None, mat=E)
-        a.piece("pavillon_" + nom, A.tour(po, 32).etire(0.60, 0.34, 0.74).pose((0, 0.008, 0.016)), K.ROSE, mat=E, poil=False)
-
-    # ----- les bras : deux petits bouts de patte repliés sous le menton, les mains qui pendent sur les raquettes -----
+    # ----- les pattes avant : fines, droites, serrées sous le menton, les petites mains blanches -----
     for nom, c in (("G", 1), ("D", -1)):
-        bras = A.courbe([(c * 0.075, -0.100, 0.215), (c * 0.085, -0.160, 0.140), (c * 0.080, -0.200, 0.070), (c * 0.076, -0.210, 0.034)], 6)
-        a.piece("bras_" + nom, A.tube(bras, lambda t: 0.036 - 0.008 * t, 14), LILAS)
-        a.piece("main_" + nom, A.boule(1.0, 24, 12).etire(0.032, 0.040, 0.024), LILAS, pos=(c * 0.076, -0.218, 0.028))
+        ch = [(c * 0.050, -0.045, 0.300), (c * 0.054, -0.085, 0.160), (c * 0.054, -0.100, 0.034)]
+        a.piece("patte_av_" + nom, A.tube(A.courbe(propres(ch), 5), lambda t: 0.028 - 0.010 * t, 12), tuple(LILAS))
+        a.piece("main_" + nom, A.boule(1.0, 16, 8).etire(0.024, 0.036, 0.018), tuple(NEIGE), pos=(c * 0.054, -0.112, 0.020))
 
-    # ----- les raquettes : d'énormes pieds de derrière posés à plat, devant le corps, les orteils cousus en travers -----
-    pp = A.profil([(0, 0), (0.046, 0.014), (0.066, 0.080), (0.074, 0.190), (0.064, 0.300), (0.040, 0.360), (0, 0.384)], 6)
-    for nom, c, cap in (("G", 1, 16.0), ("D", -1, -12.0)):
-        pied = A.tour(pp, 40).etire(1.0, 0.50, 1.0)
-        a.piece("pied_" + nom, pied, LILAS, pos=(c * 0.142, 0.150, 0.034), rot=(90, 0, c * cap))
-        a.ourlet("orteils_" + nom, "pied_" + nom, 0.62)
+    # ----- la tête : petite, le museau fin et blanc, les joues pleines ; haute, tournée vers nous -----
+    T = A.cadre(Vector((0.0, -0.120, 0.420)), Vector((0.38, -1.0, 0.06)).normalized(), Vector((0, 0, 1)))
+    T3 = T.to_3x3()
+    tete = fuseau([(0.0, 0.0), (0.08, 0.062), (0.30, 0.078), (0.58, 0.068), (0.84, 0.050), (0.97, 0.034), (1.0, 0.0)], 0.180, 48, 0.004)
+    tete.teinte = np.where((tete.v[:, 2] > 0.60 * 0.180)[:, None], tuple(NEIGE), tuple(LILAS))
+    a.piece("tete", tete, None, mat=T @ A.repere((0, 0, -0.060)))
+    a.piece("nez", A.boule(1.0, 20, 10).etire(0.016, 0.012, 0.012), tuple(CHARBON), mat=T @ A.repere((0, 0.004, 0.116)), poil=False)
+    a.tete = T @ Vector((0, 0.0, 0.080))
+    for nom, c in (("G", 1), ("D", -1)):
+        regard = T3 @ Vector((c * 0.80, 0.32, 0.30))
+        a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.17, JAUNE, 0.003, 0)
+        p, n = a.surface("tete", T.to_translation(), regard)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0155)
+        # l'oreille : LONGUE, étroite, dressée un peu en arrière, le bout noir
+        po = A.profil([(0, 0), (0.036, 0.010), (0.040, 0.060), (0.034, 0.130), (0.024, 0.190), (0.010, 0.228), (0, 0.240)], 6)
+        vers = (T3 @ Vector((c * 0.26, 0.94, -0.18))).normalized()
+        E = A.cadre(T @ Vector((c * 0.040, 0.050, -0.030)) - vers * 0.008, vers, T3 @ Vector((c * 0.2, 0.0, 1.0)))
+        a.piece("oreille_" + nom, K.bandes(A.tour(po, 36).etire(1.0, 0.30, 1.0), [(0.190, tuple(LILAS)), (9, tuple(CHARBON))]), None, mat=E)
+        a.piece("pavillon_" + nom, A.tour(po, 28).etire(0.58, 0.26, 0.84).pose((0, 0.008, 0.010)), M.hexa("#f2c6d8"), mat=E, poil=False)
 
-    # ----- la queue : une petite houppette blanche -----
-    a.piece("queue", A.boule(1.0, 24, 12).etire(0.050, 0.050, 0.046), NEIGE, pos=(0, 0.262, 0.120))
+    # ----- le pompon : une petite boule blanche à la croupe -----
+    q = A.boule(1.0, 20, 10)
+    q.teinte = np.tile(NEIGE, (len(q.v), 1))
+    a.piece("queue", q.etire(0.040, 0.040, 0.040), None, pos=(0.0, 0.232, 0.130))
     return a
 
 

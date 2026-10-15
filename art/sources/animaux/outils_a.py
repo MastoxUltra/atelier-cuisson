@@ -397,3 +397,26 @@ def plan(pos, ex, ey):
         m[0][i2], m[1][i2], m[2][i2] = v
     m[0][3], m[1][3], m[2][3] = Vector(pos)
     return m
+
+
+def sur_corps(fil, L, rayon_f, f, ang, cote=1, sx=1.0, sy=1.0, ext=0.0):
+    """Un point de la surface d'un corps couché sur un fil (fil_corps), et sa normale, sans lancer de rayons : à la fraction f,
+    l'angle ang (degrés, 0 : le dos, 180 : le ventre), du côté `cote` (+1 : le côté du flanc, -1 : l'autre) ; sx, sy : les facteurs
+    d'aplatissement appliqués au corps (un déformé qui écrase X ou Y) ; ext : de combien au-dessus de la peau."""
+    c, av, nq = (Vector(q) for q in fil.cadre(f * L))
+    fl = Vector(fil.flanc).normalized()
+    r = float(rayon_f(f))
+    th = math.radians(ang)
+    n = (fl * (cote * math.sin(th) / max(sx, 1e-6)) + nq * (math.cos(th) / max(sy, 1e-6))).normalized()
+    p = c + fl * (cote * math.sin(th) * r * sx) + nq * (math.cos(th) * r * sy) + n * ext
+    return p, n
+
+
+def points_lumineux(pts_normales, rayon, couleur):
+    """Une maille de petites pastilles posées à plat (photophores, pois) : pts_normales = [(point, normale), …]."""
+    m = None
+    for p, n in pts_normales:
+        up = Vector((0.0, 0.0, 1.0)) if abs(n.z) < 0.9 else Vector((0.0, 1.0, 0.0))
+        d = couche(teinte(A.boule(1.0, 10, 6).etire(rayon, rayon, rayon * 0.45), couleur), A.cadre(p, n, up))
+        m = d if m is None else m + d
+    return m

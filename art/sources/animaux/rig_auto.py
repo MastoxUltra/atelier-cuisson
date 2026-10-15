@@ -163,6 +163,15 @@ def _tete_bones(m, plan):
         parent = "cou"
     tv = m.v["tete"] if "tete" in m.v else (np.vstack([m.v[n] for n in noms]) if noms else None)
     if tv is not None:
+        # les pièces dont le nom ne dit rien (crâne, truffe, front…) mais qui sont logées contre la tête la suivent aussi
+        ctr = tv.mean(axis=0)
+        rad = 0.60 * float(np.ptp(tv, axis=0).max())
+        for n, V in m.v.items():
+            if n in noms or n == m.corps_nom or n in cou or _debut(n, QUEUE) or _debut(n, JAMBES) or _debut(n, ("aile", "elytre", "nageoire")):
+                continue
+            d = np.linalg.norm(V - ctr, axis=1)
+            if float(np.median(d)) < 1.15 * rad and float(d.max()) < 2.2 * rad:
+                noms.append(n)
         dev = -1.0 if m.tete_cible[1] < m.centre[1] else 1.0                       # la tête est devant (−Y) ou derrière
         y_nuque = float(tv[:, 1].max() if dev < 0 else tv[:, 1].min())
         piv = (float(tv[:, 0].mean()), y_nuque - dev * 0.12 * float(np.ptp(tv[:, 1])), float(tv[:, 2].mean() - 0.10 * np.ptp(tv[:, 2])))
@@ -202,7 +211,8 @@ def rig_quad(m, plan=None, souple=False):
         a(p, "av_g", (avant, 0, 0)); a(p, "av_d", (avant * diagonale, 0, 0))
         a(p, "ar_g", (arriere, 0, 0)); a(p, "ar_d", (arriere * diagonale, 0, 0))
 
-    amp = 26.0 if Lleg > 0.25 else 34.0
+    amp = 20.0 if Lleg > 0.25 else 12.0                               # les pattes courtes (assis, couché) bougent peu : sinon elles se détachent
+    plie = 62.0 if Lleg > 0.20 else 22.0
 
     def ondule(p, t, ampli, tours=1.0):
         for k, nm in enumerate(chaine):
@@ -215,7 +225,7 @@ def rig_quad(m, plan=None, souple=False):
         g, d = cloche(t, 0.25, 0.13), cloche(t, 0.62, 0.12)
         a(p, "cou", rot=(2 * r, 0, 10 * g - 10 * d))
         a(p, "tete", rot=(-3 * g + 2 * r, 0, 16 * g - 18 * d))
-        a(p, "queue", rot=(0, 0, 14 * onde(t, 2)))
+        a(p, "queue", rot=(0, 0, 8 * onde(t, 2)))
         ondule(p, t, 5.0)
         p.ouvert = 1 - cloche(t, 0.45, 0.02) - cloche(t, 0.85, 0.02)
         return p
@@ -228,7 +238,7 @@ def rig_quad(m, plan=None, souple=False):
         a(p, "av_d", (-amp * s, 0, 0)); a(p, "ar_g", (-amp * s, 0, 0))
         a(p, "cou", rot=(3 * c, 0, 0))
         a(p, "tete", rot=(-3 * c, 0, 4 * s))
-        a(p, "queue", rot=(0, 0, 16 * s))
+        a(p, "queue", rot=(0, 0, 9 * s))
         return p
 
     def mange(t):
@@ -261,11 +271,11 @@ def rig_quad(m, plan=None, souple=False):
         p = Pose(); r = onde(t, 1)
         p.ouvert = 0.0
         a(p, "corps", pos=(0, 0, -chute), rot=(0, 3, 0), ech=(1 + 0.012 * r, 1, 1 + 0.02 * r))
-        a(p, "av_g", (62, 0, 0)); a(p, "av_d", (58, 0, 0))
-        a(p, "ar_g", (-62, 0, 0)); a(p, "ar_d", (-58, 0, 0))
+        a(p, "av_g", (plie, 0, 0)); a(p, "av_d", (plie - 4, 0, 0))
+        a(p, "ar_g", (-plie, 0, 0)); a(p, "ar_d", (-plie + 4, 0, 0))
         a(p, "cou", rot=(22, 0, 30))
         a(p, "tete", rot=(18, 6, 24))
-        a(p, "queue", rot=(0, 0, 18))
+        a(p, "queue", rot=(0, 0, 8))
         ondule(p, t, 3.0)
         for nm in chaine[1:]:
             a(p, nm, rot=(0, 0, 8))
@@ -681,7 +691,14 @@ def rig_fixe(m):
 def rig(module, plan="quad", **opt):
     """Rend (OS, PORTEURS, ANIMATIONS) pour la bête `module` (voir le haut de ce fichier)."""
     m = Mesures(module)
-    fabrique = {"quad": lambda: rig_quad(m, souple=opt.get("souple", False)), "dresse": lambda: rig_dresse(m), "oiseau": lambda: rig_oiseau(m), "poisson": lambda: rig_poisson(m),
-                "serpent": lambda: rig_serpent(m, **opt), "mou": lambda: rig_fixe(m), "fixe": lambda: rig_fixe(m)}[plan]
-    pl, anim = fabrique()
+    if plan in ("membres", "bras", "etoile", "meduse", "mou"):
+        import rig_plus
+        fabrique = {"membres": rig_plus.rig_membres, "bras": rig_plus.rig_bras, "etoile": rig_plus.rig_etoile,
+                    "meduse": rig_plus.rig_meduse, "mou": rig_plus.rig_limace}[plan]
+        pl, anim = fabrique(m, **opt)
+    else:
+        fabrique = {"quad": lambda: rig_quad(m, souple=opt.get("souple", False)), "dresse": lambda: rig_dresse(m),
+                    "oiseau": lambda: rig_oiseau(m), "poisson": lambda: rig_poisson(m),
+                    "serpent": lambda: rig_serpent(m, **opt), "fixe": lambda: rig_fixe(m)}[plan]
+        pl, anim = fabrique()
     return pl.os, pl.porteurs(), anim

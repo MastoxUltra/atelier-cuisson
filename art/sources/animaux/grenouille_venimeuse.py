@@ -1,7 +1,8 @@
-"""La grenouille venimeuse en peluche, cousue main : un jaune citron vif, le dos barré de bandes noires en croissant,
-le ventre et les cuisses marbrés de pois noirs, des ventouses rondes au bout de chaque doigt et deux gros yeux noirs
-saillants. Une minuscule diva qui sait ce qu'elle vaut : assise bien droite sur ses pattes arrière, les mains en avant
-comme un chanteur lyrique, le menton haut, la gorge qui se gonfle : elle va lancer la note qu'on n'oubliera pas.
+"""La grenouille venimeuse en peluche, cousue main (2e dessin : plus de bébé aux yeux énormes) : un DENDROBATE, fin et
+nerveux, le corps mince d'un jaune citron vif tout recouvert d'un RÉSEAU noir en mailles (le dos, la tête, les
+cuisses), la tête en coin, de petits yeux noirs à fleur de peau, de longues pattes grêles et des ventouses rondes et
+pâles au bout de chaque doigt, les grandes pattes arrière repliées. Posée sur ses quatre pattes, la tête haute : toute
+petite, toute vive, elle sait qu'on n'y touche pas.
 
     python grenouille_venimeuse.py        fabrique la fiche art/apercus/animaux/grenouille_venimeuse.png (cousu main, palier 2)
 """
@@ -15,14 +16,12 @@ import numpy as np
 from mathutils import Vector
 
 import atelier as A
-import garnitures as G
 import matieres as M
 import peluche as K
 
 
 def propres(points, eps=2e-4):
-    """Les points d'un tracé sans doublons consécutifs (un tube dont deux points se suivent à l'identique se déforme en NaN) ;
-    au moins deux points, écartés d'un millimètre au pire."""
+    """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""
     sortie = []
     for q in points:
         if not sortie or (np.asarray(q, float) - np.asarray(sortie[-1], float)).dot(np.asarray(q, float) - np.asarray(sortie[-1], float)) > eps * eps:
@@ -32,76 +31,88 @@ def propres(points, eps=2e-4):
         sortie = [base, Vector(base) + Vector((0.0, 0.0, 0.001))]
     return sortie
 
-CITRON = M.hexa("#ffe95a")                    # la dominante : jaune citron vif
-NOIR = M.hexa("#26242c")                      # l'accent : les bandes et les pois
-VENTRE = M.hexa("#fff8c0")                    # le ventre, la gorge
+
+CITRON = np.array(M.hexa("#ffe95a"))          # la dominante : jaune citron vif
+NOIR = np.array(M.hexa("#26242c"))            # l'accent : le réseau
+VENTRE = np.array(M.hexa("#fff8c0"))          # le ventre, la gorge
 VENTOUSE = M.hexa("#fff4b0")                  # le bout des doigts
-CORPS = Vector((0.0, 0.040, 0.105))
-TETE = Vector((0.0, -0.045, 0.200))
+PAS = 0.005
+
+
+def lisser(r, n=5):
+    k = np.ones(n) / n
+    return np.convolve(np.pad(r, n // 2, mode="edge"), k, "valid")
+
+
+def fuseau(points, longueur, cotes=48, pas=PAS):
+    s = np.arange(pas, longueur - pas, pas)
+    f, r = zip(*points)
+    rayons = lisser(np.interp(s / longueur, f, r), 7)
+    return A.tour([(0.0, 0.0)] + [(float(ri), float(si)) for ri, si in zip(rayons, s)] + [(0.0, float(longueur))], cotes)
+
+
+def reseau(m, graine, n=34, largeur=0.0105, ventre=None):
+    """Peint un RÉSEAU noir en mailles sur du jaune : le plus proche et le deuxième plus proche de quelques graines tirées
+    dans la boîte de la pièce (le joint, là où ils sont presque à égale distance) ; le ventre jaune pâle, sans réseau."""
+    rng = np.random.default_rng(graine)
+    v = m.v
+    lo, hi = v.min(axis=0) - 0.01, v.max(axis=0) + 0.01
+    graines = lo + rng.random((n, 3)) * (hi - lo)
+    d = np.sort(np.linalg.norm(v[:, None, :] - graines[None, :, :], axis=2), axis=1)[:, :2]
+    t = np.tile(CITRON, (len(v), 1))
+    t[(d[:, 1] - d[:, 0]) < largeur] = NOIR
+    if ventre is not None:
+        t[ventre(v)] = VENTRE
+    m.teinte = t
+    return m
 
 
 def construire():
     a = K.Animal("grenouille_venimeuse")
     a.taille = 0.34
 
-    # ----- le corps : une poire dressée, large du bas, le ventre en avant ; peinte de bandes noires en croissant sur le dos -----
-    corps = A.boule(1.0, 56, 28)
-    v = corps.v
-    t = np.tile(np.asarray(CITRON, float), (len(v), 1))
-    t[(v[:, 1] < -0.35)] = VENTRE
-    onde = np.sin(7.5 * v[:, 2] + 1.7 * v[:, 0])
-    t[(v[:, 1] > 0.10) & (onde > 0.55)] = NOIR
-    corps.teinte = t
+    # ----- le corps : mince, un peu relevé devant, le dos tout couvert du réseau noir, le ventre pâle -----
+    fil = K.Fil([(0.0, y, z) for y, z in ((0.120, 0.060), (0.050, 0.075), (-0.020, 0.100), (-0.070, 0.118))], (1, 0, 0))
+    L = fil.long
+    corps = fuseau([(0.0, 0.0), (0.05, 0.036), (0.28, 0.054), (0.62, 0.052), (0.90, 0.040), (1.0, 0.0)], L, 52, 0.004)
+    reseau(corps, 3, 38, 0.0115, ventre=lambda v: (v[:, 1] < -0.030))
+    a.piece("corps", corps.sculpte(fil.couche), None)
 
-    def poire(v):
-        s = v * [0.092, 0.086, 0.112]
-        s[:, 0] *= 1 + 0.30 * K.lisse((-v[:, 2] + 0.2) / 1.0)
-        s[:, 1] *= 1 + 0.14 * K.lisse((-v[:, 2] + 0.2) / 1.0)
-        return s
-    G.sillons(corps, [14], 0.004, 1.1)
-    a.piece("corps", corps.sculpte(poire), None, pos=CORPS, rot=(-8, 0, 0))
-
-    # ----- la tête : large et plate, la gorge qui se gonfle dessous ; le menton levé -----
-    H = A.repere(TETE, (-12, 0, 14))
-    H3 = H.to_3x3()
-
-    def tete_f(v):
-        s = v * [0.092, 0.082, 0.062]
-        s[:, 1] += 0.010 * K.lisse((v[:, 2] + 0.2) / 1.0)
-        return s
-    a.piece("tete", A.boule(1.0, 48, 24).sculpte(tete_f), CITRON, mat=H)
-    a.piece("gorge", A.boule(1.0, 32, 16).etire(0.050, 0.036, 0.030), VENTRE, mat=H @ A.repere((0, -0.040, -0.040)))
-    a.tete = H @ Vector((0, -0.095, 0.0))
-    bouche = [H3 @ Vector(d) for d in ((-0.55, -0.72, -0.40), (-0.20, -0.90, -0.46), (0.20, -0.90, -0.46), (0.55, -0.72, -0.40))]
-    a.broderie("bouche", A.courbe(propres(a.trace("tete", TETE, bouche, 0.003)), 4), 0.0020, NOIR)
-
-    # ----- les yeux : deux gros globes noirs sur le dessus de la tête, un reflet blanc ; un point cousu autour -----
+    # ----- la tête : un coin pointu, bas ; de PETITS yeux noirs, à fleur de tête, sur les côtés du crâne -----
+    T = A.cadre(Vector((0.0, -0.105, 0.134)), Vector((0.30, -1.0, 0.16)).normalized(), Vector((0, 0, 1)))
+    T3 = T.to_3x3()
+    tete = fuseau([(0.0, 0.0), (0.10, 0.042), (0.36, 0.052), (0.64, 0.044), (0.88, 0.030), (0.98, 0.016), (1.0, 0.0)], 0.110, 40, 0.003)
+    tete.v[:, 1] *= 0.80
+    reseau(tete, 5, 14, 0.0095, ventre=lambda v: (v[:, 1] < -0.020))
+    a.piece("tete", tete, None, mat=T @ A.repere((0, 0, -0.040)))
+    a.tete = T @ Vector((0, 0.0, 0.060))
     for nom, c in (("G", 1), ("D", -1)):
-        place = H @ Vector((c * 0.050, -0.030, 0.050))
-        a.piece("globe_" + nom, A.boule(1.0, 28, 14).etire(0.036, 0.036, 0.034), CITRON, mat=A.repere(place))
-        p, n = a.surface("globe_" + nom, place, H3 @ Vector((c * 0.30, -0.90, 0.30)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0245)
+        regard = T3 @ Vector((c * 0.74, 0.55, 0.20))
+        p, n = a.surface("tete", T @ Vector((0, 0.0, 0.020)), regard)
+        a.oeil("oeil_" + nom, p + n * 0.002, n, 0.0105)
 
-    # ----- les bras : deux petits bras en avant, les mains ouvertes, un pois noir sur le coude ; les ventouses rondes -----
+    # ----- les pattes avant : fines et droites, quatre longs doigts à ventouse ; les arrière : longues, repliées en Z,
+    #       le pied à plat, les doigts écartés, chacun sa ventouse -----
+    def doigts(centre, cap, long, k=4):
+        m = None
+        for i in range(k):
+            ang = cap + (i - (k - 1) / 2) * 24
+            t = math.radians(ang)
+            d = A.boule(1.0, 12, 6).etire(0.0045, long, 0.0045).pose((long * math.sin(t) * 0.9, -long * math.cos(t) * 0.9, 0.0), (0, 0, ang))
+            v = A.boule(1.0, 12, 6).etire(0.0105, 0.0105, 0.0065).pose((long * math.sin(t) * 1.85, -long * math.cos(t) * 1.85, 0.0))
+            m = d + v if m is None else m + d + v
+        return m.pose(tuple(centre))
     for nom, c in (("G", 1), ("D", -1)):
-        bras = [(c * 0.060, -0.030, 0.150), (c * 0.085, -0.075, 0.130), (c * 0.075, -0.115, 0.115)]
-        a.piece("bras_" + nom, A.tube(A.courbe(bras, 5), lambda t: 0.020 - 0.004 * t, 12), CITRON)
-        a.piece("main_" + nom, A.boule(1.0, 20, 10).etire(0.022, 0.026, 0.014), CITRON, pos=bras[-1])
-        for k in (-1, 0, 1):
-            a.piece("doigt_%s%d" % (nom, k), A.boule(1.0, 16, 8).etire(0.0095, 0.0095, 0.0075), VENTOUSE,
-                    pos=(bras[-1][0] + k * 0.019, bras[-1][1] - 0.028, bras[-1][2] - 0.003), poil=False)
-
-    # ----- les pattes arrière : deux cuisses repliées marbrées de noir, les longs pieds aux trois ventouses -----
-    for nom, c in (("G", 1), ("D", -1)):
-        cuisse = A.boule(1.0, 36, 18)
-        cu = np.tile(np.asarray(CITRON, float), (len(cuisse.v), 1))
-        cu[np.sin(9 * cuisse.v[:, 0] + 5 * cuisse.v[:, 2]) * np.sin(8 * cuisse.v[:, 1] + 1.0) > 0.5] = NOIR
-        cuisse.teinte = cu
-        a.piece("cuisse_" + nom, cuisse.etire(0.034, 0.072, 0.056), None, pos=(c * 0.100, 0.050, 0.070), rot=(10, 0, c * 18))
-        a.piece("pied_" + nom, A.boule(1.0, 24, 12).etire(0.020, 0.070, 0.012), CITRON, pos=(c * 0.115, -0.030, 0.014), rot=(0, 0, c * 16))
-        for k in (-1, 0, 1):
-            a.piece("orteil_%s%d" % (nom, k), A.boule(1.0, 16, 8).etire(0.0095, 0.0095, 0.0075), VENTOUSE,
-                    pos=(c * 0.115 + k * 0.019 + c * 0.012, -0.100, 0.010), poil=False)
+        ch = [(c * 0.034, -0.050, 0.095), (c * 0.052, -0.080, 0.056), (c * 0.058, -0.100, 0.014)]
+        m = A.tube(A.courbe(propres(ch), 5), lambda t: 0.013 - 0.005 * t, 12)
+        m.teinte = np.tile(CITRON, (len(m.v), 1))
+        a.piece("bras_" + nom, m, None)
+        a.piece("doigts_av_" + nom, doigts((c * 0.058, -0.104, 0.010), c * 14, 0.030), VENTOUSE, poil=False)
+        cu = [(c * 0.046, 0.100, 0.082), (c * 0.092, 0.040, 0.070), (c * 0.084, 0.118, 0.026), (c * 0.074, 0.062, 0.012)]
+        mj = A.tube(A.courbe(propres(cu), 6), lambda t: 0.020 - 0.010 * t, 14)
+        reseau(mj, 11 + (c > 0), 12, 0.0085)
+        a.piece("jambe_ar_" + nom, mj, None)
+        a.piece("doigts_ar_" + nom, doigts((c * 0.074, 0.060, 0.010), c * 10, 0.040), VENTOUSE, poil=False)
     return a
 
 

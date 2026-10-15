@@ -1,8 +1,7 @@
-"""L'anaconda en peluche de magasin : un bronze sombre à l'huile, des ocelles charbon cernés de crème qui courent le long
-du dos, le ventre jaune pâle, un corps épais comme un tronc enroulé en grosses boucles de boudin, et une tête plate
-posée haut sur le cou, les narines sur le dessus, deux petits yeux d'or à la fente verticale, et la langue fourchue
-qui goûte l'air. Le roi de la rivière, qui ne fait jamais rien et n'en a pas besoin : lové sur lui-même, le cou dressé,
-la tête tournée de trois quarts vers nous, la gueule fermée sur un demi-sourire.
+"""L'anaconda en peluche de magasin (3e dessin : plus de bouée) : un serpent ÉPAIS, d'un olive sombre à grandes taches
+noires cernées de crème, vautré en lourdes boucles lâches et irrégulières, l'une passant sur l'autre, la queue qui traîne
+en pointe, et sur le haut de la pile une tête plate et large, posée sur une boucle, les narines sur le dessus, deux petits
+yeux d'or à la fente verticale, la langue fourchue qui goûte l'air. Le roi de la rivière, qui ne fait jamais rien.
 
     python anaconda.py        fabrique la fiche art/apercus/animaux/anaconda.png (peluche de magasin, palier 4)
 """
@@ -21,8 +20,7 @@ import peluche as K
 
 
 def propres(points, eps=2e-4):
-    """Les points d'un tracé sans doublons consécutifs (un tube dont deux points se suivent à l'identique se déforme en NaN) ;
-    au moins deux points, écartés d'un millimètre au pire."""
+    """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""
     sortie = []
     for q in points:
         if not sortie or (np.asarray(q, float) - np.asarray(sortie[-1], float)).dot(np.asarray(q, float) - np.asarray(sortie[-1], float)) > eps * eps:
@@ -32,104 +30,95 @@ def propres(points, eps=2e-4):
         sortie = [base, Vector(base) + Vector((0.0, 0.0, 0.001))]
     return sortie
 
+
 # le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
-BRONZE = M.hexa("#9a7a38")                    # la dominante : bronze sombre
-OCELLE = M.hexa("#3a2c22")                    # l'accent : les ocelles charbon
-ANNEAU = M.hexa("#e8d68a")                    # le cerne crème des ocelles, le ventre
+OLIVE = np.array(M.hexa("#8c8a34"))           # la dominante : olive sombre (bronze verdâtre)
+TACHE = np.array(M.hexa("#2a2420"))           # l'accent : les grandes taches charbon
+ANNEAU = np.array(M.hexa("#e8d68a"))          # le cerne crème des taches
+VENTRE = np.array(M.hexa("#d8c880"))          # le dessous de la tête
 OR = M.hexa("#ffcf2a")                        # les yeux
 ROSE = M.hexa("#e0556a")                      # la langue
-LACET = 28.0
+NOIR = M.hexa("#241e1a")
+EPAIS = 0.056                                 # le rayon du corps
 
 
-def serpent(chemin, rayon, cotes=16, saut=0.085):
-    """Un tube peint tout le long (comme K.tube_peint, mais en ocelles) : sur chaque anneau, quelques facettes charbon
-    cernées de crème, décalées d'un bloc à l'autre ; le ventre (le dessous) crème."""
-    ch = np.asarray(chemin, float)
-    fait = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(ch, axis=0), axis=1))])
-    n = max(8, int(fait[-1] / 0.012))
-    t = np.linspace(0.0, 1.0, n)
-    ch = np.stack([np.interp(t * fait[-1], fait, ch[:, k]) for k in range(3)], axis=1)
-    m = A.tube(ch, rayon, cotes)
-    teinte = np.tile(np.asarray(BRONZE, float), (len(m.v), 1))
-    bloc = max(1, int(saut / 0.012))
-    for i in range(n):
-        k = i // bloc
-        suite = i % bloc
-        if k % 2 == 0:
-            deb = (3 * (k // 2)) % cotes
-            for j in range(cotes):
-                d = (j - deb) % cotes
-                if d in (0, 1, 2) and 1 < suite < bloc - 2:
-                    teinte[i * cotes + j] = OCELLE
-                elif d in (cotes - 1, 3) and 0 < suite < bloc - 1:
-                    teinte[i * cotes + j] = ANNEAU
-                elif d in (0, 1, 2) and suite in (1, bloc - 2):
-                    teinte[i * cotes + j] = ANNEAU
-    m.teinte = teinte
-    return m
+def mouchetures(v, cote, rayon, graine=0, proba=0.74):
+    v = np.asarray(v, float)
+    base = np.floor(v / cote).astype(np.int64)
+    dedans = np.zeros(len(v), bool)
+    for dx in (-1, 0, 1):
+        for dy in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                c = base + np.array([dx, dy, dz], dtype=np.int64)
+                h = ((c[:, 0] * 73856093) ^ (c[:, 1] * 19349663) ^ (c[:, 2] * 83492791) ^ (graine * 40503)) & 0x7FFFFFFF
+
+                def alea(m):
+                    return ((((h * m) + 12345) >> 9) & 0xFFFF) / 65535.0
+                present = alea(1103515245) < proba
+                centre = (c + np.stack([alea(214013), alea(1664525), alea(22695477)], axis=1)) * cote
+                r = rayon * (0.70 + 0.60 * alea(134775813))
+                dedans |= present & (np.linalg.norm(v - centre, axis=1) < r)
+    return dedans
+
+
+def rayon(t):
+    """Le rayon le long du corps (0 = la pointe de la queue, 1 = la nuque)."""
+    queue = max(0.0, (0.22 - t) / 0.22) ** 1.3
+    cou = min(1.0, max(0.0, (t - 0.86) / 0.14))
+    return EPAIS * (1.0 - 0.80 * queue) - 0.014 * cou * cou * (3 - 2 * cou)
+
+
+# la pile de boucles : une grande boucle à plat, une plus petite posée dessus, puis le cou qui monte poser la tête
+CHEMIN = [(0.50, 0.22, 0.020), (0.46, 0.34, 0.052), (0.34, 0.42, 0.056), (0.14, 0.46, 0.056), (-0.08, 0.40, 0.056),
+          (-0.28, 0.28, 0.056), (-0.38, 0.06, 0.056), (-0.34, -0.18, 0.056), (-0.16, -0.32, 0.056), (0.08, -0.34, 0.056),
+          (0.30, -0.24, 0.056), (0.40, -0.04, 0.060), (0.34, 0.14, 0.100), (0.18, 0.24, 0.150), (-0.02, 0.26, 0.162),
+          (-0.18, 0.16, 0.162), (-0.22, -0.04, 0.162), (-0.12, -0.18, 0.164), (0.06, -0.18, 0.176), (0.16, -0.06, 0.206),
+          (0.08, 0.08, 0.250), (-0.06, 0.14, 0.262)]
 
 
 def construire():
     a = K.Animal("anaconda")
     a.taille = 4.50
 
-    # ----- le corps : une grosse boucle de boudin posée à plat (trois tours qui s'étagent), qui s'élève en cou à la fin -----
-    pts = []
-    for k in range(0, 71):
-        u = k / 70.0
-        ang = 2 * math.pi * 2.6 * u + 0.6
-        r = 0.50 * (1.0 - 0.45 * u)
-        haut = 0.095 + 0.100 * min(u * 3.0, 1.0) * 0 + 0.150 * u * 0.0
-        z = 0.095 + 0.130 * (min(u, 0.90) / 0.90) ** 1.1
-        pts.append((r * math.cos(ang), r * math.sin(ang), z))
-    # le cou : il quitte la boucle et monte en S vers la tête
-    x0, y0, z0 = pts[-1]
-    sortie = np.array([-math.sin(2 * math.pi * 2.6 + 0.6), math.cos(2 * math.pi * 2.6 + 0.6), 0.0])
-    cou = [(x0 + sortie[0] * 0.08, y0 + sortie[1] * 0.08, z0 + 0.03), (x0 + sortie[0] * 0.16, y0 + sortie[1] * 0.16, z0 + 0.12),
-           (x0 + sortie[0] * 0.22, y0 + sortie[1] * 0.22, z0 + 0.25), (x0 + sortie[0] * 0.20, y0 + sortie[1] * 0.20, z0 + 0.38),
-           (x0 + sortie[0] * 0.12, y0 + sortie[1] * 0.12, z0 + 0.48), (x0 + sortie[0] * 0.02, y0 + sortie[1] * 0.02, z0 + 0.56)]
-    chemin = pts + cou
-    gros = lambda t: 0.105 - 0.026 * max(0.0, (t - 0.72) / 0.28) ** 1.2 - 0.088 * max(0.0, (0.14 - t) / 0.14) ** 1.3
-    queue = [(0.50 * 0.99 * math.cos(0.6) + 0.02, 0.50 * math.sin(0.6) + 0.04, 0.060)]
-    a.piece("corps", serpent(chemin, gros, 16), None, poil=False)
-    fin = Vector(chemin[-1])
-    a.tete = fin + Vector((0.0, -0.14, 0.04))
+    # ----- le corps : un gros boudin olive à grandes taches charbon cernées de crème, en boucles lâches et irrégulières -----
+    ch = np.asarray([tuple(q) for q in A.courbe(propres(CHEMIN), 8)], float)
+    fait = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(ch, axis=0), axis=1))])
+    n = max(32, int(fait[-1] / 0.010))
+    u = np.linspace(0.0, 1.0, n)
+    ch = np.stack([np.interp(u * fait[-1], fait, ch[:, k]) for k in range(3)], axis=1)
+    corps = A.tube(ch, rayon, 24)
+    p = np.asarray(corps.v, float)
+    grand = mouchetures(p, 0.150, 0.055, 4)
+    cerne = mouchetures(p, 0.150, 0.070, 4)
+    petit = mouchetures(p + 0.07, 0.100, 0.020, 9, 0.5)
+    t = np.tile(OLIVE, (len(p), 1))
+    t[cerne] = ANNEAU
+    t[grand] = TACHE
+    t[petit & ~cerne] = TACHE
+    corps.teinte = t
+    a.piece("corps", corps, None, poil=False)
+    fin = Vector(ch[-1])
+    sens = Vector(ch[-1] - ch[-9]).normalized()
 
-    # ----- la tête : un coin plat, large derrière, le museau rond, tournée de trois quarts vers nous -----
-    dirige = Vector((math.sin(math.radians(LACET)), -math.cos(math.radians(LACET)), -0.10)).normalized()
-    H = A.cadre(fin + Vector((0, 0, 0.040)) + dirige * 0.050, dirige, Vector((0, 0, 1)))
-    H3 = H.to_3x3()
-
-    def tete_f(v):
-        s = v.copy()
-        z = v[:, 2]
-        s[:, 0] *= 0.55 + 0.45 * K.lisse((0.35 - z) / 0.9)
-        s[:, 1] *= 0.55
-        return s
-    tete = A.tour(A.profil([(0, 0), (0.078, 0.010), (0.130, 0.065), (0.134, 0.150), (0.108, 0.235), (0.080, 0.300), (0.052, 0.345), (0, 0.370)], 6), 44)
-    tete.teinte = np.tile(np.asarray(BRONZE, float), (len(tete.v), 1))
-    tete.teinte[tete.v[:, 1] < -0.040] = ANNEAU
-    a.piece("tete", tete.sculpte(tete_f), None, mat=H, poil=False)
-
-    # ----- les yeux : deux petites billes d'or, haut sur les côtés, une fente de feutrine noire dessus ; les narines -----
-    centre = H @ Vector((0, 0, 0.200))
+    # ----- la tête : plate et large, en coin arrondi, posée sur la boucle du dessus ; narines sur le dessus ; yeux d'or -----
+    T = A.cadre(fin + sens * 0.050 + Vector((0, 0, 0.004)), sens, Vector((0, 0, 1)))
+    T3 = T.to_3x3()
+    tete = A.boule(1.0, 56, 28)
+    tete.teinte = np.where((tete.v[:, 1] < -0.15)[:, None], VENTRE, OLIVE)
+    a.piece("tete", tete.etire(0.062, 0.036, 0.098), None, mat=T, poil=False)
+    a.tete = T @ Vector((0, 0.0, 0.080))
     for nom, c in (("G", 1), ("D", -1)):
-        vers = H3 @ Vector((c * 0.82, 0.54, 0.0))
-        p, n = a.surface("tete", centre, vers)
-        a.piece("bille_" + nom, A.boule(1.0, 20, 10).etire(0.034, 0.034, 0.020), OR, mat=A.cadre(p + n * 0.0015, n), poil=False)
-        a.bouton("oeil_" + nom, p + n * 0.005, n, 0.017)
-        a.piece("narine_" + nom, A.boule(1.0, 16, 8).etire(0.010, 0.010, 0.006), OCELLE, mat=A.cadre(H @ Vector((c * 0.052, 0.056, 0.325)), H3 @ Vector((c * 0.2, 0.9, 0.3))), poil=False)
-
-    # ----- la langue : fourchue, qui sort entre les lèvres et goûte l'air ; la gueule : un trait de bouche brodé -----
-    base = H @ Vector((0, -0.020, 0.368))
-    tige = [base, base + H3 @ Vector((0, -0.005, 0.040)), base + H3 @ Vector((0, 0.000, 0.080))]
-    a.piece("langue", A.tube(A.courbe([tuple(q) for q in tige], 4), 0.0075, 8), ROSE, poil=False)
-    for c in (1, -1):
-        fourche = [tige[-1], tige[-1] + H3 @ Vector((c * 0.018, 0.004, 0.030))]
-        a.piece("fourche_" + ("G" if c > 0 else "D"), A.tube([tuple(q) for q in fourche], 0.0055, 8), ROSE, poil=False)
-    for c in (1, -1):
-        bouche = [H3 @ Vector(d) for d in ((c * 0.10, -0.30, 0.95), (c * 0.58, -0.40, 0.65), (c * 0.88, -0.28, 0.20))]
-        a.broderie("bouche_" + ("G" if c > 0 else "D"), A.courbe(propres(a.trace("tete", centre, bouche, 0.002)), 4), 0.0030, OCELLE)
+        vers = T3 @ Vector((c * 0.82, 0.54, 0.22))
+        pe, ne = a.surface("tete", T.to_translation(), vers)
+        a.piece("bille_" + nom, A.boule(1.0, 20, 10).etire(0.026, 0.026, 0.016), OR, mat=A.cadre(pe + ne * 0.0015, ne), poil=False)
+        a.bouton("oeil_" + nom, pe + ne * 0.004, ne, 0.0125)
+        a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.008, 0.008, 0.005), NOIR, mat=A.cadre(T @ Vector((c * 0.026, 0.034, 0.080)), T3 @ Vector((c * 0.2, 0.9, 0.3))), poil=False)
+    base = T @ Vector((0, -0.005, 0.094))
+    tige = [tuple(base), tuple(base + T3 @ Vector((0, -0.004, 0.040))), tuple(base + T3 @ Vector((0, 0.0, 0.080)))]
+    a.piece("langue", A.tube(A.courbe(propres(tige), 4), 0.0065, 8), ROSE, poil=False)
+    for c, nom in ((1, "G"), (-1, "D")):
+        fourche = [Vector(tige[-1]), Vector(tige[-1]) + T3 @ Vector((c * 0.018, 0.004, 0.030))]
+        a.piece("fourche_" + nom, A.tube([tuple(q) for q in fourche], 0.0050, 8), ROSE, poil=False)
     return a
 
 
