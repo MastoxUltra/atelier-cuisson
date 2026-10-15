@@ -85,8 +85,8 @@ def construire():
         cen, av, nq = (Vector(q) for q in fil.cadre(0.875 * L))
         cote = nq.cross(av)
         base = cen + cote * (c * CORPS(0.875) * 0.95) + nq * 0.012
-        axe = cote * (c * 1.0) + av * (-0.30) + nq * 0.65             # en éventail, relevées : les trois panaches se voient des deux côtés
-        a.piece("branchies_" + nm, O.plumes(base, axe, nq, n=3, long=0.150, ray=0.0140, couleur=tuple(CORAIL), filaments=8), None, poil=False)
+        axe = cote * (c * 0.85) + av * (-0.25) + nq * 0.55             # en éventail, relevées : les trois panaches se voient des deux côtés
+        a.piece("branchies_" + nm, O.plumes(base, axe, av, n=3, long=0.150, ray=0.0140, couleur=tuple(CORAIL), filaments=8), None, poil=False)
         for pos_f, nom in ((0.765, "avant"), (0.360, "arriere")):
             cn, avn, nqn = (Vector(q) for q in fil.cadre(pos_f * L))
             cn2 = nqn.cross(avn)
