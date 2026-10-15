@@ -66,29 +66,24 @@ def construire():
     t[masque] = CHARBON
     t[(zz < -0.45) & front] = CLAIR
     tete.teinte = t
-    RT = A.repere(TETE, (6, 0, 40))
-    a.piece("tete", tete.etire(0.140, 0.125, 0.108), None, mat=RT)
-    museau = A.tour(A.profil([(0.070, 0), (0.060, 0.030), (0.044, 0.068), (0.026, 0.100), (0, 0.118)], 4), 28).etire(1.0, 0.84, 1.0)
-    a.piece("museau", O.couche(O.teinte(museau, CLAIR), RT @ A.cadre(Vector((0.0, -0.095, -0.028)), (0.0, -1.0, -0.14), (0, 1, 0))), None)
-    a.piece("nez", A.boule(1.0, 14, 8).etire(0.018, 0.015, 0.014), NEZ, mat=RT @ A.repere((0.0, -0.212, -0.048)), poil=False)
-    O.paire_yeux(a, "tete", TETE, (0.60, -0.76, 0.14), 0.0190, couleur_lourde=tuple(CHARBON), coupe=0.10, decolle=0.003)
+    RT = A.repere(TETE, (6, 0, 12))
+    a.piece("tete", tete.etire(0.118, 0.106, 0.092), None, mat=RT)
+    museau = A.tour(A.profil([(0.062, 0), (0.058, 0.024), (0.050, 0.052), (0.036, 0.078), (0.016, 0.094), (0, 0.098)], 5), 28).etire(1.0, 0.86, 1.0)
+    a.piece("museau", O.couche(O.teinte(museau, CLAIR), RT @ A.cadre(Vector((0.0, -0.082, -0.024)), (0.0, -1.0, -0.14), (0, 1, 0))), None)
+    a.piece("nez", A.boule(1.0, 14, 8).etire(0.016, 0.013, 0.012), NEZ, mat=RT @ A.repere((0.0, -0.182, -0.041)), poil=False)
+    O.paire_yeux(a, "tete", TETE, (0.60, -0.76, 0.14), 0.0165, couleur_lourde=tuple(CHARBON), coupe=0.10, decolle=0.003, R=RT)
     # le masque creusé autour des yeux : une collerette noire en relief et, au-dessus, un fil crème qui souligne le sourcil
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", TETE, Vector((c * 0.60, -0.76, 0.14)))
-        a.piece("cerne_" + nom, A.tore(0.0290, 0.0085, 28, 8), tuple(CHARBON * 0.8), mat=A.cadre(pos + n * 0.001, n), poil=False)
+        pos, n = a.surface("tete", TETE, RT.to_3x3() @ Vector((c * 0.60, -0.76, 0.14)))
+        a.piece("cerne_" + nom, A.tore(0.0250, 0.0075, 28, 8), tuple(CHARBON * 0.8), mat=A.cadre(pos + n * 0.001, n), poil=False)
         arc = [Vector((c * (0.34 + 0.34 * u_), -0.80 + 0.12 * u_, 0.40 + 0.06 * math.sin(math.pi * u_))) for u_ in np.linspace(0, 1, 8)]
-        O.broder(a, "sourcil_" + nom, "tete", TETE, [tuple(d) for d in arc], 0.0030, tuple(CLAIR), decolle=0.004)
+        O.broder(a, "sourcil_" + nom, "tete", TETE, [tuple(d) for d in arc], 0.0030, tuple(CLAIR), decolle=0.004, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
-        ore = A.boule(1.0, 24, 12).etire(0.048, 0.020, 0.052)
-        a.piece("oreille_" + nom, O.teinte(ore, POIVRE), None, mat=RT @ A.repere((c * 0.100, 0.006, 0.108), (0, c * 16, 0)))
-        our = A.boule(1.0, 20, 10).etire(0.034, 0.014, 0.038)
-        a.piece("ourlet_" + nom, O.teinte(our, CLAIR), None, mat=RT @ A.repere((c * 0.098, -0.008, 0.112), (0, c * 16, 0)), poil=False)
-        for k in range(3):                                                      # les favoris : des petites pointes claires sur les joues
-            fav = O.pointe(0.052, 0.012, 8)
-            d = Vector((c * (0.80 + 0.10 * k), -0.20, -0.40 - 0.25 * k)).normalized()
-            a.piece("favori_%s%d" % (nom, k), O.couche(O.teinte(fav, CLAIR), RT @ A.cadre(Vector((c * 0.118, -0.040 - 0.010 * k, -0.045 - 0.020 * k)), d, (0, 0, 1))),
-                    None, poil=False)
-    O.broder(a, "sourire", "tete", TETE, [(0.30 * u_ + 0.08, -0.97, -0.40 + 0.12 * u_ * u_) for u_ in np.linspace(-1, 1, 9)], 0.0022, FIL, decolle=0.003)
+        ore = A.tour(A.profil([(0.040, 0), (0.036, 0.020), (0.024, 0.048), (0.010, 0.068), (0, 0.076)], 4), 20).etire(1.0, 0.50, 1.0)
+        a.piece("oreille_" + nom, O.couche(O.teinte(ore, POIVRE), RT @ A.cadre(Vector((c * 0.080, 0.010, 0.080)), Vector((c * 0.50, 0.10, 1.0)), (0, 1, 0))), None)
+        our = A.tour(A.profil([(0.030, 0), (0.026, 0.016), (0.017, 0.040), (0.007, 0.057), (0, 0.064)], 4), 18).etire(1.0, 0.42, 1.0)
+        a.piece("ourlet_" + nom, O.couche(O.teinte(our, CLAIR), RT @ A.cadre(Vector((c * 0.080, -0.002, 0.082)), Vector((c * 0.50, 0.10, 1.0)), (0, 1, 0))), None, poil=False)
+    O.broder(a, "sourire", "tete", TETE, [(0.30 * u_ + 0.08, -0.97, -0.40 + 0.12 * u_ * u_) for u_ in np.linspace(-1, 1, 9)], 0.0022, FIL, decolle=0.003, R=RT)
     a.tete = TETE + Vector((0.12, -0.14, 0.0))
 
     # ----- les mains qui se frottent : deux avant-bras courts qui se rejoignent, des doigts en trait ; les cuisses, les pieds -----
@@ -113,7 +108,7 @@ def construire():
         a.piece("pied_" + nom, pied, None, pos=(c * 0.140, -0.130, 0.028), rot=(0, 0, c * -12), poil=False)
 
     # ----- la queue : un énorme panache annelé, plus haut que lui, qui s'enroule dans son dos ; sept bagues et le bout noir -----
-    chemin = [(0.0, 0.220, 0.100), (0.0, 0.440, 0.050), (0.0, 0.640, 0.170), (0.0, 0.640, 0.420), (0.0, 0.490, 0.610), (0.02, 0.330, 0.690)]
+    chemin = [(0.0, 0.220, 0.130), (0.0, 0.440, 0.110), (0.0, 0.640, 0.190), (0.0, 0.640, 0.420), (0.0, 0.490, 0.610), (0.02, 0.330, 0.690)]
     paliers = []
     for k in range(8):
         paliers.append(((k + 1) / 8, POIVRE * 1.05 if k % 2 == 0 else CHARBON))

@@ -66,13 +66,13 @@ def construire():
     museau = A.boule(1.0, 28, 14).etire(0.060, 0.054, 0.044)
     a.piece("museau", O.teinte(museau, BLANC), None, mat=RT @ A.repere((0.0, -0.100, -0.036)))
     a.piece("nez", A.boule(1.0, 16, 8).etire(0.022, 0.016, 0.014), NEZ, mat=RT @ A.repere((0.0, -0.148, -0.020)), poil=False)
-    O.paire_yeux(a, "tete", TETE, (0.50, -0.82, 0.22), 0.0185, couleur_lourde=tuple(BLANC), coupe=0.05, decolle=0.003)
+    O.paire_yeux(a, "tete", TETE, (0.50, -0.82, 0.22), 0.0185, couleur_lourde=tuple(BLANC), coupe=0.05, decolle=0.003, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.tour(A.profil([(0.050, 0), (0.044, 0.030), (0.026, 0.070), (0.009, 0.095), (0, 0.104)], 4), 22).etire(1.0, 0.45, 1.0)
         a.piece("oreille_" + nom, O.couche(O.teinte(ore, CANNELLE), RT @ A.cadre(Vector((c * 0.100, 0.010, 0.082)), (c * 0.45, 0.10, 1.0), (0, 1, 0))), None)
         our = A.tour(A.profil([(0.036, 0), (0.030, 0.026), (0.016, 0.060), (0.005, 0.082), (0, 0.090)], 4), 20).etire(1.0, 0.40, 1.0)
         a.piece("ourlet_" + nom, O.couche(O.teinte(our, BLANC), RT @ A.cadre(Vector((c * 0.100, -0.006, 0.086)), (c * 0.45, 0.10, 1.0), (0, 1, 0))), None, poil=False)
-    O.broder(a, "bouche", "museau", RT @ Vector((0, -0.100, -0.036)), [(0.46 * u_, -0.82, -0.50 + 0.08 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0020, FIL)
+    O.broder(a, "bouche", "museau", RT @ Vector((0, -0.100, -0.036)), [(0.46 * u_, -0.82, -0.50 + 0.08 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0020, FIL, R=RT)
     a.tete = TETE + Vector((0.0, -0.17, 0.0))
 
     # ----- les bras : levés à demi, les coudes au dehors, de grosses pattes sombres aux trois griffes ; les jambes courtes -----

@@ -74,8 +74,15 @@ def construire():
         s[:, 0] *= 1 - 0.18 * np.clip(v[:, 2] / 0.300, 0, 1)
         return s
     bec = A.tour(A.profil([(0, 0), (0.048, 0.010), (0.066, 0.060), (0.068, 0.130), (0.056, 0.210), (0.036, 0.270), (0.014, 0.300), (0, 0.308)], 6), 40)
-    K.bandes(bec, [(0.115, CITRON), (0.215, ORANGE), (0.272, ROUGE), (9, NOIR)])
+    # les couleurs se fondent l'une dans l'autre (citron, orange, rouge) et la pointe noire est nette : plus de bandes dures
+    zz = bec.v[:, 2] / 0.308
+    cles = [0.0, 0.14, 0.46, 0.84, 0.90, 0.93, 1.0]
+    palette = [CITRON, CITRON, ORANGE, ROUGE, ROUGE, NOIR, NOIR]
+    bec.teinte = np.stack([np.interp(zz, cles, [c[k] for c in palette]) for k in range(3)], axis=1)
     a.piece("bec", bec.etire(0.82, 1.0, 1.0).sculpte(courbe_), None, mat=B, poil=False)
+    # la mandibule : plus courte et plus fine, sous le bec, d'un rouge orangé
+    bas = A.tour(A.profil([(0, 0), (0.036, 0.008), (0.046, 0.060), (0.040, 0.140), (0.024, 0.215), (0.008, 0.262), (0, 0.272)], 6), 36)
+    a.piece("mandibule", bas.etire(0.76, 0.55, 1.0).sculpte(courbe_), ORANGE, mat=B @ A.repere((0, -0.044, 0.006)), poil=False)
 
     # ----- les ailes : deux galets noirs plaqués sur les flancs, la pointe qui croise sur la queue -----
     for nom, c in (("G", 1), ("D", -1)):
@@ -125,7 +132,7 @@ OS = [
 ]
 
 PORTEURS = [
-    ('oeil_reflet', 'tete'), ('sous_queue', 'corps'), ('orteils', 'patte_av', True), ('lourde', 'tete'),
+    ('oeil_reflet', 'tete'), ('sous_queue', 'corps'), ('orteils', 'patte_av', True), ('lourde', 'tete'), ('mandibule', 'tete'),
     ('corps', 'corps'), ('cerne', 'tete'), ('queue', 'queue'), ('patte', 'patte_av', True), ('tete', 'tete'),
     ('oeil', 'tete'), ('aile', 'aile', True), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'),
     ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),

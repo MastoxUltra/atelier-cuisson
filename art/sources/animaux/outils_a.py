@@ -149,12 +149,14 @@ def nageoire(contour, ep, couleur, casse=0.010):
     return teinte(m, couleur)
 
 
-def paire_yeux(a, piece, centre, direction_g, rayon, fermee=None, couleur_lourde=None, coupe=0.05, haut=(0, 0, 1), decolle=0.002, nom="oeil", vivant=True):
+def paire_yeux(a, piece, centre, direction_g, rayon, fermee=None, couleur_lourde=None, coupe=0.05, haut=(0, 0, 1), decolle=0.002, nom="oeil", vivant=True, R=None):
     """Deux yeux symétriques (bouton : le style en fait un bouton à croix, un œil de feutrine ou une bille de verre).
     direction_g : où viser, depuis centre, pour l'œil gauche (+X) ; le droit est son miroir sur X.
     couleur_lourde : si donnée, une paupière lourde de cette couleur ; coupe : sa coupe (0 : à moitié fermé)."""
     for suffixe, c in (("_G", 1), ("_D", -1)):
         d = Vector((c * direction_g[0], direction_g[1], direction_g[2]))
+        if R is not None:                                                    # la tête est tournée : les yeux restent symétriques DANS elle
+            d = R.to_3x3() @ d
         pos, n = a.surface(piece, centre, d)
         if vivant:
             a.oeil(nom + suffixe, pos + n * decolle, n, rayon)                 # un œil vivant de feutrine, avec son reflet
@@ -166,8 +168,11 @@ def paire_yeux(a, piece, centre, direction_g, rayon, fermee=None, couleur_lourde
             a.piece("lourde" + suffixe, K.paupiere(rayon, coupe), tuple(couleur_lourde), mat=A.cadre(pos + n * decolle, n, h), poil=False)
 
 
-def broder(a, nom, piece, centre, directions, rayon, couleur, decolle=0.003, lisse=4):
-    pts = a.trace(piece, centre, [Vector(d) for d in directions], decolle)
+def broder(a, nom, piece, centre, directions, rayon, couleur, decolle=0.003, lisse=4, R=None):
+    ds = [Vector(d) for d in directions]
+    if R is not None:
+        ds = [R.to_3x3() @ d for d in ds]
+    pts = a.trace(piece, centre, ds, decolle)
     if len(pts) >= 2:
         a.broderie(nom, A.courbe(pts, lisse), rayon, couleur)
     return pts

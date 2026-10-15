@@ -59,11 +59,11 @@ def construire():
     a.piece("nez", O.teinte(nez, MUFLE), None, mat=RT @ A.repere((0.0, -0.152, -0.008)))
     for c in (1, -1):
         a.piece("narine_%d" % c, A.boule(1.0, 12, 6).etire(0.017, 0.012, 0.012), NEZ, mat=RT @ A.repere((c * 0.038, -0.206, 0.028)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.86, -0.38, 0.36), 0.0160, couleur_lourde=tuple(SABLE * 0.94), coupe=0.10, decolle=0.002)
+    O.paire_yeux(a, "tete", H, (0.86, -0.38, 0.36), 0.0160, couleur_lourde=tuple(SABLE * 0.94), coupe=0.10, decolle=0.002, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 20, 10).etire(0.028, 0.014, 0.030)
         a.piece("oreille_" + nom, O.teinte(ore, SABLE * 0.88), None, mat=RT @ A.repere((c * 0.074, 0.060, 0.094)))
-    O.broder(a, "bouche", "nez", RT @ Vector((0, -0.152, -0.008)), [(0.62 * u_, -0.80, -0.34 + 0.06 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0024, FIL)
+    O.broder(a, "bouche", "nez", RT @ Vector((0, -0.152, -0.008)), [(0.62 * u_, -0.80, -0.34 + 0.06 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0024, FIL, R=RT)
     a.tete = H + Vector((0.0, -0.20, 0.0))
 
     # ----- les pattes courtes et fortes, les pieds palmés à gros doigts ; pas de queue -----

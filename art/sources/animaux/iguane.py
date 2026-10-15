@@ -33,7 +33,7 @@ CHEMIN = [(0.30, 0.86, 0.020), (0.22, 0.76, 0.026), (0.10, 0.64, 0.036), (-0.02,
           (0.00, 0.16, 0.130), (0.00, 0.04, 0.150), (0.00, -0.08, 0.168), (0.00, -0.18, 0.190), (0.00, -0.26, 0.235),
           (0.00, -0.32, 0.290), (0.00, -0.38, 0.340), (0.00, -0.45, 0.372), (0.00, -0.53, 0.378)]
 CORPS = O.interp([(0.0, 0.0), (0.02, 0.006), (0.10, 0.016), (0.30, 0.030), (0.46, 0.048), (0.60, 0.070), (0.72, 0.078),
-                  (0.80, 0.062), (0.87, 0.058), (0.93, 0.066), (0.975, 0.056), (0.99, 0.038), (1.0, 0.0)])
+                  (0.79, 0.058), (0.85, 0.046), (0.89, 0.052), (0.925, 0.066), (0.950, 0.064), (0.972, 0.050), (0.988, 0.036), (0.998, 0.022), (1.0, 0.0)])
 
 
 def construire():
@@ -56,21 +56,26 @@ def construire():
         def g(v):
             s = v.copy()
             fr = v[:, 2] / L
-            h = np.clip((fr - 0.90) / 0.05, 0.0, 1.0)
+            h = np.clip((fr - 0.885) / 0.045, 0.0, 1.0)                 # la tête : large derrière (les mâchoires), plate dessus
             h = h * h * (3 - 2 * h)
-            s[:, 0] *= 1.0 + 0.22 * h
-            s[:, 1] *= 1.0 - 0.10 * h
+            s[:, 0] *= 1.0 + 0.34 * h
+            s[:, 1] *= 1.0 - 0.30 * h
+            pt = np.clip((fr - 0.955) / 0.045, 0.0, 1.0)                # le museau : un coin qui s'effile
+            s[:, 0] *= 1.0 - 0.18 * pt
             return s
         return g
     fil, L = O.fil_corps(a, "corps", CHEMIN, CORPS, peint, None, cotes=34, flanc=(1.0, 0.0, 0.0), deforme=tete)
 
     # ----- la crête : des pointes ocre le long du dos, de la nuque jusque dans la queue, les plus hautes sur le cou -----
     crete = None
-    for k, f in enumerate(np.linspace(0.40, 0.955, 24)):
+    for k, f in enumerate(np.linspace(0.30, 0.90, 24)):
         c, av, nq = (Vector(q) for q in fil.cadre(f * L))
-        h = 0.020 + 0.034 * math.exp(-((f - 0.82) / 0.13) ** 2)
-        base = c + nq * (CORPS(f) * 0.88)
-        p = O.couche(O.teinte(O.pointe(h, 0.0075, 8), OCRE), A.cadre(base, nq * 1.0 + av * 0.55, nq.cross(av)))
+        h = 0.034 + 0.058 * math.exp(-((f - 0.80) / 0.17) ** 2)         # des plaques triangulaires, les plus hautes sur la nuque
+        base = c + nq * (CORPS(f) * 0.80)
+        tri = [(-0.013, 0.0), (0.013, 0.0), (0.006, h * 0.50), (0.008 + 0.08 * h, h), (-0.004, h * 0.50)]
+        pl = A.decoupe(tri, 0.0075, 0.0030)
+        pl.teinte = np.tile(OCRE, (len(pl.v), 1))
+        p = O.couche(pl, A.cadre(base, nq.cross(av), nq))
         crete = p if crete is None else crete + p
     a.piece("crete", crete, None, poil=False)
 

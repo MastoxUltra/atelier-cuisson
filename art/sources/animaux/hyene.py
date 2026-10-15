@@ -75,7 +75,7 @@ def construire():
     fil = K.Fil([(0.0, y, z) for y, z in ((0.500, 0.520), (0.320, 0.570), (0.060, 0.650), (-0.180, 0.730), (-0.340, 0.760))], (1, 0, 0))
     L = fil.long
     corps = fuseau([(0.0, 0.0), (0.04, 0.110), (0.15, 0.170), (0.45, 0.190), (0.72, 0.215), (0.92, 0.205), (1.0, 0.0)], L, 72)
-    tacheter(corps, 4, 70, 0.055, TACHE, GRIS, ventre=lambda v: (np.abs(np.arctan2(v[:, 0], v[:, 1])) > 2.6))
+    tacheter(corps, 4, 190, 0.030, TACHE, GRIS, ventre=lambda v: (np.abs(np.arctan2(v[:, 0], v[:, 1])) > 2.6))
     a.piece("corps", corps.sculpte(fil.couche), None)
     # la crinière : une brosse hérissée le long de l'échine, de la nuque au milieu du dos
     crin = None

@@ -90,9 +90,9 @@ def construire():
     # ----- les yeux : grands, ronds, d'ambre, sous deux trait de rayure brodés qui tombent vers le nez -----
     for nom, c in (("G", 1), ("D", -1)):
         regard = T3 @ Vector((c * 0.50, -0.82, 0.18))
-        a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.30, OEIL, 0.003, 0)
+        a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.36, OEIL, 0.003, 0)
         p, n = a.surface("tete", T.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0185)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0215)
         brow = [T3 @ Vector((c * (0.18 + 0.36 * t), -0.94 + 0.16 * t, 0.26 + 0.10 * t)) for t in np.linspace(0, 1, 5)]
         a.broderie("sourcil_" + nom, propres(a.trace("tete", T.to_translation(), brow, 0.004)), 0.0030, CHOCOLAT)
         E = A.cadre(T @ Vector((c * 0.080, 0.040, 0.070)), T3 @ Vector((c * 0.30, 0.22, 0.93)), T3 @ Vector((c * 0.4, -0.9, 0.0)))

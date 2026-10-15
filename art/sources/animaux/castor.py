@@ -90,7 +90,7 @@ def construire():
         a.piece("dent_" + nom_d, dent, M.hexa("#efdcb0"), mat=RT @ A.repere((loc.x + c * 0.0075, loc.y + 0.0015, loc.z - 0.0062), (-6, 0, c * -3)), poil=False)
 
     # les yeux : petits, vivants, sous un sourcil lourd ; les petites oreilles rondes, sombres
-    O.paire_yeux(a, "tete", TETE, (0.52, -0.80, 0.20), 0.0165, couleur_lourde=tuple(MARRON), coupe=0.14, decolle=0.003)
+    O.paire_yeux(a, "tete", TETE, (0.52, -0.80, 0.20), 0.0175, decolle=0.003, R=RT)          # ouverts, sans paupière lourde (l'air triste du contrôleur)
     for nom, c in (("G", 1), ("D", -1)):
         oreille = A.boule(1.0, 24, 12).etire(0.034, 0.016, 0.036)
         a.piece("oreille_" + nom, O.teinte(oreille, CHARBON), None, mat=RT @ A.repere((c * 0.104, 0.012, 0.100), (0, c * 18, 0)))
@@ -125,8 +125,8 @@ def construire():
     def losanges(m):
         x, y = m.v[:, 0], m.v[:, 1]
         g = (np.sin((x + y) * 38) > 0.62) | (np.sin((x - y) * 38) > 0.62)
-        t = np.tile(CHARBON, (len(x), 1))
-        t[g] = CHARBON * 0.45 + MARRON * 0.55
+        t = np.tile(CHARBON * 0.92, (len(x), 1))
+        t[g] = CHARBON * 1.55
         r = np.hypot(x / 0.190, y / 0.340)
         t[r > 0.86] = CHARBON * 0.6                                       # le bord, plus sombre
         m.teinte = t

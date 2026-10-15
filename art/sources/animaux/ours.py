@@ -73,13 +73,22 @@ def construire():
     mach = A.boule(1.0, 32, 16).sculpte(lambda v: K.emousse(v, 0.6)).etire(0.062, 0.122, 0.034)
     a.piece("machoire", O.teinte(mach, CLAIR * 0.9), None, mat=jaune @ A.repere((0.0, -0.118, -0.010)))
     a.piece("langue", A.boule(1.0, 20, 8).etire(0.032, 0.080, 0.010), LANGUE, mat=jaune @ A.repere((0.0, -0.125, 0.014)), poil=False)
+    # les crocs : chaque base est PLANTÉE dans la peau (le point de surface cherché au rayon), sans le moindre jour
+    MUZ = RT @ A.repere((0.0, -0.188, -0.034), (-8, 0, 0))
+    JAW = jaune @ A.repere((0.0, -0.118, -0.010))
+    bas_m = (MUZ.to_3x3() @ Vector((0.0, 0.0, -1.0))).normalized()
+    haut_j = (JAW.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
     for c in (1, -1):
-        haut_ = O.pointe(0.040, 0.0100, 8)
-        a.piece("croc_haut_%d" % c, O.couche(O.teinte(haut_, np.array(DENT)), RT @ A.cadre(Vector((c * 0.040, -0.282, -0.082)), (0.0, 0.10, -1.0), (0, 1, 0))), None, poil=False)
-        bas_ = O.pointe(0.034, 0.0092, 8)
-        a.piece("croc_bas_%d" % c, O.couche(O.teinte(bas_, np.array(DENT)), jaune @ A.cadre(Vector((c * 0.036, -0.205, 0.016)), (0.0, -0.10, 1.0), (0, 1, 0))), None, poil=False)
+        pu, nu = a.surface("museau", MUZ @ Vector((c * 0.046, -0.085, 0.0)), bas_m)
+        dir_u = (bas_m + (RT.to_3x3() @ Vector((0.0, -0.10, 0.0)))).normalized()
+        haut_ = O.pointe(0.046, 0.0105, 8)
+        a.piece("croc_haut_%d" % c, O.couche(O.teinte(haut_, np.array(DENT)), A.cadre(pu - dir_u * 0.011, dir_u, (0, 1, 0))), None, poil=False)
+        pb, nb = a.surface("machoire", JAW @ Vector((c * 0.034, -0.030, 0.0)), haut_j)
+        dir_b = (haut_j + (RT.to_3x3() @ Vector((0.0, -0.10, 0.0)))).normalized()
+        bas_ = O.pointe(0.038, 0.0095, 8)
+        a.piece("croc_bas_%d" % c, O.couche(O.teinte(bas_, np.array(DENT)), A.cadre(pb - dir_b * 0.010, dir_b, (0, 1, 0))), None, poil=False)
     # de petits yeux enfoncés sous une lourde paupière : le regard noir
-    O.paire_yeux(a, "tete", H, (0.62, -0.74, 0.20), 0.0145, couleur_lourde=tuple(NOISETTE * 0.9), coupe=0.30, decolle=-0.001)
+    O.paire_yeux(a, "tete", H, (0.62, -0.74, 0.20), 0.0160, couleur_lourde=tuple(NOISETTE * 0.9), coupe=0.18, decolle=0.001, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 24, 12).etire(0.040, 0.026, 0.040)
         a.piece("oreille_" + nom, O.teinte(ore, NOISETTE * 0.9), None, mat=RT @ A.repere((c * 0.150, 0.050, 0.092)))

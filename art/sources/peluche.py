@@ -386,6 +386,16 @@ def _jardin(bas, haut):
     h.habiller({"gazon": M.gazon()})
 
 
+def fusion_demandee(module=None):
+    """La base fusionnée (fusion.py), ÉTEINTE par défaut : « fusion » sur la ligne de commande, BIBELOTS_FUSION=1, ou
+    FUSION = True dans le fichier de la bête ; « sans-fusion » l'éteint toujours."""
+    if "sans-fusion" in sys.argv:
+        return False
+    if "fusion" in sys.argv[1:] or os.environ.get("BIBELOTS_FUSION") == "1":
+        return True
+    return bool(getattr(module, "FUSION", False))
+
+
 def planche(construire, titre=None):
     """La fiche d'un animal, rendue à son tour : un seul calcul à la fois sur la machine, jamais pendant un jeu
     ni à chaud (voir machine.py). L'attente peut durer plusieurs minutes : ce n'est pas une panne."""
@@ -399,6 +409,10 @@ def _planche(construire, titre=None):
     from PIL import Image, ImageDraw, ImageFont
     A.neuf()
     a = construire()
+    if fusion_demandee(sys.modules.get("__main__")):         # éteinte par défaut : voir fusion.py
+        import fusion
+        fusion.symetriser(a)
+        fusion.fusionner(a)
     a.monter()
     bas, haut = a.boite()
     _jardin(bas, haut)

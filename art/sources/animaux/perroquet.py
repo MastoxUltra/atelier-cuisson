@@ -111,7 +111,7 @@ def construire():
     def crochet(v):
         s = v.copy()
         z = np.clip(v[:, 2] / 0.122, 0, 1)
-        s[:, 1] += 0.070 * z ** 1.8                                                 # la pointe se recourbe vers le bas
+        s[:, 1] += 0.092 * z ** 1.8                                                 # la pointe se recourbe vers le bas
         return s
     haut = A.tour(A.profil([(0, 0), (0.056, 0.010), (0.062, 0.040), (0.052, 0.074), (0.032, 0.100), (0.012, 0.116), (0, 0.122)], 6), 36)
     a.piece("bec", haut.etire(1.0, 1.15, 1.45).sculpte(crochet), IVOIRE, mat=B, poil=False)

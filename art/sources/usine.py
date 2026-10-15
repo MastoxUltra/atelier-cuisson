@@ -6,6 +6,8 @@
     python usine.py canard style=B      dans un autre style que celui de l'espèce (A cousu main, B peluche de magasin,
                                         C velours ras : voir styles.py) ; vaut aussi pour « essai »
     python usine.py machine             dit seulement si la machine est libre et froide (rien n'est lancé)
+    python usine.py canard fusion       sur la base fusionnée (une peau d'une seule pièce, voir fusion.py) ; éteinte par
+                                        défaut, vaut aussi pour « essai » ; FUSION = True dans le fichier de la bête l'allume
 
 L'usine ménage la machine : une seule fabrication à la fois (un verrou), rien tant qu'un jeu tourne ou que la carte
 graphique est chaude, et un repos après chaque passe de cuisson. Elle attend d'elle-même, puis renonce au bout de 30 minutes.
@@ -220,6 +222,9 @@ def monter_bas(a):
         j = A.Jouet(groupe)
         j.pieces = [dict(p, matiere="cuit") for p in volumes if p["groupe"] == groupe]
         ob = j.monter()
+        if any(p.get("fusion") for p in j.pieces):           # la base fusionnée : ses pièces se soudent bord à bord
+            import fusion
+            fusion.souder(ob, j.pieces)
         if part < 0.98 and not groupe.startswith(epingle.OS_LIBRES):
             allege = ob.modifiers.new("allege", "DECIMATE")
             allege.ratio = part
@@ -478,10 +483,14 @@ def _fabriquer(nom, avec_apercus=True):
     bpy.context.scene.render.fps = 30
     style = _style()
     a = styles.construire(nom, style, module)
+    fondre = K.fusion_demandee(module)                         # la base fusionnée : éteinte par défaut (fusion.py)
+    if fondre:
+        import fusion
+        fusion.symetriser(a)
     lids = paupieres(a)
     piques = _epingles(a, module)
     k = a.a_taille()
-    global TAILLE                                              # un géant de 15 m en 2048 px est floue de près
+    global TAILLE                                             # un géant de 15 m en 2048 px est floue de près
     TAILLE = TAILLE_GEANT if (a.taille or 0.0) > GEANT else TAILLE_NORMALE
     porteurs = epingle.porteurs(piques) + list(module.PORTEURS) + [("paupiere", "paupiere", True), ("cil", "paupiere", True)]
     porter(a, porteurs)
@@ -489,6 +498,8 @@ def _fabriquer(nom, avec_apercus=True):
     groupe_de = {p["nom"]: p["groupe"] for p in a._toutes()}
     liste_os = list(module.OS) + [(n, groupe_de.get(voisine + "_G", groupe_de.get(voisine, "corps")), t) for n, voisine, t in lids]
     liste_os = tous_les_os(liste_os) + [(n, _os_de(a, piece), t) for n, piece, t in piques]
+    if fondre:
+        fusion.fusionner(a)
 
     hauts = monter_hauts(a)
     bas = monter_bas(a)
@@ -557,6 +568,10 @@ def _essayer(nom, lesquelles=()):
     module = importlib.import_module(nom)
     A.neuf()
     a = styles.construire(nom, _style(), module)
+    fondre = K.fusion_demandee(module)                         # la base fusionnée : éteinte par défaut (fusion.py)
+    if fondre:
+        import fusion
+        fusion.symetriser(a)
     lids = paupieres(a)
     piques = _epingles(a, module)
     k = a.a_taille()
@@ -564,6 +579,8 @@ def _essayer(nom, lesquelles=()):
     groupe_de = {p["nom"]: p["groupe"] for p in a._toutes()}
     liste_os = tous_les_os(list(module.OS) + [(n, groupe_de.get(voisine + "_G", groupe_de.get(voisine, "corps")), t) for n, voisine, t in lids])
     liste_os += [(n, _os_de(a, piece), t) for n, piece, t in piques]
+    if fondre:
+        fusion.fusionner(a)
     connus = {o[0] for o in liste_os}
     for p in a._toutes():
         for o in (list(p["poids"]) if p.get("poids") else [p["os"]]):
@@ -600,6 +617,6 @@ if __name__ == "__main__":
     if sys.argv[1] == "machine":
         os.system('"%s" "%s"' % (sys.executable, os.path.join(ICI, "machine.py")))
     elif "essai" in sys.argv:
-        essayer(sys.argv[1], [x for x in sys.argv[2:] if x != "essai"])
+        essayer(sys.argv[1], [x for x in sys.argv[2:] if x not in ("essai", "fusion", "sans-fusion")])
     else:
         fabriquer(sys.argv[1], "sans-apercus" not in sys.argv)

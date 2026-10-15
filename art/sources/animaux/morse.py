@@ -67,7 +67,7 @@ def construire():
         racine = H @ Vector((c * 0.040, -0.118, -0.098))
         bout = racine + H3 @ Vector((c * 0.030, -0.070, -0.250))
         D = A.cadre(racine, bout - racine, H3 @ Vector((0, -1, 0)))
-        defense = A.tour(A.profil([(0, -0.02), (0.024, 0.0), (0.022, 0.08), (0.016, 0.17), (0.007, 0.245), (0, 0.262)], 6), 28)
+        defense = A.tour(A.profil([(0, -0.02), (0.031, 0.0), (0.029, 0.08), (0.021, 0.17), (0.010, 0.245), (0, 0.270)], 6), 32)
         defense.sculpte(lambda v: v + np.stack([np.zeros(len(v)), 0.06 * (v[:, 2] / 0.26) ** 2, np.zeros(len(v))], axis=1))
         a.piece("defense_" + nom, defense, IVOIRE, mat=D, poil=False)
 

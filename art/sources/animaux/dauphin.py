@@ -41,7 +41,7 @@ def couche(m, mat):
 
 def rayon(f):
     """Le rayon du corps à la fraction f de la longueur : le bec fin, le melon, le plus large au tiers, puis la queue."""
-    pts = [(0.0, 0.0), (0.012, 0.030), (0.036, 0.085), (0.040, 0.150), (0.072, 0.190), (0.130, 0.240), (0.180, 0.320),
+    pts = [(0.0, 0.0), (0.030, 0.010), (0.046, 0.035), (0.054, 0.075), (0.070, 0.120), (0.108, 0.170), (0.150, 0.230), (0.188, 0.320),
            (0.205, 0.420), (0.198, 0.540), (0.160, 0.680), (0.104, 0.800), (0.062, 0.900), (0.044, 0.970), (0.030, 1.0)]
     x = np.array([p[1] for p in pts])
     r = np.array([p[0] for p in pts])
@@ -52,25 +52,32 @@ def construire():
     a = K.Animal("dauphin")
     a.taille = 2.40
 
-    # ----- le corps : un fuseau tourné, peint dos / flancs / ventre, puis couché le long du fil -----
-    fs = np.linspace(0.0, 1.0, 120)
-    prof = [(0.0, 0.0)] + [(rayon(f), f * L) for f in fs[1:-1]] + [(0.0, L)]
-    corps = A.tour(prof, 56)
-    x, y = corps.v[:, 0], corps.v[:, 1]
-    ang = np.abs(np.arctan2(x, y))                      # 0 : le dos (+Y local) ; pi : le ventre
-    t = np.tile(ARDOISE, (len(x), 1))
-    t[ang > 1.00] = PERLE
-    t[ang > 2.05] = CREME
-    t[(corps.v[:, 2] / L > 0.10) & (ang > 1.00) & (ang <= 1.10)] = ARDOISE * 0.92        # la ligne reste nette
-    corps.teinte = t
+    # ----- le corps : un fuseau tourné, peint dos / flancs / ventre, puis couché le long du fil ; le bec est une pièce à part,
+    #       lisse (sans poil : le contrôleur voyait un bec hérissé), qui se fond dans le melon -----
+    F_BEC = 0.125
 
-    def melon(v):                                       # le front bombe au-dessus du bec : le melon
+    def fuseau(f0, f1, n):
+        fs = np.linspace(f0, f1, n)
+        prof = [(0.0, f0 * L)] + [(rayon(f), f * L) for f in fs] + [(0.0, f1 * L)]
+        m = A.tour(prof, 56)
+        x, y = m.v[:, 0], m.v[:, 1]
+        ang = np.abs(np.arctan2(x, y))                      # 0 : le dos (+Y local) ; pi : le ventre
+        t = np.tile(ARDOISE, (len(x), 1))
+        t[ang > 1.00] = PERLE
+        t[ang > 2.05] = CREME
+        t[(m.v[:, 2] / L > 0.10) & (ang > 1.00) & (ang <= 1.10)] = ARDOISE * 0.92        # la ligne reste nette
+        m.teinte = t
+        return m
+
+    def melon(v):                                       # le front bombe franchement au-dessus du bec : le melon
         s = v.copy()
         f = v[:, 2] / L
-        bosse = np.exp(-((f - 0.115) / 0.05) ** 2)
-        s[:, 1] += np.where(v[:, 1] > 0, 0.030 * bosse, 0.0)
+        bosse = np.exp(-((f - 0.150) / 0.060) ** 2)
+        s[:, 1] += np.where(v[:, 1] > 0, 0.062 * bosse, 0.0)
+        s[:, 0] *= 1.0 + 0.10 * bosse
         return s
-    a.piece("corps", corps.sculpte(melon).sculpte(FIL.couche), None)
+    a.piece("corps", fuseau(F_BEC - 0.010, 1.0, 110).sculpte(melon).sculpte(FIL.couche), None)
+    a.piece("bec", fuseau(0.0, F_BEC + 0.012, 24).sculpte(melon).sculpte(FIL.couche), None, poil=False)
 
     # ----- la queue : un croissant horizontal, posé au bout du fil, un peu relevé -----
     croissant = [(-0.31, 0.10), (-0.23, 0.04), (-0.11, -0.04), (-0.03, -0.07), (0.03, -0.07), (0.11, -0.04), (0.23, 0.04), (0.31, 0.10),
@@ -104,9 +111,9 @@ def construire():
         a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0245)
         bouche = []
         for u in np.linspace(0.0, 1.0, 7):
-            ss = (0.040 + 0.165 * u) * L
-            cc, dd = FIL.vise(ss, 0.0, -c * 1.0, -0.30 + 0.12 * u)
-            q = a.trace("corps", cc, [dd], 0.002)
+            ss = (0.030 + 0.105 * u) * L                    # la bouche s'arrête bien avant l'œil
+            cc, dd = FIL.vise(ss, 0.0, -c * 1.0, -0.30 + 0.10 * u)
+            q = a.trace("bec", cc, [dd], 0.002)
             if q:
                 bouche.append(q[0])
         a.broderie("sourire_" + nom, A.courbe(bouche, 4), 0.0040, ROSE)

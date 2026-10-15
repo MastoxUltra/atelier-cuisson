@@ -92,7 +92,7 @@ def construire():
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.060)), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0170)
         # la corne : part sur le côté, descend, puis se relève en crochet
-        ch = [H @ Vector(q) for q in ((c * 0.070, 0.090, -0.080), (c * 0.180, 0.060, -0.100), (c * 0.250, 0.060, -0.040), (c * 0.250, 0.060, 0.080), (c * 0.210, 0.050, 0.150))]
+        ch = [H @ Vector(q) for q in ((c * 0.060, 0.080, 0.080), (c * 0.130, 0.085, 0.078), (c * 0.200, 0.055, 0.070), (c * 0.236, -0.005, 0.064), (c * 0.226, -0.062, 0.058), (c * 0.196, -0.040, 0.050), (c * 0.170, 0.050, 0.044))]
         a.piece("corne_" + nom, A.tube(A.courbe(propres(ch), 6), lambda t: 0.034 - 0.026 * t, 14), CORNE, poil=False)
         po = A.profil([(0, 0), (0.034, 0.008), (0.042, 0.034), (0.032, 0.062), (0.012, 0.078), (0, 0.084)], 5)
         a.piece("oreille_" + nom, A.tour(po, 24).etire(1.0, 0.38, 1.0), tuple(ARGENT),

@@ -58,7 +58,7 @@ def construire():
     tete.teinte = t
     a.piece("tete", tete.etire(0.050, 0.060, 0.044), None, pos=tuple(TETE), rot=(-10, 0, 14))
     a.piece("nez", A.boule(1.0, 12, 6).etire(0.010, 0.008, 0.008), NEZ, pos=tuple(TETE + Vector((0.0, -0.062, 0.002))), poil=False)
-    O.paire_yeux(a, "tete", TETE, (0.64, -0.74, 0.22), 0.0140, decolle=0.002)
+    O.paire_yeux(a, "tete", TETE, (0.64, -0.74, 0.22), 0.0140, decolle=0.002, R=A.repere((0.0, 0.0, 0.0), (-10, 0, 14)))
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 16, 8).etire(0.022, 0.008, 0.024)
         a.piece("oreille_" + nom, O.teinte(ore, BRUN), None, pos=(c * 0.042, TETE.y + 0.018, TETE.z + 0.040), rot=(0, c * 14, 0))

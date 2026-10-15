@@ -93,7 +93,7 @@ def construire():
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.040)), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0145)
         larme = [H3 @ Vector((c * (0.80 - 0.10 * t), 0.20 - 0.42 * t, 0.14 + 0.22 * t)) for t in np.linspace(0, 1, 6)]
-        a.broderie("larme_" + nom, A.courbe(propres(a.trace("tete", H @ Vector((0, 0.020, 0.040)), larme, 0.003)), 4), 0.0032, tuple(NOIR))
+        a.broderie("larme_" + nom, A.courbe(propres(a.trace("tete", H @ Vector((0, 0.020, 0.040)), larme, 0.003)), 4), 0.0080, tuple(NOIR))
         po = A.profil([(0, 0), (0.030, 0.008), (0.038, 0.030), (0.030, 0.052), (0.012, 0.066), (0, 0.072)], 5)
         E = A.cadre(H @ Vector((c * 0.058, 0.060, -0.020)), H3 @ Vector((c * 0.50, 0.85, -0.15)), H3 @ Vector((c * 0.2, 0.0, 1.0)))
         a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.0, 0.42, 1.0), [(0.050, tuple(OR)), (9, tuple(NOIR))]), None, mat=E)
@@ -115,10 +115,10 @@ def construire():
         m = fuseau([(0.0, r0), (0.40, r0 * 0.62), (0.52, r0 * 0.74), (0.62, r0 * 0.52), (0.95, r0 * 0.46), (1.0, 0.0)], f.long, 28, 0.008)
         tacheter(m, 20 + int(abs(x) * 100), 40, 0.020, ventre=lambda v, L=f.long: v[:, 2] > 0.86 * L)
         a.piece("patte_" + nom, m.sculpte(f.couche), None)
-        a.piece("pied_" + nom, A.boule(1.0, 20, 10).etire(0.048, 0.078, 0.026), tuple(CREME), pos=(x, pts[-1][1] - 0.030, 0.026))
+        a.piece("pied_" + nom, A.boule(1.0, 20, 10).etire(0.044, 0.070, 0.024), tuple(OR), pos=(x, pts[-1][1] - 0.028, 0.024))
     levee = [(0.095, -0.320, 0.680), (0.102, -0.340, 0.470), (0.105, -0.420, 0.440), (0.105, -0.460, 0.340)]
-    a.piece("patte_av_G", K.tube_peint(A.courbe(levee, 6), lambda t: 0.050 - 0.016 * t, [(0.86, tuple(OR)), (1, tuple(CREME))], 14), None)
-    a.piece("pied_av_G", A.boule(1.0, 20, 10).etire(0.044, 0.070, 0.026), tuple(CREME), pos=(0.105, -0.490, 0.316), rot=(-40, 0, 0))
+    a.piece("patte_av_G", K.tube_peint(A.courbe(levee, 6), lambda t: 0.050 - 0.016 * t, [(1, tuple(OR))], 14), None)
+    a.piece("pied_av_G", A.boule(1.0, 20, 10).etire(0.040, 0.064, 0.024), tuple(OR), pos=(0.105, -0.490, 0.316), rot=(-40, 0, 0))
 
     # ----- la queue : longue, annelée de noir, qui pend et se relève au bout ; le pinceau noir -----
     chemin = [(0.0, 0.540, 0.640), (0.040, 0.760, 0.470), (0.120, 0.920, 0.260), (0.230, 0.980, 0.150), (0.340, 0.940, 0.110)]

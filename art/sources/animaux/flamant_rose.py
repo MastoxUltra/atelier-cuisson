@@ -82,7 +82,7 @@ def construire():
 
     def coude(v):
         s = v.copy()
-        s[:, 1] -= 0.080 * np.clip((v[:, 2] - 0.060) / 0.090, 0, 1) ** 1.5                  # le bec se plie vers le bas
+        s[:, 1] -= 0.100 * np.clip((v[:, 2] - 0.060) / 0.090, 0, 1) ** 1.5                  # le bec se plie vers le bas
         s[:, 2] = np.where(v[:, 2] > 0.06, 0.06 + (v[:, 2] - 0.06) * (1 - 0.35 * np.clip((v[:, 2] - 0.06) / 0.09, 0, 1)), v[:, 2])
         return s
     a.piece("bec", bec.etire(1.0, 0.82, 1.0).sculpte(coude), None, mat=T @ A.repere((0, -0.004, 0.026)), poil=False)
@@ -97,8 +97,8 @@ def construire():
     # ----- les ailes : deux galets roses plaqués, les rémiges noires qui dépassent en bas, une plume claire au-dessus -----
     for nom, c, rot in (("G", 1, (-6, 0, 10)), ("D", -1, (-6, 0, -10))):
         aile = A.boule(1.0, 40, 20)
-        aile.teinte = np.where((aile.v[:, 1] < -0.30)[:, None] & (aile.v[:, 2] < -0.05)[:, None], np.array(NOIR),
-                               np.where((aile.v[:, 1] > 0.40)[:, None], PALE, ROSE))
+        aile.teinte = np.where((aile.v[:, 1] > 0.50)[:, None] & (aile.v[:, 2] < 0.25)[:, None], np.array(NOIR),
+                               np.where((aile.v[:, 1] < -0.45)[:, None], PALE, ROSE))
         a.piece("aile_" + nom, aile.etire(0.030, 0.165, 0.110), None, pos=(c * 0.122, 0.040, 0.800), rot=rot)
 
     # ----- les jambes : deux très longues, minces, roses, le genou inversé (la cheville) marqué ; la gauche repliée -----

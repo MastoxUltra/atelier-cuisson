@@ -110,18 +110,20 @@ def construire():
         s[:, 0] *= 0.90 + 0.06 * gauss((z - 0.050) / 0.040)
         s[:, 1] *= np.where(haut, 1 + 0.12 * gauss((z - 0.040) / 0.035), 1 + 0.10 * gauss((z - 0.150) / 0.030))   # le front, la lèvre
         return s
-    tete = A.tour(A.profil([(0, 0), (0.044, 0.008), (0.060, 0.034), (0.060, 0.074), (0.050, 0.112), (0.046, 0.142),
-                            (0.046, 0.162), (0.036, 0.176), (0, 0.182)], 6), 56)
+    tete = A.tour(A.profil([(0, 0), (0.044, 0.008), (0.060, 0.034), (0.060, 0.074), (0.050, 0.112), (0.045, 0.145),
+                            (0.043, 0.178), (0.040, 0.204), (0.030, 0.222), (0, 0.230)], 6), 56)
     a.piece("tete", tete.sculpte(tete_), ROSE, mat=T)
     a.piece("toupet", A.boule(1.0, 32, 16).sculpte(lambda v: boucles(v * [1, 1, 1], 0.10)).etire(0.046, 0.034, 0.040), CREME,
             mat=T @ A.repere((0, 0.052, 0.040)))
-    # la lèvre fendue et la moue : un fil chocolat qui descend du nez et s'ouvre en Y
-    centre = T @ Vector((0, 0, 0.160))
-    levre = [a.trace("tete", centre, [T3 @ Vector(d)])[0] for d in ((0, 0.30, 0.95), (0, -0.05, 1.0), (0, -0.45, 0.90))]
-    a.broderie("levre", A.courbe(levre, 4), 0.0024, CHOCO)
+    # les lèvres : un vrai museau de lama — la lèvre du haut fendue en deux lobes, celle du bas plus avancée, les narines au-dessus
+    LEVRE = np.array(ROSE) * 0.80 + np.array(CHOCO) * 0.20
     for nom, c in (("G", 1), ("D", -1)):
-        moue = [a.trace("tete", centre, [T3 @ Vector((c * x, -0.45 - 0.35 * x, 0.90 - 0.70 * x))])[0] for x in (0.0, 0.30, 0.55, 0.80)]
-        a.broderie("moue_" + nom, A.courbe(moue, 4), 0.0022, CHOCO)
+        lobe = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.0215, 0.0185, 0.026)
+        a.piece("levre_" + nom, O.teinte(lobe, LEVRE), None, mat=T @ A.repere((c * 0.0185, -0.010, 0.214)), poil=False)
+    bas_ = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.034, 0.017, 0.032)
+    a.piece("levre_bas", O.teinte(bas_, LEVRE * 0.92), None, mat=T @ A.repere((0.0, -0.036, 0.196)), poil=False)
+    centre = T @ Vector((0, 0, 0.160))
+    for nom, c in (("G", 1), ("D", -1)):
         narine = [a.trace("tete", centre, [T3 @ Vector((c * (0.30 + 0.10 * u), 0.55 - 0.20 * u, 0.80))])[0] for u in (0.0, 0.5, 1.0)]
         a.broderie("narine_" + nom, A.courbe(narine, 3), 0.0022, CHOCO)
 

@@ -5,7 +5,8 @@ qui retombent comme une barbe, entre lesquels deux longs tentacules sortent, ten
 flotte à ras du sable, immobile : on la prendrait pour un caillou rayé si elle ne vous regardait pas.
 
     python seiche.py        fabrique la fiche art/apercus/animaux/seiche.png (style du palier : voir styles.py)
-    (le premier dessin, jugé le 15/10 : « on dirait un scarabée à yeux »)
+    (le premier dessin, jugé le 15/10 : « on dirait un scarabée à yeux » ; le deuxième, du contrôleur : un escargot à tiges et
+    un cloporte rayé — d'où les bras en couronne vers l'avant, les tentacules à palette et la grande nageoire en ruban)
 """
 import math
 import os
@@ -33,70 +34,96 @@ def construire():
     a = K.Animal("seiche")
     a.taille = 0.70
 
-    # ----- le manteau : une semelle ovale, plus large devant, qui s'effile derrière ; le dessous plat ; des zébrures en travers,
-    #       la ligne du dos plus sombre -----
+    # ----- le manteau : une galette ovale, plus large devant, qui s'effile derrière ; le dessous plat ; des zébrures sinueuses en
+    #       travers (jamais des anneaux réguliers : ce serait un cloporte), la ligne du dos plus sombre, des points clairs -----
     def semelle(v):
         s = v.copy()
         z = v[:, 2]
         y = v[:, 1]
-        s[:, 2] = np.where(z < 0, z * 0.30, z)                                    # le dessous presque plat
+        s[:, 2] = np.where(z < 0, z * 0.22, z)                                    # le dessous presque plat
         arriere = np.clip(y / 0.40, 0.0, 1.0)
         s[:, 0] *= 1.0 - 0.55 * arriere ** 1.5                                   # le bout arrière s'effile
         return s
-    manteau = A.boule(1.0, 64, 32).sculpte(semelle).etire(0.190, 0.430, 0.085)
+    manteau = A.boule(1.0, 72, 36).sculpte(semelle).etire(0.190, 0.430, 0.068)
     yv, xv, zv = manteau.v[:, 1], manteau.v[:, 0], manteau.v[:, 2]
     t = np.tile(TAUPE, (len(yv), 1))
-    zeb = (np.sin(yv * 36.0 + 1.2 * np.abs(xv) * 9.0) > 0.30) & (zv > 0.0)
-    t[zeb] = ZEBRE * 0.90 + TAUPE * 0.10
-    t[(np.abs(xv) < 0.016) & (zv > 0.0)] = OMBRE                                  # la ligne du dos
+    onde = yv * 21.0 + 2.6 * np.sin(xv * 17.0 + 0.9) + 1.4 * np.sin(yv * 9.0 - xv * 11.0)
+    zeb = (np.sin(onde) > 0.38) & (zv > 0.0)
+    t[zeb] = ZEBRE * 0.88 + TAUPE * 0.12
+    bord_sombre = (np.sin(onde) > 0.18) & (np.sin(onde) <= 0.38) & (zv > 0.0)
+    t[bord_sombre] = OMBRE * 0.55 + TAUPE * 0.45
+    t[(np.abs(xv) < 0.014) & (zv > 0.0)] = OMBRE                                  # la ligne du dos
+    rng_m = np.random.default_rng(11)
+    pts_cl = rng_m.uniform(-1.0, 1.0, (46, 2)) * np.array([0.150, 0.360])
+    for px, py in pts_cl:
+        t[((xv - px) ** 2 + (yv - py) ** 2 < 0.0004) & (zv > 0.02) & ~zeb] = ZEBRE
     manteau.teinte = t
-    a.piece("manteau", manteau, None, pos=(0.0, 0.140, 0.085))
+    a.piece("manteau", manteau, None, pos=(0.0, 0.140, 0.068))
 
-    # ----- la frange des nageoires : un ruban ondulé qui court tout le long du manteau, des deux côtés, plus clair -----
-    pts = []
-    n = 70
-    for k in range(n + 1):
-        th = math.tau * k / n
-        x = 0.215 * math.cos(th) * (1.0 - 0.45 * max(0.0, math.sin(th)) ** 1.5)
-        y = 0.140 + 0.440 * math.sin(th)
-        pts.append((x, y - 0.140, 0.012 * math.sin(th * 14.0)))
-    frange = A.tube(A.courbe(pts, 2), 0.020, 8).etire(1.0, 1.0, 0.45).pose((0.0, 0.140, 0.062))
-    frange.teinte = np.tile(ZEBRE * 0.72 + TAUPE * 0.28, (len(frange.v), 1))
+    # ----- la frange : la grande nageoire ondulée, un ruban qui borde le manteau de chaque côté, de la tête jusqu'à la pointe,
+    #       plus large au milieu, le bord froncé ; double face ; elle s'éteint devant, derrière la tête -----
+    n_f = 90
+    pts_f, faces_f = [], []
+    th0, th1 = -math.pi / 2 + 0.55, 1.5 * math.pi - 0.55
+    for k in range(n_f + 1):
+        u = k / n_f
+        th = th0 + (th1 - th0) * u
+        env = math.sin(math.pi * u) ** 0.55                                         # le ruban naît et meurt devant
+        sx = 1.0 - 0.45 * max(0.0, math.sin(th)) ** 1.5
+        px = 0.186 * math.cos(th) * sx
+        py = 0.435 * math.sin(th)
+        nx, ny = math.cos(th) / 0.186, math.sin(th) / 0.435                          # la normale de l'ellipse
+        nn = math.hypot(nx, ny)
+        nx, ny = nx / nn, ny / nn
+        larg = 0.052 * env * (0.80 + 0.20 * math.cos(2.0 * math.sin(th)))
+        zf = 0.058 + 0.014 * math.sin(th * 15.0 + 0.8) * env
+        pts_f.append((px, py + 0.140, 0.062))                                        # le pied du ruban, collé au manteau
+        pts_f.append((px + nx * larg, py + 0.140 + ny * larg, zf))                   # le bord libre, qui ondule
+    for k in range(n_f):
+        b = 2 * k
+        faces_f.append((b, b + 1, b + 3, b + 2))
+    Pf = np.array(pts_f)
+    nf = len(Pf)
+    tous = np.vstack([Pf + np.array([0.0, 0.0, 0.0035]), Pf - np.array([0.0, 0.0, 0.0035])])
+    toutes = list(faces_f) + [tuple(q + nf for q in reversed(f)) for f in faces_f]
+    frange = A.Maille(tous, toutes)
+    frange.teinte = np.tile(ZEBRE * 0.62 + TAUPE * 0.38, (len(tous), 1))
     a.piece("frange", frange, None, poil=False)
 
-    # ----- la tête : étroite, dans le prolongement ; les yeux sur les côtés, iris pâle ; la bouche cachée sous les bras -----
-    tete = A.boule(1.0, 40, 20).etire(0.120, 0.110, 0.078)
+    # ----- la tête : large et basse, dans le prolongement ; de gros yeux sur les côtés, iris pâle ; la bouche cachée sous les bras -----
+    tete = A.boule(1.0, 40, 20).etire(0.135, 0.115, 0.070)
     tete.teinte = np.tile(OMBRE * 0.7 + TAUPE * 0.3, (len(tete.v), 1))
-    a.piece("tete", tete, None, pos=(0.0, -0.250, 0.098))
-    centre = Vector((0.0, -0.250, 0.098))
+    a.piece("tete", tete, None, pos=(0.0, -0.248, 0.082))
+    centre = Vector((0.0, -0.248, 0.082))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n_ = a.surface("tete", centre, Vector((c * 0.95, -0.22, 0.15)))
-        iris = A.boule(1.0, 24, 12).etire(0.042, 0.042, 0.011)
+        pos, n_ = a.surface("tete", centre, Vector((c * 0.95, -0.22, 0.18)))
+        iris = A.boule(1.0, 24, 12).etire(0.056, 0.056, 0.012)
         a.piece("iris_" + nom, O.couche(O.teinte(iris, IRIS), A.cadre(pos + n_ * 0.001, n_, (0, 0, 1))), None, poil=False)
-        a.oeil("oeil_" + nom, pos + n_ * 0.009, n_, 0.026)
+        a.oeil("oeil_" + nom, pos + n_ * 0.010, n_, 0.036)
         haut_oeil = (Vector((0, 0, 1)) - n_ * n_.z).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.044, 0.05), tuple(OMBRE * 0.7 + TAUPE * 0.3), mat=A.cadre(pos + n_ * 0.003, n_, haut_oeil), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.058, 0.55), tuple(OMBRE * 0.7 + TAUPE * 0.3), mat=A.cadre(pos + n_ * 0.004, n_, haut_oeil), poil=False)
     a.tete = centre + Vector((0.0, -0.12, 0.0))
 
-    # ----- les huit bras courts : en bouquet devant la tête, retombant en barbe, les bouts qui se recourbent ; le bout sombre -----
+    # ----- les huit bras : un bouquet serré qui part vers l'AVANT, en couronne autour de la bouche, épais à la base et qui
+    #       s'effilent ; les bouts se recourbent un peu ; le bout sombre -----
     for k in range(8):
-        th = math.radians(-77 + 22 * k)
-        base = (0.060 * math.sin(th), -0.330, 0.100 + 0.030 * math.cos(th) - 0.040)
+        psi = math.tau * (k + 0.5) / 8.0
+        sx, cz = math.sin(psi), math.cos(psi)
+        base = (0.040 * sx, -0.330, 0.082 + 0.030 * cz)
         pts = [base,
-               (0.100 * math.sin(th), -0.395, 0.062 + 0.010 * math.cos(th)),
-               (0.140 * math.sin(th), -0.445, 0.034),
-               (0.170 * math.sin(th) * 1.05, -0.480, 0.020 + (0.026 if k % 2 else 0.0))]
-        bras = K.tube_peint(A.courbe(pts, 5), lambda t_: 0.036 - 0.024 * t_, [(0.7, TAUPE), (1.0, OMBRE)], 12)
+               (0.062 * sx, -0.395, 0.080 + 0.040 * cz),
+               (0.088 * sx, -0.460, 0.078 + 0.046 * cz - 0.006),
+               (0.108 * sx, -0.520, 0.082 + 0.044 * cz + (0.014 if k % 2 else 0.004))]
+        bras = K.tube_peint(A.courbe(pts, 5), lambda t_: 0.034 - 0.026 * t_, [(0.65, TAUPE), (1.0, OMBRE)], 12)
         a.piece("bras_%d" % k, bras, None)
 
-    # ----- les deux tentacules : longs, tendus vers l'avant et un peu vers le haut, une massue crème au bout ; ils sortent d'entre les bras -----
+    # ----- les deux tentacules : minces, tendus droit devant, à hauteur des bras ; une palette plate crème au bout (pas une boule) -----
     for nom, c in (("G", 1), ("D", -1)):
-        pts = [(c * 0.030, -0.335, 0.100), (c * 0.075, -0.440, 0.120), (c * 0.115, -0.560, 0.150), (c * 0.135, -0.680, 0.160),
-               (c * 0.130, -0.760, 0.150)]
-        a.piece("tentacule_" + nom, K.tube_peint(A.courbe(pts, 5), lambda t_: 0.016 - 0.005 * t_, [(1.0, TAUPE)], 10), None)
-        massue = A.boule(1.0, 18, 10).etire(0.026, 0.050, 0.020)
+        pts = [(c * 0.016, -0.345, 0.084), (c * 0.034, -0.470, 0.086), (c * 0.046, -0.600, 0.086), (c * 0.050, -0.700, 0.084)]
+        a.piece("tentacule_" + nom, K.tube_peint(A.courbe(pts, 5), lambda t_: 0.013 - 0.004 * t_, [(1.0, TAUPE)], 10), None)
+        massue = A.boule(1.0, 18, 10).etire(0.034, 0.062, 0.0075)
         massue.teinte = np.tile(ZEBRE * 0.82 + TAUPE * 0.18, (len(massue.v), 1))
-        a.piece("massue_" + nom, massue, None, pos=(c * 0.128, -0.780, 0.146), poil=False)
+        a.piece("massue_" + nom, massue, None, pos=(c * 0.052, -0.742, 0.082), poil=False)
     return a
 
 

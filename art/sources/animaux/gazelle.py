@@ -82,12 +82,12 @@ def construire():
         p, n = a.surface("tete", H @ Vector((0, 0.0, 0.030)), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0200)
         ligne = [H3 @ Vector((c * (0.82 - 0.30 * t), 0.30 - 0.34 * t, 0.10 + 0.34 * t)) for t in np.linspace(0, 1, 6)]
-        a.broderie("ligne_" + nom, A.courbe(propres(a.trace("tete", H @ Vector((0, 0.0, 0.030)), ligne, 0.003)), 4), 0.0030, tuple(BANDE))
+        a.broderie("ligne_" + nom, A.courbe(propres(a.trace("tete", H @ Vector((0, 0.0, 0.030)), ligne, 0.003)), 4), 0.0075, tuple(BANDE * 0.62))
         po = A.profil([(0, 0), (0.026, 0.010), (0.034, 0.050), (0.026, 0.100), (0.010, 0.140), (0, 0.152)], 6)
         a.piece("oreille_" + nom, A.tour(po, 24).etire(1.0, 0.36, 1.0), tuple(CARAMEL),
                 mat=A.cadre(H @ Vector((c * 0.052, 0.070, -0.010)), H3 @ Vector((c * 0.62, 0.10, 0.70)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
         # les cornes en lyre : deux courbes annelées qui montent en S
-        ch = [H @ Vector(q) for q in ((c * 0.034, 0.060, 0.040), (c * 0.060, 0.100, 0.140), (c * 0.076, 0.150, 0.250), (c * 0.050, 0.170, 0.340))]
+        ch = [H @ Vector(q) for q in ((c * 0.034, 0.060, 0.020), (c * 0.058, 0.130, 0.000), (c * 0.078, 0.215, -0.030), (c * 0.068, 0.300, -0.072), (c * 0.040, 0.358, -0.104))]
         a.piece("corne_" + nom, K.tube_peint(A.courbe(propres(ch), 6), lambda t: 0.020 - 0.014 * t,
                                              [(0.15, tuple(NOIR)), (0.28, tuple(CARAMEL * 0.7)), (0.42, tuple(NOIR)), (0.58, tuple(CARAMEL * 0.7)),
                                               (0.74, tuple(NOIR)), (1, tuple(NOIR))], 12), None)

@@ -60,7 +60,7 @@ def construire():
         s = v.copy()
         s[:, 1] -= 0.014 * np.clip(v[:, 2] / 0.20, 0, 1) ** 2
         return s
-    a.piece("bec", A.tour(A.profil([(0, 0), (0.011, 0.004), (0.009, 0.060), (0.005, 0.150), (0.002, 0.195), (0, 0.205)], 5), 16).sculpte(aiguille),
+    a.piece("bec", A.tour(A.profil([(0, 0), (0.013, 0.004), (0.010, 0.060), (0.006, 0.160), (0.003, 0.215), (0, 0.228)], 5), 16).sculpte(aiguille),
             CHARBON, mat=B, poil=False)
 
     # ----- les yeux : un seul bouton de chaque côté, petit, brillant, sous un sourcil d'indigo -----

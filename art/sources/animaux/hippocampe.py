@@ -57,15 +57,16 @@ def construire():
     tete.teinte = np.tile(np.array(SAFRAN), (len(tete.v), 1))
     RT = A.repere(H, (-10, 0, 0))
     a.piece("tete", tete.etire(0.068, 0.088, 0.072), None, mat=RT)
-    museau = A.tour(A.profil([(0.034, 0.0), (0.028, 0.050), (0.023, 0.110), (0.019, 0.160), (0.014, 0.195), (0, 0.210)], 4), 28)
-    a.piece("museau", museau, SAFRAN, mat=A.cadre(H + Vector((0.0, -0.062, -0.020)), (0.0, -0.94, -0.34), (0, 0, 1)))
-    a.piece("bout", A.boule(1.0, 16, 8).etire(0.016, 0.014, 0.009), CREME,
-            mat=A.cadre(H + Vector((0.0, -0.062, -0.020)) + Vector((0.0, -0.94, -0.34)).normalized() * 0.206, (0.0, -0.94, -0.34), (0, 0, 1)), poil=False)
+    museau = A.tour(A.profil([(0.030, 0.0), (0.024, 0.030), (0.020, 0.060), (0.0185, 0.090), (0.0180, 0.118), (0.0150, 0.128), (0, 0.130)], 4), 28)
+    dirm = Vector((0.0, -0.97, -0.22)).normalized()
+    a.piece("museau", museau, SAFRAN, mat=A.cadre(H + Vector((0.0, -0.062, -0.016)), dirm, (0, 0, 1)))
+    a.piece("bout", A.boule(1.0, 16, 8).etire(0.0095, 0.0075, 0.0050), CREME,
+            mat=A.cadre(H + Vector((0.0, -0.062, -0.016)) + dirm * 0.129, dirm, (0, 0, 1)), poil=False)
     for k, (x, hh, lean) in enumerate(((-0.044, 0.062, -22), (-0.022, 0.082, -9), (0.0, 0.092, 0), (0.022, 0.082, 9), (0.044, 0.062, 22))):
         pointe = O.pointe(0.060 + 0.012 * (1 - abs(x) / 0.044), 0.0155, 10)
         a.piece("couronne_%d" % k, O.couche(O.teinte(pointe, np.array(ANNEAU)), A.cadre(H + Vector((x, 0.020, hh - 0.034)),
                 (math.sin(math.radians(lean)), 0.18, 1.0), (0, 1, 0))), None, poil=False)
-    O.paire_yeux(a, "tete", H, (0.94, -0.34, 0.22), 0.0200, couleur_lourde=tuple(SAFRAN), coupe=-0.10, decolle=0.003)
+    O.paire_yeux(a, "tete", H, (0.94, -0.34, 0.22), 0.0200, couleur_lourde=tuple(SAFRAN), coupe=-0.10, decolle=0.003, R=RT)
     a.tete = H + Vector((0.0, -0.17, -0.04))
 
     # ----- les nageoires : le grand éventail du dos, un petit éventail à chaque joue ; l'éventail porte un liseré -----

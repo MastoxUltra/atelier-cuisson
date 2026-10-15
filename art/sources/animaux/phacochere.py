@@ -56,10 +56,11 @@ def construire():
     G.sillons(corps, [14], 0.005, 1.1)
     a.piece("corps", corps.sculpte(tonneau), None, pos=CORPS)
     a.couture("dos", "corps", 14, 0.35, 0.95)
-    for i, y in enumerate(np.linspace(-0.26, 0.30, 12)):
-        h = 0.052 - 0.020 * abs(y) / 0.3
-        a.piece("soie_%02d" % i, A.boule(1.0, 8, 4).etire(0.014, 0.020, 0.052 + 0.008 * math.cos(i)), SOMBRE,
-                pos=(0.0, CORPS.y + y, CORPS.z + 0.215 * (1 - 0.12 * ((y / 0.32 + 0.0) / 1.0)) + 0.030), poil=False)
+    rng = np.random.default_rng(6)
+    for i, y in enumerate(np.linspace(-0.26, 0.30, 17)):
+        h = 0.060 - 0.022 * abs(y) / 0.3
+        a.piece("soie_%02d" % i, A.boule(1.0, 10, 6).etire(0.034, 0.040, h + 0.012 * rng.random()), SOMBRE,
+                pos=(0.0, CORPS.y + y, CORPS.z + 0.215 * (1 - 0.12 * ((y / 0.32 + 0.0) / 1.0)) + 0.020), rot=(rng.uniform(-14, 14), 0, 0), poil=False)
 
     # ----- la tête : large, plate sur le dessus, le museau carré ; quatre verrues ; les défenses recourbées ; de côté vers nous -----
     H = A.repere(TETE, (-10, 0, LACET))
@@ -73,13 +74,17 @@ def construire():
     a.piece("groin", A.boule(1.0, 32, 16).etire(0.080, 0.062, 0.090), tuple(SOMBRE), mat=H @ A.repere((0, -0.230, -0.030)))
     a.piece("nez", A.boule(1.0, 20, 10).etire(0.040, 0.030, 0.016), tuple(SOMBRE), mat=H @ A.repere((0, -0.305, -0.026)), poil=False)
     a.tete = H @ Vector((0, -0.220, -0.020))
-    for k, (dx, dy, dz) in enumerate(((0.100, -0.060, 0.040), (-0.100, -0.060, 0.040), (0.120, -0.150, -0.050), (-0.120, -0.150, -0.050))):
-        a.piece("verrue_%d" % k, A.boule(1.0, 14, 8).etire(0.030, 0.026, 0.028), CLAIR, mat=H @ A.repere((dx, dz * 1.0 + 0.0, dy)), poil=False)
+    # les verrues : trois paires sur la face (sous l'œil, sur la joue, au-dessus du groin), des bosses de peau pâle
+    for k, (dx, dy, dz) in enumerate(((0.118, -0.150, 0.026), (0.108, -0.082, -0.052), (0.062, -0.215, 0.050))):
+        for c in (1, -1):
+            a.piece("verrue_%d%s" % (k, "G" if c > 0 else "D"), A.boule(1.0, 14, 8).etire(0.028, 0.030, 0.022), CLAIR,
+                    mat=H @ A.repere((c * dx, dy, dz)), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        ch = [H @ Vector(q) for q in ((c * 0.100, -0.150, -0.130), (c * 0.150, -0.230, -0.130), (c * 0.170, -0.290, -0.040), (c * 0.150, -0.320, 0.070))]
-        a.piece("defense_" + nom, A.tube(A.courbe(propres(ch), 6), lambda t: 0.026 - 0.020 * t, 14), IVOIRE, poil=False)
-        p, n = a.surface("tete", H @ Vector((0, 0.0, 0.0)), H3 @ Vector((c * 0.72, 0.40, -0.48)))
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0140)
+        # les défenses : elles sortent au coin de la gueule, juste à côté du groin, et montent en se recourbant
+        ch = [H @ Vector(q) for q in ((c * 0.070, -0.265, -0.060), (c * 0.112, -0.300, -0.052), (c * 0.150, -0.300, 0.010), (c * 0.150, -0.265, 0.110))]
+        a.piece("defense_" + nom, A.tube(A.courbe(propres(ch), 6), lambda t: 0.024 - 0.018 * t, 14), IVOIRE, poil=False)
+        p, n = a.surface("tete", H @ Vector((0, 0.0, 0.0)), H3 @ Vector((c * 0.62, -0.62, 0.50)))
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0185)
         po = A.profil([(0, 0), (0.030, 0.008), (0.036, 0.034), (0.026, 0.060), (0.008, 0.074), (0, 0.080)], 5)
         a.piece("oreille_" + nom, A.tour(po, 24).etire(1.0, 0.42, 1.0), ROUILLE,
                 mat=A.cadre(H @ Vector((c * 0.110, 0.110, 0.080)), H3 @ Vector((c * 0.30, 0.18, 0.95)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
@@ -120,7 +125,7 @@ OS = [
     ('queue', 'corps', (0.002, 0.373, 0.415)),
 ]
 
-PORTEURS = [
+PORTEURS = [('soie', 'corps'), 
     ('oeil_reflet', 'tete'), ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True),
     ('genou_av', 'patte_av', True), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True),
     ('verrue_0', 'corps'), ('verrue_1', 'corps'), ('verrue_2', 'corps'), ('verrue_3', 'corps'), ('soie_00', 'tete'),

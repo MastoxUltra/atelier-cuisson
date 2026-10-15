@@ -52,7 +52,7 @@ def construire():
     museau = A.boule(1.0, 20, 10).etire(0.028, 0.034, 0.024)
     a.piece("museau", O.teinte(museau, VENTRE), None, pos=(0.0, -0.100, 0.188))
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.0105, 0.009, 0.0085), ROSE, pos=(0.0, -0.131, 0.194), poil=False)
-    O.paire_yeux(a, "tete", TETE, (0.54, -0.78, 0.18), 0.0270, decolle=0.003)
+    O.paire_yeux(a, "tete", TETE, (0.54, -0.78, 0.18), 0.0270, decolle=0.003, R=A.repere((0.0, 0.0, 0.0), (8, 0, 12)))
     for nom, c in (("G", 1), ("D", -1)):
         oreille = A.boule(1.0, 20, 10).etire(0.030, 0.010, 0.032)
         a.piece("oreille_" + nom, O.teinte(oreille, MASQUE * 1.4), None, pos=(c * 0.066, 0.000, 0.268), rot=(0, c * 16, 0))

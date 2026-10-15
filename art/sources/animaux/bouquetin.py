@@ -99,8 +99,8 @@ def construire():
         a.piece("corne_" + nom, O.teinte(corne(RT, c), IVOIRE), None, poil=False)
         ore = A.tour(A.profil([(0.030, 0), (0.026, 0.030), (0.014, 0.060), (0.004, 0.080), (0, 0.086)], 4), 18).etire(1.0, 0.42, 1.0)
         a.piece("oreille_" + nom, O.couche(O.teinte(ore, PIERRE), RT @ A.cadre(Vector((c * 0.086, 0.040, 0.030)), (c * 0.9, 0.05, -0.20), (0, 0, 1))), None)
-    O.paire_yeux(a, "tete", H, (0.84, -0.50, 0.22), 0.0170, couleur_lourde=tuple(PIERRE), coupe=0.05, decolle=0.003)
-    O.broder(a, "bouche", "museau", RT @ Vector((0, -0.140, -0.040)), [(0.52 * u_, -0.80, -0.40 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0022, FIL)
+    O.paire_yeux(a, "tete", H, (0.84, -0.50, 0.22), 0.0170, couleur_lourde=tuple(PIERRE), coupe=0.05, decolle=0.003, R=RT)
+    O.broder(a, "bouche", "museau", RT @ Vector((0, -0.140, -0.040)), [(0.52 * u_, -0.80, -0.40 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0022, FIL, R=RT)
     a.tete = H + Vector((0.10, -0.20, 0.0))
 
     # ----- les jambes : courtes, fortes, le genou et le jarret marqués, la chaussette chocolat, le sabot en deux ; l'antérieur

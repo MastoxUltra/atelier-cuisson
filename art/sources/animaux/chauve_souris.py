@@ -119,7 +119,7 @@ def construire():
         a.piece("narine_%d" % c, A.boule(1.0, 10, 6).etire(0.0065, 0.0045, 0.0065), FIL, mat=RT @ A.repere((c * 0.0125, -0.1085, -0.012)), poil=False)
         dent = O.couche(O.teinte(O.pointe(0.018, 0.0058, 6), np.array(DENT)), RT @ A.cadre(Vector((c * 0.0175, -0.092, -0.044)), Vector((0.0, 0.10, -1.0)), (0, 1, 0)))
         a.piece("dent_%d" % c, dent, None, poil=False)
-    O.paire_yeux(a, "tete", H, (0.52, -0.76, 0.24), 0.0125, decolle=0.002)
+    O.paire_yeux(a, "tete", H, (0.52, -0.76, 0.24), 0.0125, decolle=0.002, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         contour = [(0.0, 0.0), (0.068, 0.007), (0.111, 0.050), (0.124, 0.108), (0.081, 0.155), (0.019, 0.173), (-0.019, 0.148), (-0.041, 0.086),
                    (-0.046, 0.029)]
@@ -131,7 +131,7 @@ def construire():
         dedans.teinte = np.tile(ROSE, (len(dedans.v), 1))
         R2 = O.plan(H + Vector((c * 0.050, 0.014, 0.052)), Vector((c * 0.55, 0.0, 0.0)), Vector((c * 0.30, 0.10, 1.0)))
         a.piece("dedans_" + nom, O.couche(dedans, R2), None, poil=False)
-    O.broder(a, "bouche", "groin", RT @ Vector((0.0, -0.062, -0.014)), [(0.60 * u_, -0.80, -0.42 + 0.08 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0019, FIL)
+    O.broder(a, "bouche", "groin", RT @ Vector((0.0, -0.062, -0.014)), [(0.60 * u_, -0.80, -0.42 + 0.08 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0019, FIL, R=RT)
     a.tete = H + Vector((0.0, -0.13, 0.0))
 
     # ----- les ailes : le bras plié qui monte au poignet, quatre doigts de feutrine foncée, la membrane tendue entre eux ; le pouce -----

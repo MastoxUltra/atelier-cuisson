@@ -56,7 +56,7 @@ def construire():
     a.piece("corps", corps.sculpte(forme), None, mat=T)
 
     # ----- la tête fondue dans les épaules : une boule noire posée contre le haut du fuseau ; un bec fort et noir -----
-    H = Vector(T @ Vector((0.0, -0.075, 0.590)))
+    H = Vector(T @ Vector((0.0, -0.085, 0.612)))
     tete = A.boule(1.0, 44, 22)
     tete.teinte = np.tile(NOIR, (len(tete.v), 1))
     RT = A.repere(H, (-4, 0, 20))
@@ -64,7 +64,11 @@ def construire():
     bec = A.tour(A.profil([(0.040, 0), (0.037, 0.036), (0.027, 0.080), (0.013, 0.115), (0, 0.136)], 4), 24).etire(0.92, 0.82, 1.0)
     bec = bec.sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.014 * (v[:, 2] / 0.136) ** 2.4, v[:, 2]], axis=1))
     a.piece("bec", bec, BEC, mat=RT @ A.cadre(Vector((0.0, -0.075, -0.006)), (0.0, -1.0, -0.05), (0, 1, 0)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.82, -0.52, 0.22), 0.0155, couleur_lourde=tuple(NOIR), coupe=0.15, decolle=0.002)
+    O.paire_yeux(a, "tete", H, (0.82, -0.52, 0.22), 0.0185, decolle=0.004, R=RT)
+    for nom_, c_ in (("G", 1), ("D", -1)):
+        pos_, n_ = a.surface("tete", H, RT.to_3x3() @ Vector((c_ * 0.82, -0.52, 0.22)))
+        iris = A.boule(1.0, 20, 10).etire(0.0235, 0.0235, 0.0060)
+        a.piece("iris_" + nom_, O.couche(O.teinte(iris, np.array(M.hexa("#b9c4d6"))), A.cadre(pos_ + n_ * 0.0005, n_, (0, 0, 1))), None, poil=False)
     a.tete = H + Vector((0.0, -0.13, 0.0))
 
     # ----- les ailes repliées le long du corps, noires à reflets, l'épaulette blanche en lame sur le haut ; les bouts croisés -----
@@ -79,15 +83,21 @@ def construire():
         ep = A.boule(1.0, 24, 12).etire(0.015, 0.034, 0.130)
         a.piece("epaule_" + nom, O.teinte(ep, BLANC), None, mat=T @ A.repere((c * 0.160, 0.085, 0.380), (0, 0, c * 5)), poil=False)
 
-    # ----- la traîne : trois plumes étagées qui sortent du croupion, rasent un peu, puis se relèvent à 20° derrière elle -----
+    # ----- la traîne : UNE longue queue étagée (les plumes se chevauchent), étroite à la base, qui s'élargit puis s'effile en
+    #       gradins ; bleu nuit, puis turquoise, puis un bout violet ; elle part du croupion, rase un peu et se relève de 18° -----
     base = Vector(T @ Vector((0.0, 0.030, 0.030)))
-    for k, (dx, long_) in enumerate(((0.0, 1.00), (-0.050, 0.80), (0.050, 0.80))):
-        pts = [base, base + Vector((dx * 0.3, 0.20 * long_, -0.045)), base + Vector((dx * 0.7, 0.45 * long_, -0.040)),
-               base + Vector((dx * 1.2, 0.75 * long_, 0.030)), base + Vector((dx * 1.6, 1.02 * long_, 0.165))]
-        ray = lambda t_: 0.044 * math.sin(math.pi * min(t_ * 1.02 + 0.05, 1.0)) ** 0.55 + 0.007
-        paliers = [(0.34, BLEU), (0.64, TURQ * 0.55 + BLEU * 0.45), (0.90, TURQ), (1.0, VIOLET)]
-        plume = K.tube_peint(A.courbe([tuple(p) for p in pts], 6), ray, paliers, 14)
-        a.piece("traine_%d" % k, plume, None, poil=False)
+    cont = [(-0.030, 0.0), (-0.052, 0.18), (-0.060, 0.34), (-0.058, 0.50), (-0.050, 0.62), (-0.040, 0.70), (-0.030, 0.74), (-0.018, 0.80),
+            (0.0, 0.84), (0.018, 0.80), (0.030, 0.74), (0.040, 0.70), (0.050, 0.62), (0.058, 0.50), (0.060, 0.34), (0.052, 0.18), (0.030, 0.0)]
+    traine = A.decoupe(cont, 0.012, 0.004)
+    yy = traine.v[:, 1] / 0.84
+    tt = np.tile(BLEU, (len(yy), 1))
+    tt[yy > 0.40] = TURQ * 0.55 + BLEU * 0.45
+    tt[yy > 0.62] = TURQ
+    tt[yy > 0.82] = VIOLET
+    traine.teinte = tt
+    # courbée : le milieu rase le sol, le bout se relève
+    traine = traine.sculpte(lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] + 0.14 * np.clip((v[:, 1] / 0.84 - 0.55) / 0.45, 0.0, 1.0) ** 1.6], axis=1))
+    a.piece("traine", O.couche(traine, O.plan(base + Vector((0.0, 0.020, -0.035)), Vector((1.0, 0.0, 0.0)), Vector((0.0, 1.0, 0.0)))), None, poil=False)
 
     # ----- les pattes : sortent du ventre à la verticale du centre de gravité ; la gauche levée en plein pas -----
     for nom, c, plantee in (("D", -1, True), ("G", 1, False)):
@@ -97,13 +107,13 @@ def construire():
         else:
             pts = [(c * 0.060, -0.020, 0.290), (c * 0.070, -0.090, 0.215), (c * 0.068, -0.150, 0.165)]
             fin = Vector((c * 0.068, -0.150, 0.150))
-        a.piece("patte_" + nom, O.teinte(O.tube_r(pts, [0.024, 0.017, 0.013], 10), PATTE), None, poil=False)
+        a.piece("patte_" + nom, O.teinte(O.tube_r(pts, [0.030, 0.022, 0.018], 12), PATTE), None, poil=False)
         doigts = None
         for ang_ in (-34, 0, 34):
             r_ = math.radians(ang_)
             d = Vector((math.sin(r_), -math.cos(r_), 0.0))
-            tub = O.tube_r([(0.0, 0.0, 0.012), tuple(d * 0.040 + Vector((0, 0, 0.008))), tuple(d * 0.072 + Vector((0, 0, 0.004)))],
-                           [0.0095, 0.0085, 0.0065], 8).pose(fin + Vector((0.0, 0.0, 0.004)))
+            tub = O.tube_r([(0.0, 0.0, 0.012), tuple(d * 0.048 + Vector((0, 0, 0.008))), tuple(d * 0.086 + Vector((0, 0, 0.004)))],
+                           [0.0130, 0.0115, 0.0085], 8).pose(fin + Vector((0.0, 0.0, 0.004)))
             doigts = tub if doigts is None else doigts + tub
         a.piece("doigts_" + nom, O.teinte(doigts, PATTE), None, poil=False)
     return a

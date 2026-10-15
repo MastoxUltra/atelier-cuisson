@@ -57,7 +57,7 @@ def construire():
         s = v.copy()
         s[:, 1] += 0.040 * np.clip(v[:, 2] / 0.225, 0, 1) ** 2.0
         return s
-    bec = A.tour(A.profil([(0, 0), (0.020, 0.006), (0.016, 0.040), (0.010, 0.140), (0.007, 0.245), (0.004, 0.220), (0, 0.230)], 5), 24)
+    bec = A.tour(A.profil([(0, 0), (0.020, 0.006), (0.016, 0.040), (0.011, 0.130), (0.008, 0.200), (0.005, 0.240), (0, 0.256)], 5), 24)
     a.piece("bec", bec.sculpte(canne), IVOIRE, mat=B, poil=False)
     a.tete = C + dirige * 0.100
     for c in (1, -1):

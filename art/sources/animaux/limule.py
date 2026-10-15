@@ -1,6 +1,6 @@
-"""La limule en peluche, deuxième dessin : étrange et ancienne. Un casque en fer à cheval, lisse et bombé comme un
-bouclier, bronze patiné de vert-de-gris sur le bord, deux rivets noirs sur le dessus pour yeux et deux plus petits au
-front ; derrière, la plaque de l'abdomen à six pointes de chaque côté et une arête de piquants ; et le telson, un long
+"""La limule en peluche, deuxième dessin : étrange et ancienne. Un casque en fer à cheval, bas et lisse comme un
+bouclier, le large bord évasé patiné de vert-de-gris, deux grands yeux noirs en haricot sur les côtés et deux petits
+points au front ; derrière, la plaque de l'abdomen à six pointes de chaque côté et une arête de piquants ; et le telson, un long
 sabre charbon, droit, qui part vers l'arrière et vers le haut. Pas de visage, pas de sourire : elle n'a pas changé
 depuis quatre cents millions d'années et ne compte pas commencer. Elle avance un coin du casque levé, sur de
 petites pattes serrées sous le bord.
@@ -35,10 +35,11 @@ def construire():
     T = A.repere((0.0, 0.0, 0.0), (0, 0, 18))        # elle avance de biais : un coin du casque levé (la fiche ; 0 pour le jeu)
 
     # ----- le casque : un dôme lisse bombé en fer à cheval ; le bord arrière en échancrure, deux pointes aux coins -----
-    pc = A.profil([(0.0, 0.0), (0.150, 0.0), (0.205, 0.006), (0.222, 0.020), (0.205, 0.050), (0.170, 0.095), (0.120, 0.135), (0.060, 0.155), (0, 0.162)], 6)
+    pc = A.profil([(0.0, 0.0), (0.150, 0.0), (0.228, 0.002), (0.252, 0.014), (0.234, 0.030), (0.198, 0.060), (0.150, 0.094), (0.100, 0.120),
+                   (0.050, 0.136), (0, 0.141)], 6)
     casque = A.tour(pc, 64)
-    r_ = np.hypot(casque.v[:, 0], casque.v[:, 1]) / 0.222
-    bord = np.clip((r_ - 0.70) / 0.26, 0.0, 1.0)[:, None]
+    r_ = np.hypot(casque.v[:, 0], casque.v[:, 1]) / 0.252
+    bord = np.clip((r_ - 0.62) / 0.30, 0.0, 1.0)[:, None]
     casque.teinte = BRONZE * (1 - bord) + PATINE * bord
 
     def fer_a_cheval(v):
@@ -47,29 +48,38 @@ def construire():
         x = v[:, 0]
         arriere = y > 0.0
         s[arriere, 1] = (y * 0.55 - 0.045 * np.exp(-(x / 0.115) ** 2))[arriere]          # le bord arrière : une échancrure au milieu
-        s[:, 1] -= 0.020 * (y < 0) * np.clip(-y / 0.22, 0, 1)                            # le front avance un peu
+        s[:, 1] -= 0.020 * (y < 0) * np.clip(-y / 0.25, 0, 1)                            # le front avance un peu
         return s
     casque = casque.sculpte(fer_a_cheval)
     a.piece("casque", casque, None, mat=T @ A.repere((0.0, -0.060, 0.034), (-6, 0, 0)))
     RC = T @ A.repere((0.0, -0.060, 0.034), (-6, 0, 0))
     for c in (1, -1):                                                           # les pointes aux coins arrière du casque
         pointe = O.pointe(0.080, 0.022, 10)
-        a.piece("genale_" + ("G" if c > 0 else "D"), O.couche(O.teinte(pointe, SOMBRE), T @ A.cadre(Vector((c * 0.200, 0.030, 0.048)), (c * 0.55, 1.0, -0.05), (0, 0, 1))),
+        a.piece("genale_" + ("G" if c > 0 else "D"), O.couche(O.teinte(pointe, SOMBRE), T @ A.cadre(Vector((c * 0.215, 0.040, 0.026)), (c * 0.55, 1.0, -0.02), (0, 0, 1))),
                 None, poil=False)
 
-    # ----- les arêtes du dôme : une médiane et deux latérales, basses, d'un bout à l'autre ; les rivets-yeux -----
+    # ----- les arêtes du dôme : une médiane et deux latérales, basses, posées sur la peau du casque ; les yeux : deux grands, sur
+    #       les CÔTÉS, en haricot, et deux petits points serrés près du front -----
+    haut_ = (RC.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
+
+    def sur_casque(x, y):
+        p_, n_ = a.surface("casque", RC @ Vector((x, y, 0.010)), haut_)
+        return p_, n_
     for k, x0 in enumerate((0.0, -0.085, 0.085)):
-        pts = [tuple(RC @ Vector((x0 * (0.4 + 0.6 * f), -0.130 + 0.250 * f, 0.150 - 0.060 * f - 0.050 * abs(x0) * 4 * f))) for f in np.linspace(0, 1, 7)]
-        a.piece("arete_%d" % k, O.teinte(O.tube_r(pts, [0.009, 0.0125, 0.0135, 0.0135, 0.0125, 0.0105, 0.0080], 12), SOMBRE), None, poil=False)
+        pts = []
+        for f in np.linspace(0.0, 1.0, 9):
+            p_, n_ = sur_casque(x0 * (0.5 + 0.5 * f), -0.120 + 0.190 * f)
+            pts.append(tuple(p_ + n_ * 0.002))
+        a.piece("arete_%d" % k, O.teinte(O.tube_r(pts, [0.008, 0.011, 0.0125, 0.0125, 0.0120, 0.0115, 0.0105, 0.0095, 0.0080], 12), SOMBRE), None, poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        pos = RC @ Vector((c * 0.092, -0.030, 0.147))
-        riv = A.boule(1.0, 20, 10).etire(0.0125, 0.0160, 0.0085)
-        a.piece("rivet_" + nom, O.teinte(riv, CHARBON), None, mat=A.cadre(pos, RC.to_3x3() @ Vector((c * 0.25, -0.1, 1.0)), (0, 1, 0)), poil=False)
+        pos, n_ = a.surface("casque", RC @ Vector((0.0, -0.030, 0.030)), RC.to_3x3() @ Vector((c * 0.95, -0.12, 0.42)))
+        oeil = A.boule(1.0, 24, 12).etire(0.0115, 0.0270, 0.0095)
+        a.piece("rivet_" + nom, O.teinte(oeil, CHARBON), None, mat=A.cadre(pos + n_ * 0.002, n_, RC.to_3x3() @ Vector((0.0, 1.0, 0.0))), poil=False)
     for nom, c in (("g", 1), ("d", -1)):
-        pos = RC @ Vector((c * 0.018, -0.120, 0.150))
+        pos, n_ = sur_casque(c * 0.020, -0.135)
         riv = A.boule(1.0, 14, 8).etire(0.0062, 0.0062, 0.0042)
-        a.piece("point_" + nom, O.teinte(riv, CHARBON), None, pos=tuple(pos), poil=False)
-    a.tete = Vector(RC @ Vector((0.0, -0.160, 0.130)))
+        a.piece("point_" + nom, O.teinte(riv, CHARBON), None, mat=A.cadre(pos + n_ * 0.001, n_, (0, 1, 0)), poil=False)
+    a.tete = Vector(RC @ Vector((0.0, -0.160, 0.090)))
 
     # ----- l'abdomen : une plaque en hexagone derrière le casque, six pointes par côté, une arête de piquants -----
     def hexa(v):
@@ -96,7 +106,7 @@ def construire():
     a.piece("piquants", O.teinte(O.couche(dos, T), SOMBRE), None, poil=False)
 
     # ----- le telson : un long sabre charbon, droit, qui part vers l'arrière et vers le haut, un peu relevé au bout -----
-    telson = A.tour(A.profil([(0.034, 0), (0.030, 0.100), (0.024, 0.250), (0.016, 0.400), (0.008, 0.510), (0, 0.560)], 4), 3 * 8)
+    telson = A.tour(A.profil([(0.026, 0), (0.023, 0.100), (0.018, 0.250), (0.012, 0.400), (0.006, 0.520), (0, 0.580)], 4), 3 * 8)
     telson.teinte = np.tile(CHARBON, (len(telson.v), 1))
     a.piece("telson", O.couche(telson, T @ A.cadre(Vector((0.0, 0.340, 0.040)), (0.0, 1.0, 0.34), (0, 0, 1))), None, poil=False)
 

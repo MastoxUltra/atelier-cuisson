@@ -87,25 +87,25 @@ def construire():
 
     # ----- la tête : petite, étroite, le museau crème ; penchée vers nous d'en haut ; deux ossicônes à houppe, les oreilles -----
     centre, avant, nuque = enc.cadre(Lc)
-    l, p = math.radians(40.0), math.radians(-26.0)
+    l, p = math.radians(40.0), math.radians(-8.0)
     nez = Vector((math.sin(l) * math.cos(p), -math.cos(l) * math.cos(p), math.sin(p)))
     T = A.cadre(Vector(centre) + Vector((0.0, -0.020, 0.040)), nez, Vector((0, 0, 1)))
     T3 = T.to_3x3()
-    tete = fuseau([(0.0, 0.0), (0.05, 0.062), (0.22, 0.078), (0.50, 0.062), (0.75, 0.056), (0.92, 0.056), (1.0, 0.0)], 0.300, 56, 0.006)
-    tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.4)[:, None] | (tete.v[:, 2] > 0.235)[:, None], CREME, MIEL)
+    tete = fuseau([(0.0, 0.0), (0.05, 0.060), (0.20, 0.076), (0.45, 0.056), (0.70, 0.046), (0.90, 0.046), (0.97, 0.040), (1.0, 0.0)], 0.360, 56, 0.006)
+    tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.4)[:, None] | (tete.v[:, 2] > 0.315)[:, None], CREME, MIEL)
     a.piece("tete", tete.sculpte(lambda v: v * [0.84, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.040, -0.060)))
     a.tete = T @ Vector((0, 0.040, 0.140))
-    a.piece("nez", A.boule(1.0, 20, 10).etire(0.034, 0.026, 0.026), CORNE, mat=T @ A.repere((0, 0.030, 0.240)), poil=False)
+    a.piece("nez", A.boule(1.0, 20, 10).etire(0.034, 0.026, 0.026), CORNE, mat=T @ A.repere((0, 0.026, 0.300)), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.040, 0.050)), T3 @ Vector((c * 0.84, 0.42, 0.06)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0155)
         a.piece("cils_" + nom, K.paupiere(0.019, 0.20), BRUN, mat=A.cadre(pos + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
-        oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.019, 0.060), (0.013, 0.108), (0, 0.118)], 5), 18)
+        oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.019, 0.070), (0.013, 0.130), (0, 0.150)], 5), 18)
         a.piece("ossicone_" + nom, oss, tuple(MIEL), mat=A.cadre(T @ Vector((c * 0.030, 0.092, -0.040)), Vector((c * 0.10, 0.20, 0.97)), (0, 1, 0)))
         a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.024, 0.024, 0.026), BRUN, pos=tuple(T @ Vector((c * 0.034, 0.108, -0.040)) + Vector((c * 0.012, 0.024, 0.116))))
         po = A.profil([(0, 0), (0.030, 0.008), (0.040, 0.032), (0.030, 0.060), (0.010, 0.078), (0, 0.084)], 5)
         E = A.cadre(T @ Vector((c * 0.064, 0.056, -0.034)), Vector((c * 0.95, 0.10, 0.28)), (0, 0, 1))
-        a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.0, 0.36, 1.0), [(0.060, tuple(MIEL)), (9, BRUN)]), None, mat=E)
+        a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.35, 0.36, 1.40), [(0.060, tuple(MIEL)), (9, BRUN)]), None, mat=E)
 
     # ----- les jambes : quatre longues, fines, les genoux noueux ; pavés en haut, crème en bas ; les sabots sombres -----
     def jambe(depart, plan, graine):

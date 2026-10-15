@@ -44,7 +44,9 @@ def construire():
         s[:, 0] *= 0.96
         s[:, 1] *= 1.06
         s[:, 2] = np.where(v[:, 2] < 0, v[:, 2] * 0.75, v[:, 2] * 1.0)
-        s[:, 1] -= 0.05 * np.clip(-v[:, 2], 0, 1) * (v[:, 1] < 0)       # la mâchoire inférieure avance
+        r_ = np.clip(v[:, 1] / 1.0, 0.0, 1.0)
+        s[:, 0] *= 1.0 - 0.32 * r_ ** 1.4                               # le derrière s'effile en queue
+        s[:, 2] *= 1.0 - 0.22 * r_ ** 1.4
         return s
     corps = A.boule(1.0, 64, 32)
     u = corps.v / np.maximum(np.linalg.norm(corps.v, axis=1, keepdims=True), 1e-9)
@@ -63,32 +65,86 @@ def construire():
     a.broderie("gueule_haut", A.courbe(lèvre, 4), 0.0075, FIL)
     menton = [a.trace("corps", CENTRE, [d], 0.004)[0] for d in bas]
     a.broderie("gueule_bas", A.courbe(menton, 4), 0.0075, FIL)
+    # l'intérieur de la gueule : une bande sombre qui suit la peau entre la lèvre du haut et celle du bas
+    rangs = []
+    for r_ in np.linspace(0.0, 1.0, 5):
+        ligne = []
+        for h_, b_ in zip(haut, bas):
+            q = a.trace("corps", CENTRE, [h_ * (1 - r_) + b_ * r_], 0.0035)
+            ligne.append(np.array(q[0]) if q else None)
+        rangs.append(ligne)
+    pts_g, faces_g = [], []
+    for r_ in range(5):
+        for c_ in range(13):
+            p_ = rangs[r_][c_]
+            pts_g.append(p_ if p_ is not None else rangs[r_][max(c_ - 1, 0)])
+    for r_ in range(4):
+        for c_ in range(12):
+            q0 = r_ * 13 + c_
+            faces_g.append((q0, q0 + 1, q0 + 14, q0 + 13))
+    P_ = np.array(pts_g)
+    n_ = len(P_)
+    toutes_ = list(faces_g) + [tuple(q + n_ for q in reversed(f)) for f in faces_g]
+    bande = A.Maille(np.vstack([P_, P_]), toutes_)
+    bande.teinte = np.tile(BOUCHE, (2 * n_, 1))
+    a.piece("palais", bande, None, poil=False)
+
+    # la mâchoire du bas : une vraie pièce, qui avance en avant du museau ; ses crocs sont plantés sur son bord
+    JC = Vector((0.0, -0.205, 0.140))
+    jaw = A.boule(1.0, 40, 20).etire(0.185, 0.205, 0.066)
+    jt = np.tile(AUBERGINE * 1.05, (len(jaw.v), 1))
+    jt[jaw.v[:, 2] < -0.01] = GRIS
+    jaw.teinte = jt
+    a.piece("machoire", jaw, None, pos=tuple(JC))
     rng = np.random.default_rng(4)
-    for k, u_ in enumerate(np.linspace(-0.85, 0.85, 11)):
-        for rang, y_ in (("h", 0.06 + 0.15 * u_ * u_), ("b", -0.10 + 0.19 * u_ * u_)):
-            q = a.trace("corps", CENTRE, [Vector((0.92 * u_, -0.96, y_ + (0.02 if rang == "b" else -0.02)))], 0.003)
-            if not q:
-                continue
-            long = 0.050 + 0.030 * rng.random()
-            dent = A.tour(A.profil([(0.014, 0), (0.0095, 0.020), (0.0042, 0.042), (0, long)], 3), 8)
-            sens = (0.0, 0.3, -1.0) if rang == "h" else (0.0, 0.3, 1.0)
-            a.piece("dent_%s%d" % (rang, k), couche(dent, A.cadre(q[0], sens, (0, 1, 0))), DENT, poil=False)
+    for k_, phi in enumerate(np.linspace(-1.20, 1.20, 9)):
+        d_ = Vector((math.sin(phi) * 0.95, -math.cos(phi), 0.46))
+        try:
+            pb, nb = a.surface("machoire", JC, d_)
+        except ValueError:
+            continue
+        long = 0.060 + 0.050 * rng.random()
+        sens = Vector((0.0, 0.18, 1.0)).normalized()
+        dent = A.tour(A.profil([(0.017, 0), (0.0115, 0.026), (0.0050, 0.056), (0, long)], 3), 8)
+        a.piece("dent_bas%d" % k_, couche(dent, A.cadre(pb - sens * 0.010, sens, (0, 1, 0))), DENT, poil=False)
+    # les grands crocs du haut : plantés dans la lèvre, longs, un peu courbés vers l'intérieur
+    courbe_h = A.courbe([tuple(p_) for p_ in lèvre], 3)
+    for k in range(4, len(courbe_h) - 4, 3):
+        base = Vector(tuple(courbe_h[k]))
+        long = 0.060 + 0.055 * rng.random()
+        sens = Vector((0.0, 0.22, -1.0)).normalized()
+        dent = A.tour(A.profil([(0.018, 0), (0.0120, 0.026), (0.0052, 0.058), (0, long)], 3), 8)
+        a.piece("dent_haut%d" % k, couche(dent, A.cadre(base - sens * 0.010, sens, (0, 1, 0))), DENT, poil=False)
 
     # ----- la lanterne : une tige qui part du front, se penche devant le museau et finit par une boule jaune citron -----
     tige = A.tube(A.courbe([(0.0, -0.06, 0.470), (0.0, -0.18, 0.640), (0.0, -0.36, 0.680), (0.0, -0.46, 0.580)], 5),
                   lambda t_: 0.014 - 0.006 * t_, 12)
     tige.teinte = np.tile(AUBERGINE * 1.1, (len(tige.v), 1))
     a.piece("tige", tige, None, poil=False)
-    a.piece("lanterne", A.boule(1.0, 28, 14).etire(0.052, 0.052, 0.058), CITRON, pos=(0.0, -0.46, 0.540), poil=False)
-    a.piece("halo", A.tore(0.062, 0.0045, 28, 6), CITRON, pos=(0.0, -0.46, 0.540), rot=(90, 0, 0), poil=False)
+    a.piece("lanterne", A.boule(1.0, 28, 14).etire(0.056, 0.056, 0.062), CITRON, pos=(0.0, -0.46, 0.540), poil=False)
+    for k in range(5):
+        th = math.tau * k / 5.0 + 0.4
+        d_ = Vector((math.cos(th) * 0.8, -0.35 + 0.2 * math.sin(th), 0.55 * math.sin(th) - 0.55))
+        fil_ = A.tour(A.profil([(0.010, 0), (0.0065, 0.016), (0.0035, 0.032), (0, 0.044)], 3), 8)
+        a.piece("filament_%d" % k, couche(fil_, A.cadre(Vector((0.0, -0.46, 0.540)) + d_.normalized() * 0.050, d_, (0, 0, 1))), CITRON, poil=False)
+
+    # ----- la queue : le derrière de la poire se prolonge en un pédoncule, et la caudale en éventail -----
+    ped = O.tube_r([(0.0, 0.22, 0.250), (0.0, 0.34, 0.252), (0.0, 0.46, 0.262), (0.0, 0.54, 0.270)], [0.115, 0.080, 0.050, 0.034], 20)
+    ped.teinte = np.tile(AUBERGINE, (len(ped.v), 1))
+    a.piece("queue", ped, None)
+    caud = O.nageoire([(0.0, 0.0), (0.05, 0.05), (0.13, 0.11), (0.19, 0.08), (0.15, 0.025), (0.20, 0.0), (0.15, -0.025), (0.19, -0.08),
+                       (0.13, -0.11), (0.05, -0.05)], 0.014, GRIS * 0.9, 0.005)
+    a.piece("caudale", couche(caud, O.plan_vertical((0.0, 0.54, 0.270), (0.0, 1.0, 0.0))), None, poil=False)
 
     # ----- les yeux : tout petits, haut sur le côté, l'air pas content ; les nageoires moignons -----
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("corps", Vector((0.0, 0.0, 0.250)), Vector((c * 0.74, -0.60, 0.62)))
         a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0175)
-        nag = A.boule(1.0, 20, 10).etire(0.030, 0.085, 0.110)
-        nag.teinte = np.tile(GRIS, (len(nag.v), 1))
-        a.piece("nageoire_" + nom, nag, None, pos=(c * 0.285, 0.020, 0.115), rot=(0, 0, c * 18), poil=False)
+        feuille = O.nageoire([(0.0, 0.0), (0.04, 0.030), (0.10, 0.044), (0.17, 0.030), (0.21, 0.0), (0.17, -0.030), (0.10, -0.040), (0.04, -0.028)],
+                             0.012, GRIS, 0.004)
+        ex = Vector((c * 0.25, 0.78, -0.50))
+        ey = Vector((0.0, 0.50, 0.80))
+        a.piece("pectorale_" + nom, couche(feuille, O.plan((c * 0.270, 0.020, 0.170), ex, ey)), None, poil=False)
     a.tete = Vector((0.0, -0.30, 0.240))
     return a
 
