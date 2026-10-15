@@ -1336,6 +1336,91 @@ def gonfler(P, F, L, h, reglages=None, noms=None, base=None):
     return X, infos
 
 
+SOURCILS = ("sourcil",)          # sur la base gonflée, retirés : des traits au-dessus des yeux qui font un air inquiet (15/10)
+INTERIEURS = ("ourlet", "interieur", "dedans_")   # l'intérieur des oreilles : peint dans le pelage et creusé, la pièce retirée
+
+
+def _retirer(a, garder):
+    """Retire de l'animal les pièces que garder(p) refuse ; rend leurs noms."""
+    noms = []
+    for casier in (a._tissus, a._fils, a._durs):
+        for cle, j in list(casier.items()):
+            parties = [p for p in j.pieces if not garder(p)]
+            if parties:
+                noms += [p["nom"] for p in parties]
+                j.pieces = [p for p in j.pieces if garder(p)]
+                if not j.pieces:
+                    del casier[cle]
+    return noms
+
+
+def _oreilles_douces(a, liens, X, Q):
+    """L'intérieur des oreilles (INTERIEURS) : au lieu d'une pièce de feutrine posée (des triangles plats de plastique,
+    Principal, 15/10), la peau qu'elle couvrait prend sa couleur (le pelage, sans arête) et se creuse en douceur (au plus
+    0,3 fois l'épaisseur de l'oreille) ; la pièce est retirée. X : les points finals de la peau (numéros de P)."""
+    T = _triangles(Q)
+    if _volume(X, T) < 0:
+        T = T[:, [0, 2, 1]]
+    n = len(X)
+    E = _aretes(T)
+    deg = np.maximum(np.bincount(E[:, 0], minlength=n) + np.bincount(E[:, 1], minlength=n), 1).astype(float)
+    nv = _normales(X, T)
+    couvert = np.zeros(n, bool)
+    teinte = {}
+    pieces = []
+    for cle, j in a._tissus.items():
+        for p in j.pieces:
+            if p["nom"].lower().startswith(INTERIEURS) and not p.get("fusion") and len(p["monde"]):
+                c = np.asarray(cle[0], float) if cle[0] is not None else np.asarray(p["teinte"], float).reshape(-1, 3).mean(axis=0)
+                pieces.append((p, c))
+    if not pieces:
+        return []
+    faites = []
+    for p, c in pieces:
+        Y = p["monde"]
+        D = float(np.ptp(Y, axis=0).max())
+        arbre = BVHTree.FromPolygons(Y.tolist(), [tuple(int(i) for i in f) for f in p["faces"]])
+        idx = _dans(X, Y.min(axis=0), Y.max(axis=0), 0.3 * D)
+        ici = []
+        for i, x, nn in zip(idx.tolist(), X[idx].tolist(), nv[idx].tolist()):
+            o = Vector(x) + Vector(nn) * D                           # vu de dehors : la pièce est-elle devant ce point ?
+            r = arbre.ray_cast(o, -Vector(nn), D + 0.002 * D)
+            if r[0] is not None:
+                ici.append(i)
+        if ici:
+            ici = np.array(ici, np.int64)
+            couvert[ici] = True
+            for i in ici.tolist():
+                teinte[i] = c
+            faites.append("%s (%d points)" % (p["nom"], len(ici)))
+    if not couvert.any():
+        return [nm + " (rien dessous, laissée)" for nm in (p["nom"] for p, _c in pieces)]
+    # le creux : doux au bord, au plus 0,3 fois l'épaisseur de l'oreille sous chaque point
+    w = couvert.astype(float)
+    for _ in range(4):
+        w = 0.5 * w + 0.5 * _voisins(w, E, deg)
+    w = np.clip((w - 0.15) / 0.85, 0.0, 1.0)
+    w = w * w * (3 - 2 * w)
+    zone = np.nonzero(w > 0.01)[0]
+    arbre_peau = BVHTree.FromPolygons(X.tolist(), T.tolist())
+    ep = np.zeros(n)
+    for i, x, nn in zip(zone.tolist(), (X[zone] - nv[zone] * 1e-4).tolist(), (-nv[zone]).tolist()):
+        r = arbre_peau.ray_cast(x, nn, 1.0)
+        ep[i] = r[3] if r[0] is not None else 0.0
+    X = X.copy()
+    X[zone] -= nv[zone] * (0.3 * ep[zone] * w[zone])[:, None]
+    for q, vidx in liens:                                            # la peau prend la couleur et la forme
+        q["monde"] = X[vidx].copy()
+        t_ = np.asarray(q["teinte"], float).copy()
+        for k, i in enumerate(vidx.tolist()):
+            if i in teinte:
+                t_[k] = teinte[i]
+        q["teinte"] = t_
+    retirees = {id(p) for p, _c in pieces}
+    _retirer(a, lambda q: id(q) not in retirees)
+    return faites
+
+
 def _repeser(p, n):
     """Une pièce refaite avec n points : sa teinte et ses poids d'os (la moyenne de chacun) suivent."""
     p["teinte"] = np.tile(np.asarray(p["teinte"], float).reshape(-1, 3).mean(axis=0), (n, 1))
@@ -1347,16 +1432,9 @@ def _paupieres_ouvertes(a):
     """Sur la base gonflée, les paupières lourdes (« lourde… ») refaites : le bord à COUPE_MIN rayon au moins au-dessus du
     milieu de l'œil, fines (EPAISSEUR_PAUPIERE rayon), le bord horizontal. l'auteur (15/10) : jamais d'œil mi-clos ni grognon ;
     une paupière épaisse cache l'œil vu de trois quarts. Rend la liste « nom : coupe avant -> après »."""
+    sourcils = ["%s retiré" % nm for nm in _retirer(a, lambda p: p.get("fusion") or not p["nom"].lower().startswith(SOURCILS))]
     if PAUPIERES_LOURDES == "retirer":                               # l'œil ouvert, sans trait au-dessus (Principal, 15/10)
-        faites = []
-        for cle, j in list(a._tissus.items()):
-            lourdes = [p for p in j.pieces if p["nom"].lower().startswith("lourde")]
-            if lourdes:
-                faites += ["%s retirée" % p["nom"] for p in lourdes]
-                j.pieces = [p for p in j.pieces if not p["nom"].lower().startswith("lourde")]
-                if not j.pieces:
-                    del a._tissus[cle]
-        return faites
+        return sourcils + ["%s retirée" % nm for nm in _retirer(a, lambda p: p.get("fusion") or not p["nom"].lower().startswith("lourde"))]
     import atelier as A
     e = float(a.echelle)
     toutes = a._toutes()

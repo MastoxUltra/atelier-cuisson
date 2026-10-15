@@ -18,6 +18,8 @@ import atelier as A
 import matieres as M
 import peluche as K
 
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
+
 
 def propres(points, eps=2e-4):
     """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""
@@ -66,6 +68,7 @@ def construire():
     L = fil.long
     pts = [(0.0, 0.0), (0.02, 0.150), (0.08, 0.205), (0.20, 0.232), (0.34, 0.225), (0.46, 0.250), (0.56, 0.330), (0.66, 0.345),
            (0.74, 0.300), (0.82, 0.230), (0.88, 0.190), (0.94, 0.140), (0.985, 0.100), (1.0, 0.0)]
+    pts = [(f_, r_ * 0.88) for f_, r_ in pts]       # le gonflage élargit d'environ 30 % : on part plus mince
     corps = fuseau(pts, L, 80)
     x, y, z = corps.v[:, 0], corps.v[:, 1], corps.v[:, 2]
     f = z / L
@@ -78,24 +81,29 @@ def construire():
     a.piece("corps", corps.sculpte(fil.couche), None)
     a.tete = Vector(fil.cadre(0.90 * L)[0])
 
-    # ----- la crinière du front, la barbe ; les cornes courtes ; les petits yeux sous la crinière ; les narines -----
-    c1, av1, nq1 = fil.cadre(0.86 * L)
-    lat1 = np.cross(np.array(av1), np.array(nq1))
-    a.piece("criniere", A.boule(1.0, 28, 14).etire(0.170, 0.130, 0.150), tuple(LAINE),
-            pos=tuple(np.array(c1) + np.array(nq1) * 0.170 + np.array(av1) * 0.020))
-    c2, av2, nq2 = fil.cadre(0.95 * L)
-    a.piece("barbe", A.boule(1.0, 24, 12).etire(0.060, 0.070, 0.160), tuple(NOIR),
-            pos=tuple(np.array(c2) - np.array(nq2) * 0.130 + np.array(av2) * 0.020), rot=(-10, 0, 0))
+    # ----- la TÊTE : une grosse pièce bien visible, posée bas devant la bosse (le crâne large, le museau court et carré) ;
+    #       la crinière du front, la barbe, deux cornes courtes qui se relèvent, les yeux, les narines -----
+    c1, av1, nq1 = fil.cadre(0.955 * L)
+    c1, av1, nq1 = np.array(c1), np.array(av1), np.array(nq1)
+    lat1 = np.cross(av1, nq1)
+    centre = Vector(c1 + av1 * 0.150 - nq1 * 0.060)
+    Mh = A.cadre(centre, Vector(av1), Vector(nq1))
+    M3 = Mh.to_3x3()
+    crane = A.boule(1.0, 48, 24)
+    crane.teinte = np.tile(NOIR, (len(crane.v), 1))
+    a.piece("tete", crane.etire(0.200, 0.210, 0.250), None, mat=Mh)
+    a.piece("museau", A.boule(1.0, 36, 18).etire(0.135, 0.120, 0.130), tuple(NOIR * 1.35), mat=Mh @ A.repere((0, -0.080, 0.215)))
+    a.tete = Mh @ Vector((0, -0.020, 0.280))
+    a.piece("criniere", A.boule(1.0, 36, 18).etire(0.220, 0.150, 0.210), tuple(LAINE), mat=Mh @ A.repere((0, 0.150, -0.020)))
+    a.piece("barbe", A.boule(1.0, 28, 14).etire(0.070, 0.150, 0.080), tuple(NOIR), mat=Mh @ A.repere((0, -0.220, 0.130)))
     for nom, c in (("G", 1), ("D", -1)):
-        base = np.array(c1) + np.array(nq1) * 0.150 + lat1 * c * 0.150
-        ch = [tuple(base), tuple(base + lat1 * c * 0.100 + np.array(nq1) * 0.020), tuple(base + lat1 * c * 0.160 + np.array(nq1) * 0.130)]
-        a.piece("corne_" + nom, A.tube(A.courbe(propres(ch), 5), lambda t: 0.036 - 0.024 * t, 12), CORNE, poil=False)
-        c3, av3, nq3 = fil.cadre(0.90 * L)
-        p, n = a.surface("corps", Vector(c3), Vector(np.array([c * 0.90, 0.0, 0.0]) + np.array(nq3) * 0.10 - np.array(av3) * 0.30))
+        base = Mh @ Vector((c * 0.170, 0.110, 0.020))
+        bout = Mh @ Vector((c * 0.300, 0.230, 0.100))
+        milieu = Mh @ Vector((c * 0.245, 0.150, 0.050))
+        a.piece("corne_" + nom, A.tube(A.courbe([tuple(base), tuple(milieu), tuple(bout)], 5), lambda t: 0.034 - 0.020 * t, 12), CORNE, poil=False)
+        p, n = a.surface("tete", centre, M3 @ Vector((c * 0.90, 0.20, 0.35)))
         a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0200)
-        c4, av4, nq4 = fil.cadre(0.985 * L)
-        a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.016, 0.022, 0.012), CORNE,
-                pos=tuple(np.array(c4) - np.array(nq4) * 0.020 + lat1 * c * 0.032), poil=False)
+        a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.020, 0.020, 0.012), CORNE, mat=Mh @ A.repere((c * 0.050, -0.070, 0.340)), poil=False)
 
     # ----- les pattes : les avant épaisses, en culottes de laine sombres ; les arrière minces et claires ; sabots noirs -----
     def pilier(haut, bas, r, laine):
@@ -130,8 +138,8 @@ JAMBE = 0.733                                        # de l'épaule (ou de la ha
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.418, 0.947)),
-    ('tete', 'corps', (-0.002, -1.034, 0.651)),
+    ('corps', 'racine', (0.000, 0.365, 0.863)),
+    ('tete', 'corps', (-0.000, -1.022, 0.487)),
     ('patte_av_G', 'corps', (0.220, -0.551, 0.733)),
     ('patte_ar_G', 'corps', (0.210, 0.768, 0.733)),
     ('queue', 'corps', (-0.002, 0.977, 0.786)),
@@ -139,9 +147,10 @@ OS = [
 
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True), ('criniere', 'corps'),
-    ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True), ('pinceau', 'queue'), ('narine', 'tete'),
-    ('corps', 'corps'), ('queue', 'queue'), ('barbe', 'tete'), ('corne', 'tete'), ('oeil', 'tete'),
-    ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
+    ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True), ('pinceau', 'queue'), ('museau', 'tete'),
+    ('narine', 'tete'), ('corps', 'corps'), ('queue', 'queue'), ('barbe', 'tete'), ('corne', 'tete'),
+    ('tete', 'tete'), ('oeil', 'tete'), ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'),
+    ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
 def repos(t):

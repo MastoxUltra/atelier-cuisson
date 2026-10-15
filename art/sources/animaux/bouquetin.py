@@ -60,7 +60,7 @@ def construire():
     z = corps.v[:, 2]
     t = np.tile(PIERRE, (len(z), 1))
     t[(ang > 2.20) & (z < 0.50)] = PALE
-    t[(ang > 1.50) & (z > 0.58)] = CHOCO                                           # le plastron
+    t[(ang > 2.45) & (z > 0.60)] = CHOCO                                           # le plastron : sous la poitrine seulement
     corps.teinte = t
 
     def tonneau(v):
@@ -96,7 +96,7 @@ def construire():
     Mu = NARGUE @ A.repere((0, -0.050, -0.030), (110, 0, 0))       # dans ce repère : X la gauche, Y le dessus du nez, Z vers le bout
     Mu3 = Mu.to_3x3()
     museau = A.tour(pm, 40).etire(1.0, 0.86, 1.0)
-    museau.teinte = np.tile(PALE * 0.78 + PIERRE * 0.22, (len(museau.v), 1))
+    museau.teinte = np.tile(PIERRE, (len(museau.v), 1))             # une face brune unie (Principal, 15/10)
     a.piece("museau", museau, None, mat=Mu)
     a.piece("nez", A.boule(1.0, 24, 12).etire(0.026, 0.015, 0.016), M.hexa("#3a2a2c"), mat=Mu @ A.repere((0, 0.010, 0.168)), poil=False)
     levre = [a.trace("museau", Mu @ Vector((0, 0, z_)), [Mu3 @ Vector((math.cos(math.radians(d)), math.sin(math.radians(d)), 0))])[0]
@@ -109,7 +109,7 @@ def construire():
         a.oeil("oeil_" + nom, p + n * 0.002, n, 0.0165)
 
     # ----- la barbiche : un petit pinceau chocolat sous le menton -----
-    barbiche = A.tour(A.profil([(0, 0), (0.026, 0.010), (0.028, 0.055), (0.016, 0.130), (0, 0.170)], 5), 24)
+    barbiche = A.tour(A.profil([(0, 0), (0.016, 0.008), (0.017, 0.035), (0.010, 0.070), (0, 0.095)], 5), 24).etire(0.8, 1.0, 1.0)
     barbiche.teinte = np.tile(CHOCO * 1.1, (len(barbiche.v), 1))
     a.piece("barbiche", barbiche, None, pos=Mu @ Vector((0, -0.040, 0.100)), rot=A.viser(vers(0, -0.18, -1)))
 
@@ -121,17 +121,20 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         tombe = Vector((0.90 * c, 0.30, 0.05)).normalized()
         racine = Vector((0.086 * c, 0.030, 0.040))
-        oreille = A.boule(1.0, 28, 14).sculpte(feuille).etire(0.042, 0.013, 0.080)
+        oreille = A.tour(A.profil([(0.040, 0), (0.038, 0.035), (0.026, 0.075), (0.010, 0.108), (0, 0.125)], 4), 24).etire(1.0, 0.38, 1.0)
         oreille.teinte = np.tile(PIERRE * 0.95, (len(oreille.v), 1))
-        a.piece("oreille_" + nom, oreille, None, mat=NARGUE @ A.repere(racine + tombe * 0.066, A.viser(tombe)))
+        a.piece("oreille_" + nom, oreille, None, mat=NARGUE @ A.repere(racine + tombe * 0.020, A.viser(tombe)))
 
     # ----- les cornes : deux grands arcs d'ivoire, gros à la base, qui montent et se couchent en arrière, rayés de nœuds -----
     arc = ((0.048, 0.020, 0.070), (0.062, 0.090, 0.200), (0.082, 0.210, 0.300), (0.096, 0.350, 0.310), (0.102, 0.470, 0.235), (0.100, 0.560, 0.105))
     for nom, c in (("G", 1), ("D", -1)):
         fil = A.courbe([tuple(NARGUE @ Vector((x * c, y, z_))) for x, y, z_ in arc], 12)
-        corne = A.tube(fil, lambda t_: (0.050 - 0.036 * t_ ** 0.9) * (1 + 0.13 * max(0.0, math.cos(math.tau * 8.5 * t_)) ** 2), 18)
+        corne = A.tube(fil, lambda t_: (0.050 - 0.036 * t_ ** 0.9) * (1 + 0.34 * max(0.0, math.cos(math.tau * 7.0 * t_)) ** 1.4), 18)
         corne.teinte = np.tile(IVOIRE, (len(corne.v), 1))
         a.piece("corne_" + nom, corne, None, poil=False)
+        socle = A.boule(1.0, 24, 12).etire(0.060, 0.060, 0.046)                    # la touffe du crâne où naît la corne (l'ivoire ne bave plus sur le front)
+        socle.teinte = np.tile(PIERRE, (len(socle.v), 1))
+        a.piece("socle_" + nom, socle, None, mat=NARGUE @ A.repere((c * 0.052, 0.024, 0.060)))
 
     # ----- les quatre pattes : la jambe est une pièce tournée à sabot (comme celles de la chèvre), courte, forte, le genou
     #       gonflé ; l'épaule ou le gigot en haut ; la chaussette chocolat -----

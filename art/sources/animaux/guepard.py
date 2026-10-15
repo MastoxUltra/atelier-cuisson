@@ -85,8 +85,13 @@ def construire():
     # ----- la tête : petite et ronde, le museau court, les larmes noires de l'œil à la gueule ; haute, tournée vers nous -----
     H = A.cadre(Vector((0.0, -0.600, 0.840)), Vector((0.40, -1.0, -0.14)).normalized(), Vector((0, 0, 1)))
     H3 = H.to_3x3()
-    tete = fuseau([(0.0, 0.0), (0.08, 0.075), (0.28, 0.092), (0.55, 0.076), (0.82, 0.056), (0.96, 0.046), (1.0, 0.0)], 0.250, 56, 0.005)
+    tete = fuseau([(0.0, 0.0), (0.08, 0.075), (0.28, 0.092), (0.55, 0.068), (0.82, 0.048), (0.96, 0.040), (1.0, 0.0)], 0.250, 56, 0.005)
     tacheter(tete, 8, 60, 0.012, ventre=lambda v: (v[:, 2] > 0.190) | (np.abs(np.arctan2(v[:, 0], v[:, 1])) > 2.5))
+    # les larmes noires, peintes à plat : de l'œil, qui descendent sur la joue jusqu'au coin de la gueule (elles se voient)
+    ang = np.arctan2(np.abs(tete.v[:, 0]), tete.v[:, 1])
+    u = np.clip((tete.v[:, 2] - 0.105) / 0.090, 0.0, 1.0)
+    larme_peinte = (tete.v[:, 2] > 0.100) & (tete.v[:, 2] < 0.200) & (np.abs(ang - (1.30 + 0.85 * u)) < 0.24)
+    tete.teinte[larme_peinte] = NOIR
     a.piece("tete", tete, None, mat=H @ A.repere((0, 0, -0.060)))
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.022, 0.016, 0.014), CHARBON, mat=H @ A.repere((0, 0.034, 0.178)), poil=False)
     a.tete = H @ Vector((0, 0.020, 0.120))
@@ -95,8 +100,6 @@ def construire():
         a.rustine("iris_" + nom, "tete", H @ Vector((0, 0.020, 0.040)), regard, 0.20, OEIL, 0.003, 0)
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.040)), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0145)
-        larme = [H3 @ Vector((c * (0.80 - 0.10 * t), 0.20 - 0.42 * t, 0.14 + 0.22 * t)) for t in np.linspace(0, 1, 6)]
-        a.broderie("larme_" + nom, A.courbe(propres(a.trace("tete", H @ Vector((0, 0.020, 0.040)), larme, 0.003)), 4), 0.0080, tuple(NOIR))
         po = A.profil([(0, 0), (0.030, 0.008), (0.038, 0.030), (0.030, 0.052), (0.012, 0.066), (0, 0.072)], 5)
         E = A.cadre(H @ Vector((c * 0.058, 0.060, -0.020)), H3 @ Vector((c * 0.50, 0.85, -0.15)), H3 @ Vector((c * 0.2, 0.0, 1.0)))
         a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.0, 0.42, 1.0), [(0.050, tuple(OR)), (9, tuple(NOIR))]), None, mat=E)

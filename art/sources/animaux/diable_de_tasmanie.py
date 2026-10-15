@@ -67,17 +67,20 @@ def construire():
     corps = fuseau([(0.0, 0.0), (0.04, 0.090), (0.16, 0.130), (0.46, 0.145), (0.76, 0.142), (0.93, 0.118), (0.985, 0.075), (1.0, 0.0)], L, 72)
     th = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     corps.teinte = np.where((th > 2.5)[:, None], CENDRE, CHARBON)
+    # la bande blanche du poitrail, PEINTE sur le corps (le patch cousu se perdait dans le poil) : un croissant d'un flanc à l'autre
+    f_ = corps.v[:, 2] / L
+    bande = (f_ > 0.80) & (f_ < 0.90) & (th > 0.9) & (th < 2.45)
+    corps.teinte[bande] = BLANC
     a.piece("corps", corps.sculpte(fil.couche), None)
     # la barre blanche : une large bande en croissant en travers de la poitrine (devant, de flanc à flanc)
-    a.rustine("poitrine", "corps", Vector((0.0, -0.100, 0.190)), Vector((0.0, -0.90, -0.34)), 0.42, BLANC, 0.003, 0)
 
     # ----- le cou fort et la TÊTE : large, lourde, portée bas ; le museau court, la gueule fermée -----
     a.piece("cou", A.tube(A.courbe([(0.0, -0.200, 0.235), (0.0, -0.290, 0.225), (0.0, -0.350, 0.205)], 5), lambda t: 0.125 - 0.012 * t, 24), tuple(CHARBON))
     T = A.cadre(Vector((0.0, -0.400, 0.215)), Vector((0.50, -1.0, -0.22)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.082), (0.22, 0.118), (0.46, 0.114), (0.70, 0.094), (0.90, 0.074), (0.98, 0.048), (1.0, 0.0)], 0.290, 64, 0.005)
-    tete.v[:, 0] *= 1.10
-    tete.v[:, 1] *= 0.90
+    tete.v[:, 0] *= 1.28                                                           # une grosse tête large
+    tete.v[:, 1] *= 1.00
     tt = np.tile(CHARBON, (len(tete.v), 1))
     tt[(np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3) & (tete.v[:, 2] > 0.12)] = CENDRE
     tete.teinte = tt

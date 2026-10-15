@@ -19,6 +19,8 @@ import atelier as A
 import matieres as M
 import peluche as K
 
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
+
 # le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
 MIEL = np.array(M.hexa("#ffd070"))            # la dominante : jaune miel
 CHATAIGNE = np.array(M.hexa("#b86a30"))       # l'accent : les plaques
@@ -94,11 +96,11 @@ def construire():
     nez = Vector((math.sin(l) * math.cos(p), -math.cos(l) * math.cos(p), math.sin(p)))
     T = A.cadre(Vector(centre) + Vector((0.0, -0.020, 0.040)), nez, Vector((0, 0, 1)))
     T3 = T.to_3x3()
-    tete = fuseau([(0.0, 0.0), (0.05, 0.060), (0.20, 0.076), (0.45, 0.056), (0.70, 0.046), (0.90, 0.046), (0.97, 0.040), (1.0, 0.0)], 0.360, 56, 0.006)
-    tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.4)[:, None] | (tete.v[:, 2] > 0.315)[:, None], CREME, MIEL)
+    tete = fuseau([(0.0, 0.0), (0.05, 0.052), (0.20, 0.064), (0.45, 0.045), (0.70, 0.036), (0.90, 0.034), (0.97, 0.028), (1.0, 0.0)], 0.400, 56, 0.006)      # long et fin : un museau, pas une boule
+    tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.4)[:, None] | (tete.v[:, 2] > 0.340)[:, None], CREME, MIEL)
+    tete.teinte[tete.v[:, 2] > 0.372] = CORNE                                          # le bout des lèvres, brun doux, sans truffe en boule
     a.piece("tete", tete.sculpte(lambda v: v * [0.84, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.040, -0.060)))
     a.tete = T @ Vector((0, 0.040, 0.140))
-    a.piece("nez", A.boule(1.0, 20, 10).etire(0.034, 0.026, 0.026), CORNE, mat=T @ A.repere((0, 0.026, 0.300)), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.040, 0.050)), T3 @ Vector((c * 0.84, 0.42, 0.06)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0155)
@@ -147,25 +149,24 @@ JAMBE = 0.973                                        # de l'épaule (ou de la ha
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.233, 1.114)),
-    ('cou', 'corps', (0.000, -0.095, 1.266)),
-    ('tete', 'cou', (0.029, -0.498, 2.434)),
-    ('oreille_G', 'tete', (0.068, -0.463, 2.548)),
+    ('corps', 'racine', (0.000, 0.239, 1.114)),
+    ('cou', 'corps', (0.000, -0.098, 1.280)),
+    ('tete', 'cou', (0.010, -0.479, 2.466)),
+    ('oreille_G', 'tete', (0.075, -0.461, 2.550)),
     ('patte_av_G', 'corps', (0.130, -0.146, 1.002)),
     ('patte_ar_G', 'corps', (0.140, 0.411, 0.944)),
     ('queue', 'corps', (-0.001, 0.514, 1.002)),
 ]
 
 PORTEURS = [
-    ('oeil_reflet', 'tete'), ('jambe_av', 'patte_av', True), ('jambe_ar', 'patte_ar', True),
-    ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True), ('ossicone', 'corps'),
-    ('oreille', 'oreille', True), ('crin_00', 'corps'), ('crin_01', 'corps'), ('crin_02', 'corps'),
-    ('crin_03', 'corps'), ('crin_04', 'corps'), ('crin_05', 'corps'), ('crin_06', 'corps'), ('crin_07', 'corps'),
-    ('crin_08', 'corps'), ('crin_09', 'corps'), ('crin_10', 'corps'), ('crin_11', 'corps'), ('crin_12', 'corps'),
-    ('crin_13', 'corps'), ('crin_14', 'corps'), ('crin_15', 'corps'), ('crin_16', 'corps'), ('crin_17', 'corps'),
-    ('crin_18', 'corps'), ('crin_19', 'corps'), ('crin_20', 'corps'), ('crin_21', 'corps'), ('crin_22', 'corps'),
-    ('crin_23', 'corps'), ('pinceau', 'queue'), ('houppe', 'corps'), ('corps', 'corps'), ('queue', 'queue'),
-    ('tete', 'tete'), ('cils', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('nez', 'tete'),
+    ('oeil_reflet', 'tete'), ('jambe_av', 'patte_av', True), ('jambe_ar', 'patte_ar', True), ('ossicone', 'corps'),
+    ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True), ('oreille', 'oreille', True),
+    ('crin_00', 'corps'), ('crin_01', 'corps'), ('crin_02', 'corps'), ('crin_03', 'corps'), ('crin_04', 'corps'),
+    ('crin_05', 'corps'), ('crin_06', 'corps'), ('crin_07', 'corps'), ('crin_08', 'corps'), ('crin_09', 'corps'),
+    ('crin_10', 'corps'), ('crin_11', 'corps'), ('crin_12', 'corps'), ('crin_13', 'corps'), ('crin_14', 'corps'),
+    ('crin_15', 'corps'), ('crin_16', 'corps'), ('crin_17', 'corps'), ('crin_18', 'corps'), ('crin_19', 'corps'),
+    ('crin_20', 'corps'), ('crin_21', 'corps'), ('crin_22', 'corps'), ('crin_23', 'corps'), ('pinceau', 'queue'),
+    ('houppe', 'corps'), ('corps', 'corps'), ('queue', 'queue'), ('tete', 'tete'), ('oeil', 'tete'), ('cou', 'cou'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
