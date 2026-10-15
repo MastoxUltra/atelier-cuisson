@@ -97,7 +97,7 @@ def construire():
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.024, 0.010, 0.014), tuple(CHAIR * 0.80), mat=RT @ A.repere((0.0, -0.103, -0.026)), poil=False)
     for c in (1, -1):
         a.piece("narine_%d" % c, A.boule(1.0, 10, 6).etire(0.0065, 0.004, 0.006), NEZ, mat=RT @ A.repere((c * 0.0105, -0.1105, -0.027)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.34, -0.90, 0.10), 0.0135, couleur_lourde=tuple(ROSE * 0.93), coupe=0.30, decolle=0.002, R=RT)
+    O.paire_yeux(a, "tete", H, (0.34, -0.90, 0.10), 0.0135, couleur_lourde=tuple(ROSE * 0.93), coupe=0.60, decolle=0.002, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 22, 12).etire(0.034, 0.014, 0.032)
         a.piece("oreille_" + nom, O.teinte(ore, CHAIR), None, mat=RT @ A.repere((c * 0.122, 0.018, 0.006)), poil=False)

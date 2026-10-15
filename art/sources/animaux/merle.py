@@ -2,7 +2,7 @@
 plus long, la tête plus petite, un cerne fin au lieu d'un disque, le bec en vrai cône, plus de rond cousu au flanc.
 Le troisième, l'auteur, 15/10 : « ça fait pas trop corbeau ? » ; le deuxième : merle_ancien2.py.)
 Le merle en peluche, deuxième dessin : l'écouteur de pelouse. Un long fuseau noir suie penché en avant, le poitrail
-vers l'herbe, la très longue queue dressée derrière comme un fléau de balance ; une patte avancée, arrêté net en pleine
+vers l'herbe, la longue queue dans l'axe, à peine relevée ; une patte avancée, arrêté net en pleine
 course. La tête basse, couchée sur le côté : il tend l'œil gauche vers le sol, il écoute le ver. Le bec orange vif
 pointé vers la terre, un fin cerne orange autour de l'œil.
 
@@ -82,19 +82,19 @@ def construire():
         s[:, 0] *= 1 - 0.35 * pointe
         s[:, 2] *= 1 - 0.35 * pointe
         return s
-    aile = A.boule(1.0, 40, 20).sculpte(galet).etire(0.012, 0.092, 0.031)
-    a.piece("aile", aile, PLUME, mat=PENCHE @ A.repere((0.042, 0.036, 0.000), (-6, 0, 2)), paire=True)
+    aile = A.boule(1.0, 40, 20).sculpte(galet).etire(0.017, 0.094, 0.030)       # épaisse et à moitié dans le corps : pas une moufle posée
+    a.piece("aile", aile, PLUME, mat=PENCHE @ A.repere((0.038, 0.040, 0.004), (-9, 0, 3)), paire=True)
     a.couture("aile_bord", "aile", 10, 0.12, 0.88, "droit", fil=FUMEE, paire=True)
 
-    # ----- la queue : très longue, dressée derrière comme un fléau de balance, le bout arrondi -----
+    # ----- la queue : dans l'axe du corps, à peine relevée (dressée, elle faisait troglodyte), le bout arrondi -----
     def palette(v):
         s = K.emousse(v, 0.8)
         s[:, 0] *= 0.70 + 0.40 * K.lisse((v[:, 1] + 1) / 2)     # plus large au bout
         return s
     racine = PENCHE @ Vector((0, 0.070, 0.012))
-    leve = math.radians(24)
-    queue = A.boule(1.0, 32, 16).sculpte(palette).etire(0.024, 0.062, 0.008)
-    a.piece("queue", queue, PLUME, pos=racine + Vector((0, math.cos(leve), math.sin(leve))) * 0.058, rot=(24, 0, 0))
+    leve = math.radians(7)
+    queue = A.boule(1.0, 32, 16).sculpte(palette).etire(0.022, 0.068, 0.009)
+    a.piece("queue", queue, PLUME, pos=racine + Vector((0, math.cos(leve), math.sin(leve))) * 0.060, rot=(7, 0, 0))
 
     # ----- les pattes : longues, arrêtées en pleine course ; la gauche en avant, la droite qui pousse derrière -----
     def doigt(degres, long):

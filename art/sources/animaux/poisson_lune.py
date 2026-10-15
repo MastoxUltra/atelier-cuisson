@@ -82,7 +82,7 @@ def construire():
         pos, n = a.surface("corps", CENTRE, Vector((c * 0.92, -0.38, 0.08)))
         a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0420)
         haut_oeil = (Vector((0, 0, 1)) - n * n.z).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.0420, 0.30), tuple(ARGENT), mat=A.cadre(pos + n * 0.002, n, haut_oeil), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.0420, 0.60), tuple(ARGENT), mat=A.cadre(pos + n * 0.002, n, haut_oeil), poil=False)
     p, n = a.surface("corps", CENTRE, Vector((0.0, -0.98, -0.12)))
     lèvre = A.tore(0.034, 0.012, 32, 8)
     a.piece("bouche", lèvre, tuple(GRIS), mat=A.cadre(p + n * 0.004, n), poil=False)

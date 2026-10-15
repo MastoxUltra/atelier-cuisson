@@ -37,6 +37,9 @@ def fuseau(points, longueur, cotes=64, pas=PAS):
     s = np.arange(pas, longueur - pas, pas)
     f, r = zip(*points)
     rayons = lisser(np.interp(s / longueur, f, r), 7)
+    # les deux bouts de la pièce se referment en calotte arrondie (plus de cylindre coupé net)
+    c0, c1 = max(float(r[0]) * 0.9, 0.004), max(float(r[-1]) * 0.9, 0.004)
+    rayons = rayons * np.sqrt(np.clip(1.0 - (np.maximum(c0 - s, 0.0) / c0) ** 2, 0.0, 1.0)) * np.sqrt(np.clip(1.0 - (np.maximum(s - (longueur - c1), 0.0) / c1) ** 2, 0.0, 1.0))
     return A.tour([(0.0, 0.0)] + [(float(ri), float(si)) for ri, si in zip(rayons, s)] + [(0.0, float(longueur))], cotes)
 
 

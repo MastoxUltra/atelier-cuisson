@@ -76,7 +76,7 @@ def construire():
     cloche = K.tube_peint(A.courbe([tuple(RT @ Vector(p)) for p in ((0, -0.020, -0.100), (0, -0.040, -0.230), (0, -0.030, -0.420))], 4),
                           lambda t_: 0.058 * (1 - t_) ** 0.55 + 0.010, [(1.0, tuple(SOMBRE))], 14)
     a.piece("cloche", cloche, None)
-    O.paire_yeux(a, "tete", H, (0.84, -0.46, 0.26), 0.0200, couleur_lourde=tuple(SOMBRE), coupe=0.30, decolle=0.003, R=RT)
+    O.paire_yeux(a, "tete", H, (0.84, -0.46, 0.26), 0.0200, couleur_lourde=tuple(SOMBRE), coupe=0.60, decolle=0.003, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.tour(A.profil([(0.046, 0), (0.040, 0.050), (0.024, 0.105), (0.009, 0.140), (0, 0.152)], 4), 20).etire(1.0, 0.42, 1.0)
         a.piece("oreille_" + nom, O.couche(O.teinte(ore, SOMBRE), RT @ A.cadre(Vector((c * 0.092, 0.060, 0.050)), (c * 0.85, 0.35, -0.10), (0, 0, 1))), None)

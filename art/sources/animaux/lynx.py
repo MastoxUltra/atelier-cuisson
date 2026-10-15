@@ -65,7 +65,7 @@ def construire():
     museau = A.boule(1.0, 32, 16).etire(0.054, 0.052, 0.040)
     a.piece("museau", O.teinte(museau, CREME), None, mat=RT @ A.repere((0.0, -0.088, -0.030)))
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.017, 0.013, 0.012), NEZ, mat=RT @ A.repere((0.0, -0.136, -0.022)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.60, -0.76, 0.18), 0.0185, couleur_lourde=tuple(BEIGE), coupe=0.30, decolle=0.003, R=RT)
+    O.paire_yeux(a, "tete", H, (0.60, -0.76, 0.18), 0.0185, couleur_lourde=tuple(BEIGE), coupe=0.60, decolle=0.003, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         for k in range(5):
             ang_ = math.radians(-70 + 35 * k)

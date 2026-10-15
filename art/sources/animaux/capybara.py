@@ -59,7 +59,7 @@ def construire():
     a.piece("nez", O.teinte(nez, MUFLE), None, mat=RT @ A.repere((0.0, -0.152, -0.008)))
     for c in (1, -1):
         a.piece("narine_%d" % c, A.boule(1.0, 12, 6).etire(0.017, 0.012, 0.012), NEZ, mat=RT @ A.repere((c * 0.038, -0.206, 0.028)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.86, -0.38, 0.36), 0.0160, couleur_lourde=tuple(SABLE * 0.94), coupe=0.30, decolle=0.002, R=RT)
+    O.paire_yeux(a, "tete", H, (0.86, -0.38, 0.36), 0.0160, couleur_lourde=tuple(SABLE * 0.94), coupe=0.60, decolle=0.002, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 20, 10).etire(0.028, 0.014, 0.030)
         a.piece("oreille_" + nom, O.teinte(ore, SABLE * 0.88), None, mat=RT @ A.repere((c * 0.074, 0.060, 0.094)))
