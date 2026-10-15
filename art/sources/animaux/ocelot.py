@@ -56,7 +56,7 @@ def chaines(m, graine=0.0, freq=10.0, ventre=None):
     t = np.tile(np.asarray(SABLE, float), (len(v), 1))
     bande = np.sin(freq * v[:, 2] + graine + 0.9 * np.sin(2.4 * v[:, 1]))             # des bandes ondulées le long du flanc
     chaine = np.sin(0.55 * freq * v[:, 1] + 0.6 * graine)                              # coupées en chaînons
-    t[(bande > 0.50) & (chaine > -0.35)] = CHOCOLAT
+    t[(bande > 0.34) & (chaine > -0.55)] = CHOCOLAT
     if ventre is not None:
         t[ventre(v)] = BLANC
     m.teinte = t
@@ -106,12 +106,12 @@ def construire():
     for etiquette, pts in marques:
         for c in (1, -1):
             dirs = [T3 @ Vector((c * x, y, z)) for x, y, z in pts]
-            a.broderie("marque_" + etiquette + ("G" if c > 0 else "D"), A.courbe(propres(a.trace("tete", centre_t, dirs, 0.004)), 4), 0.0042, CHOCOLAT)
+            a.broderie("marque_" + etiquette + ("G" if c > 0 else "D"), A.courbe(propres(a.trace("tete", centre_t, dirs, 0.004)), 4), 0.0066, CHOCOLAT)
 
     # ----- les yeux : grands, ronds, d'ambre, au regard doux (plus de traits froncés) -----
     for nom, c in (("G", 1), ("D", -1)):
         regard = T3 @ Vector((c * 0.50, -0.82, 0.18))
-        a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.36, OEIL, 0.003, 0)
+        a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.24, OEIL, 0.003, 0)       # un fin cercle d'ambre : plus de lunettes
         p, n = a.surface("tete", T.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0215)
         E = A.cadre(T @ Vector((c * 0.080, 0.040, 0.070)), T3 @ Vector((c * 0.30, 0.22, 0.93)), T3 @ Vector((c * 0.4, -0.9, 0.0)))

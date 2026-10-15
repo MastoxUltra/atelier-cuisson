@@ -153,14 +153,14 @@ def construire():
         jambe.teinte = np.tile(SOMBRE, (len(jambe.v), 1))
         a.piece("jambe_" + nom, jambe, None)
         pied = A.boule(1.0, 32, 16).sculpte(lambda v: K.emousse(v, 0.86)).etire(0.100, 0.185, 0.050)
-        pied.teinte = np.tile(SOMBRE * 0.85, (len(pied.v), 1))
-        a.piece("pied_" + nom, pied, None, pos=(c * 0.198, -0.140, 0.050), rot=(0, 0, c * -8), poil=False)
+        pied.teinte = np.tile(SOMBRE * 0.92, (len(pied.v), 1))
+        a.piece("pied_" + nom, pied, None, pos=(c * 0.198, -0.140, 0.050), rot=(0, 0, c * -8))          # du même poil que la jambe
         for k, dx in enumerate((-0.062, -0.031, 0.0, 0.031, 0.062)):
             xx = c * 0.198 + dx
             yy = -0.318 - 0.008 * (2 - abs(k - 2))
             orteil = A.boule(1.0, 16, 8).etire(0.0285, 0.030, 0.030)
-            orteil.teinte = np.tile(SOMBRE * 0.82, (len(orteil.v), 1))
-            a.piece("orteil_%s%d" % (nom, k), orteil, None, pos=(xx, yy, 0.032), poil=False)
+            orteil.teinte = np.tile(SOMBRE * 0.90, (len(orteil.v), 1))
+            a.piece("orteil_%s%d" % (nom, k), orteil, None, pos=(xx, yy, 0.032))
             g = O.couche(O.teinte(O.griffe(0.046, 0.0105), np.array(GRIFFE)), A.cadre(Vector((xx, yy - 0.020, 0.030)), (0.0, -1.0, -0.12), (0, 0, 1)))
             a.piece("griffe_pied_%s%d" % (nom, k), g, None, poil=False)
 
