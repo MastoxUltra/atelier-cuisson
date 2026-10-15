@@ -68,12 +68,14 @@ LISSAGE = 18            # passes de lissage (6 : les formes restaient géométri
 TRIANGLES = (20000, 120000)   # la peau finale : le nombre de triangles d'origine, entre ces bornes
 GONFLAGE = {                    # le gonflage (3.) : ses réglages
     "methode": "ressorts",      # « ressorts » (numpy) ou « tissu » (le simulateur de tissu de Blender)
-    "pointes": 0.020,           # un bout plus pointu qu'une demi-boule de ce rayon est fermé en boule, en part de la bête (0 : non)
+    "pointes": 0.030,           # un bout plus pointu qu'une demi-boule de ce rayon est fermé en boule, en part de la bête (0 : non)
+                                # (une queue plus fine : à la moitié, au quart de ce rayon)
     "arrondi": 0.030,           # le rayon de l'arrondi : ce qui est plus aigu s'arrondit, en part de la bête (0 : pas d'arrondi)
-    "pression": 0.3,            # le gonflage g : une boule de rayon r s'élargit d'environ g r / L, un tube de 2 à 3 fois
-                                # plus, un fond plat bombe (0 : pas de pression)
-    "fins": 2.0,                # les parties fines ou plates sont plus gonflées : la pression fois (épaisseur médiane / épaisseur
-                                # locale) à cette puissance, de 1 à 20 fois (une queue, une oreille, un pied plat ; 0 : non)
+    "pression": 0.22,           # le gonflage g : une boule de rayon r s'élargit d'environ g r / L, un tube de 2 à 3 fois
+                                # plus, un fond plat bombe (0 : pas de pression) ; 0,3 le 15/10 à 20 h (le corps trop gros)
+    "fins": 2.0,                # les parties fines ou plates sont plus gonflées (une queue, un bras, une oreille, un pied plat) :
+    "renfort": 3.0,             # la pression fois 1 + renfort x ((épaisseur médiane / épaisseur locale)^fins - 1), de 1 à 40
+                                # fois (fins = 0 : non ; v2 du 15/10 : renfort 1, la queue restait une lame)
     "dedans": 0.06,             # la peau ne rentre pas de plus que cette part de son épaisseur locale
     "dehors": 0.30,             # ... ni ne sort de plus que cette part
     "plafond": 0.05,            # ... ni de plus que cette part de la bête
@@ -1018,7 +1020,7 @@ def _arrondir(X0, T, E, deg, n0, rayon, t, dedans, dehors, sol):
     return X, passes
 
 
-def _pointes(X0, T, E, rayon, zmin):
+def _pointes(X0, T, E, rayon, zmin, rayon_min=0.0):
     """Les pointes : un bout plus pointu qu'une demi-boule de ce rayon (le bout d'une queue en cône) est coupé là où le tube
     atteint ce rayon et fermé d'une demi-boule, comme le bout cousu d'une queue de peluche. Un bout déjà rond (un doigt, une
     patte, un museau mousse), une pièce plate (une oreille) ou plus fine que le rayon sur toute sa longueur ne change pas.
@@ -1048,8 +1050,38 @@ def _pointes(X0, T, E, rayon, zmin):
     nrm = _normales(X, T)
     fait = np.zeros(n, bool)
     faites = []
+
+    def couper(R, s, rad, apex, axe, rho_v):
+        """Le bout coupé là où le tube atteint rho_v et fermé d'une demi-boule ; None si ce n'est pas un bout de tube pointu."""
+        pas = 0.25 * rho_v
+        s_c = None
+        for k in range(1, int(3.5 * rho_v / pas)):
+            tranche = np.abs(s - k * pas) < 0.5 * pas
+            if tranche.sum() >= 6 and float(np.median(rad[tranche])) >= rho_v:
+                s_c = k * pas
+                break
+        if s_c is None or s_c < 1.3 * rho_v:                         # plus fine que ce rayon, ou déjà ronde
+            return None
+        if (rad[s < s_c - 0.5 * pas] > 1.2 * rho_v).any():           # pas un bout de tube : un petit bout sur un gros (un doigt)
+            return None
+        dans = np.abs(s - s_c) < 0.5 * pas
+        anneau, rr = R[dans], rad[dans]
+        if rr.min() < 0.55 * rr.max() or rr.max() > 1.6 * rho_v:     # une section plate (une oreille) ou qui déborde
+            return None
+        c = X[anneau].mean(axis=0)
+        if np.linalg.norm(c - (apex - axe * s_c)) > 0.5 * rho_v:     # la section n'est pas autour de l'axe
+            return None
+        rho = float(np.median(np.linalg.norm(X[anneau] - c, axis=1)))
+        bout = R[(s < s_c) & (rad < 1.5 * rho)]
+        d = X[bout] - c
+        X[bout] = c + rho * d / np.maximum(np.linalg.norm(d, axis=1, keepdims=True), 1e-12)
+        fait[R[s < s_c + rho_v]] = True
+        return "raccourcie de %.0f mm, bout de %.0f mm" % (1000 * (s_c - rho), 1000 * rho)
+
+    # un cône de demi-angle a porte 2 pi (1 - sin a) de courbure : 2,7 à 35°, 4,1 à 15° ; une demi-boule de rayon r, pi dans une
+    # boule de rayon r. Le seuil prend les cônes jusqu'à 60° ; la coupe (un bout plus long que 1,3 rayon) trie ensuite
     for i in np.argsort(-total).tolist():
-        if total[i] < math.pi:
+        if total[i] < 0.45 * math.pi:
             break
         if fait[i]:
             continue
@@ -1068,31 +1100,14 @@ def _pointes(X0, T, E, rayon, zmin):
         V = X[R] - apex
         s = -(V @ axe)                                               # la profondeur depuis la pointe, le long de l'axe
         rad = np.linalg.norm(V + s[:, None] * axe, axis=1)           # l'écart à l'axe
-        fait[R[np.linalg.norm(V, axis=1) < 2.0 * rayon]] = True
-        pas = 0.25 * rayon
-        s_c = None
-        for k in range(1, int(3.5 * rayon / pas)):
-            tranche = np.abs(s - k * pas) < 0.5 * pas
-            if tranche.sum() >= 6 and float(np.median(rad[tranche])) >= rayon:
-                s_c = k * pas
+        fait[R[np.linalg.norm(V, axis=1) < 0.5 * rayon]] = True
+        for rho_v in (rayon, 0.5 * rayon, 0.25 * rayon):             # le plus gros bout rond possible ; une queue fine, le sien
+            if rho_v < rayon_min:
                 break
-        if s_c is None or s_c < 1.3 * rayon:                         # plus fine que le rayon partout, ou déjà ronde
-            continue
-        if (rad[s < s_c - 0.5 * pas] > 1.2 * rayon).any():           # pas un bout de tube : un petit bout sur un gros (un doigt)
-            continue
-        anneau = R[np.abs(s - s_c) < 0.5 * pas]
-        rr = rad[np.abs(s - s_c) < 0.5 * pas]
-        if rr.min() < 0.55 * rr.max() or rr.max() > 1.6 * rayon:     # une section plate (une oreille) ou qui déborde
-            continue
-        c = X[anneau].mean(axis=0)
-        if np.linalg.norm(c - (apex - axe * s_c)) > 0.5 * rayon:       # la section n'est pas autour de l'axe
-            continue
-        rho = float(np.median(np.linalg.norm(X[anneau] - c, axis=1)))
-        bout = R[(s < s_c) & (rad < 1.5 * rho)]
-        d = X[bout] - c
-        X[bout] = c + rho * d / np.maximum(np.linalg.norm(d, axis=1, keepdims=True), 1e-12)
-        fait[R[s < s_c + rayon]] = True
-        faites.append("raccourcie de %.0f mm, bout de %.0f mm" % (1000 * (s_c - rho), 1000 * rho))
+            dit = couper(R, s, rad, apex, axe, rho_v)
+            if dit:
+                faites.append(dit)
+                break
     X[:, 2] = np.maximum(X[:, 2], zmin)
     return X, faites
 
@@ -1210,7 +1225,7 @@ def gonfler(P, F, L, h, reglages=None):
     P0, faites = P, []
     if r["pointes"] > 0:                                             # d'abord les bouts pointus : coupés et fermés en boule
         try:
-            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin)
+            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin, 3.0 * h)
         except Exception:
             import traceback
             traceback.print_exc()
@@ -1244,7 +1259,8 @@ def gonfler(P, F, L, h, reglages=None):
         if methode == "ressorts":
             facteur = 1.0
             if r["fins"] > 0:                                        # une queue, une oreille, un pied plat : gonflés eux aussi
-                facteur = np.clip((float(np.median(t)) / t) ** r["fins"], 1.0, 20.0)
+                rapport = np.maximum(float(np.median(t)) / t, 1.0) ** r["fins"]
+                facteur = np.clip(1.0 + r["renfort"] * (rapport - 1.0), 1.0, 40.0)
             Y, pas_faits = _ressorts(X, T, E, deg, r["pression"], L, int(r["iterations"]), P, n0, dedans, dehors, sol, zmin, facteur)
         X = Y
     X = _borner(X, P, n0, dedans, dehors)

@@ -179,7 +179,7 @@ def construire():
                             (0.040, 0.240), (0.039, 0.268), (0.028, 0.292), (0, 0.302)], 6), 56)
     z, y = tete.v[:, 2], tete.v[:, 1]
     menton = (y < -0.018) & (z > 0.160)
-    tete.teinte = np.where((z > 0.283)[:, None], np.asarray(CORNE), np.where(menton[:, None], np.asarray(CREME), np.asarray(CHATAIGNE)))
+    tete.teinte = np.where((z > 0.291)[:, None], np.asarray(CORNE), np.where(menton[:, None], np.asarray(CREME), np.asarray(CHATAIGNE)))
 
     def fine(v):
         s = v.copy()
@@ -193,8 +193,8 @@ def construire():
     centre = T @ Vector((0, 0, 0.090))
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.80, 0.50, 0.22)))
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0160)
-        a.piece("lourde_" + nom, K.paupiere(0.0160, 0.60), SOMBRE, mat=A.cadre(pos + n * 0.003, n, T3 @ Vector((0, 1, -0.25))), poil=False)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0215)       # visibles de profil et de face
+        a.piece("lourde_" + nom, K.paupiere(0.0215, 0.60), SOMBRE, mat=A.cadre(pos + n * 0.003, n, T3 @ Vector((0, 1, -0.25))), poil=False)
 
     # ----- les oreilles : moyennes, en cornet, portées de côté sous la ramure ; le dedans crème -----
     po = A.profil([(0, 0), (0.022, 0.010), (0.032, 0.040), (0.029, 0.075), (0.013, 0.104), (0, 0.114)], 6)
