@@ -34,7 +34,7 @@ MUSEAU = M.hexa("#4a4040")                    # le museau et la crinière sombre
 TOURNE = 0                                    # -30 pour la fiche, posé de biais (on lit sa longueur) ; 0 pour le jeu
 CORPS = Vector((0.0, 0.040, 0.300))
 LARGE, LONG, HAUT = 0.090, 0.250, 0.094       # les demi-mesures du corps
-TETE = Vector((0.0, -0.300, 0.500))
+TETE = Vector((0.0, -0.300, 0.530))
 PORT = A.repere(TETE, (10, 0, 0))             # la tête basse et DROITE : le museau en avant, les deux yeux de face
 OEIL = (0.48, -0.76, 0.30)                    # la direction de l'œil gauche, dans le repère de la tête
 
@@ -113,11 +113,11 @@ def construire():
                     dedans |= (al(1103515245) < proba) & (np.linalg.norm(v - centre, axis=1) < r)
         return dedans
     corps.teinte = np.where((taches(cv, 0.070, 0.026, 7) & ~dessous)[:, None], np.asarray(ARDOISE), corps.teinte)
-    a.piece("corps", corps, None, pos=CORPS, rot=(-9, 0, 0))        # le dos qui descend vers la croupe
+    a.piece("corps", corps, None, pos=CORPS, rot=(-17, 0, 0))       # le dos qui descend nettement vers la croupe basse
     # la crinière : une courte brosse hérissée le long de l'échine, de la nuque au milieu du dos
     crin = None
     for yy in np.linspace(-0.24, 0.02, 12):
-        zz = 0.300 + 0.094 * math.cos(math.radians(9)) + (0.040 - yy) * math.sin(math.radians(9)) + 0.006
+        zz = 0.300 + 0.094 * math.cos(math.radians(17)) + (0.040 - yy) * math.sin(math.radians(17)) + 0.006
         e = A.boule(1.0, 10, 6).etire(0.011, 0.020, 0.040).pose((0.0, float(yy), float(zz)))
         crin = e if crin is None else crin + e
     a.piece("criniere", crin, MUSEAU, poil=False)
@@ -184,13 +184,13 @@ def construire():
         a.piece("oreille_" + nom, m, None, mat=A.cadre(p - dresse * 0.018, dresse, vers(0, -1, 0.12)))
 
     # ----- les pattes : campé, les pattes avant un peu écartées, la droite avancée ; gris en haut, blanc en bas -----
-    a.piece("patte_avant_G", patte([(0.052, -0.150, 0.315), (0.062, -0.165, 0.150), (0.070, -0.172, 0.060), (0.074, -0.176, 0.020)], 0.35), None)
+    a.piece("patte_avant_G", patte([(0.052, -0.150, 0.360), (0.062, -0.165, 0.150), (0.070, -0.172, 0.060), (0.074, -0.176, 0.020)], 0.35), None)
     a.piece("pied_avant_G", A.boule(1.0, 24, 12).etire(0.034, 0.043, 0.017).pose((0.076, -0.190, 0.0168), (0, 0, 10)), BLANC)
-    a.piece("patte_avant_D", patte([(-0.052, -0.150, 0.315), (-0.060, -0.180, 0.150), (-0.066, -0.200, 0.060), (-0.068, -0.208, 0.020)], 0.35), None)
+    a.piece("patte_avant_D", patte([(-0.052, -0.150, 0.360), (-0.060, -0.180, 0.150), (-0.066, -0.200, 0.060), (-0.068, -0.208, 0.020)], 0.35), None)
     a.piece("pied_avant_D", A.boule(1.0, 24, 12).etire(0.034, 0.043, 0.017).pose((-0.069, -0.222, 0.0168), (0, 0, -10)), BLANC)
     for nom, c in (("G", 1), ("D", -1)):
-        a.piece("cuisse_" + nom, A.boule(1.0, 32, 16).etire(0.046, 0.072, 0.076), GRIS, pos=(0.064 * c, 0.200, 0.225), rot=(-22, 0, 0))
-        a.piece("patte_arriere_" + nom, patte([(0.060 * c, 0.210, 0.270), (0.070 * c, 0.170, 0.170), (0.072 * c, 0.262, 0.090),
+        a.piece("cuisse_" + nom, A.boule(1.0, 32, 16).etire(0.046, 0.072, 0.076), GRIS, pos=(0.064 * c, 0.200, 0.170), rot=(-22, 0, 0))
+        a.piece("patte_arriere_" + nom, patte([(0.060 * c, 0.210, 0.215), (0.070 * c, 0.170, 0.130), (0.072 * c, 0.262, 0.075),
                                                (0.072 * c, 0.248, 0.020)], 0.45), None)
         a.piece("pied_arriere_" + nom, A.boule(1.0, 24, 12).etire(0.033, 0.042, 0.017).pose((0.073 * c, 0.234, 0.0168), (0, 0, 6 * c)), BLANC)
 

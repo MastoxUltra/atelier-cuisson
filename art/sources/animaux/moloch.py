@@ -55,7 +55,7 @@ def pose_sur(mesh, point, normale, dedans=0.006):
 
 def construire():
     a = K.Animal("moloch")
-    a.taille = 0.22
+    a.taille = 0.36
 
     # ----- le corps : un galet plat et large, rayé de brun et de sable en travers ; le ventre sable -----
     C = np.array([0.0, 0.020, 0.062])
@@ -97,7 +97,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         regard = H3 @ Vector((c * 0.70, -0.40, 0.58))
         p, n = a.surface("tete", H.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0105)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0165)
         corne = pose_sur(cone(0.014, 0.060, 12), H @ Vector((c * 0.026, -0.010, 0.022)), H3 @ Vector((c * 0.55, 0.45, 0.70)), 0.004)
         a.piece("corne_" + nom, corne, POINTE, poil=False)
         petite = pose_sur(cone(0.008, 0.026, 8), H @ Vector((c * 0.018, -0.030, 0.018)), H3 @ Vector((c * 0.50, -0.20, 0.82)), 0.003)

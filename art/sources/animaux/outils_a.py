@@ -194,7 +194,7 @@ def plan_dos(pos, haut=(0, 0, 1)):
 def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11, incline=30.0, z0=0.12,
            tete_r=(0.062, 0.072, 0.060), tete_pos=(0.0, -0.10, 0.06), bec_long=0.07, bec_ray=0.024, bec_baisse=0.0,
            aile_dim=(0.022, 0.085, 0.180), aile_pos=(0.0, 0.0, 0.0), queue_dim=(0.040, 0.085, 0.014), queue_haut=-24.0,
-           patte_long=0.10, patte_ray=0.011, oeil_r=0.016, oeil_dir=(0.74, -0.58, 0.22), bout_aile=None, coupe_dos=1.20, yeux=True, tete_rot=(-6, 0, 0), cou_ray=0.0, aile_pointue=False):
+           patte_long=0.10, patte_ray=0.011, oeil_r=0.016, oeil_dir=(0.74, -0.58, 0.22), bout_aile=None, coupe_dos=1.20, yeux=True, tete_rot=(-6, 0, 0), cou_ray=0.0, aile_pointue=False, bec_suit=False, peint_corps=None, peint_tete=None):
     """Un oiseau debout, d'une seule volée : un œuf incliné (le dos d'une couleur, le ventre d'une autre), une tête ronde,
     un bec en cône, deux ailes plates, une queue plate, deux pattes minces. Rend un dictionnaire de repères pour que
     l'appelant ajoute ce qui fait SON oiseau (huppe, queue en ciseaux, plastron, masque…) :
@@ -206,6 +206,8 @@ def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11
     ang = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     t = np.tile(np.asarray(ventre, float), (len(ang), 1))
     t[(ang < coupe_dos) & (corps.v[:, 2] > 0.03)] = np.asarray(dos, float)
+    if peint_corps is not None:                       # un plastron, un masque : la couleur par point, sans boule posée dessus
+        t = peint_corps(corps, t)
     corps.teinte = t
     T = A.repere((0.0, 0.040, z0), (incline, 0, 0))
     a.piece("corps", corps, None, mat=T)
@@ -213,6 +215,8 @@ def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11
     H = haut + Vector(tete_pos)
     tt = A.boule(1.0, 40, 20)
     tt.teinte = np.tile(np.asarray(tete, float), (len(tt.v), 1))
+    if peint_tete is not None:
+        tt.teinte = peint_tete(tt, tt.teinte)
     a.piece("tete", tt.etire(*tete_r), None, pos=tuple(H), rot=tete_rot)
     if cou_ray > 0:                                   # un cou : la tête est emmanchée sur le corps, plus une boule posée dessus
         P0 = Vector(T @ Vector((0, 0, 0.250 * long / 0.34)))
@@ -225,7 +229,10 @@ def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11
     # le bec
     b = A.tour(A.profil([(bec_ray, 0), (0.88 * bec_ray, 0.30 * bec_long), (0.52 * bec_ray, 0.65 * bec_long), (0.18 * bec_ray, 0.92 * bec_long),
                          (0, bec_long)], 3), 20).etire(0.82, 0.70, 1.0)
-    a.piece("bec", couche(b, A.cadre(H + Vector((0.0, -tete_r[1] * 0.92, -0.004)), (0.0, -1.0, bec_baisse), (0, 1.0, 0))), bec, poil=False)
+    if bec_suit:                                      # le bec suit la tête tournée : bien attaché, jamais posé à côté
+        a.piece("bec", couche(b, A.repere(H, tete_rot) @ A.cadre(Vector((0.0, -tete_r[1] * 0.90, -0.004)), (0.0, -1.0, bec_baisse), (0, 1.0, 0))), bec, poil=False)
+    else:
+        a.piece("bec", couche(b, A.cadre(H + Vector((0.0, -tete_r[1] * 0.92, -0.004)), (0.0, -1.0, bec_baisse), (0, 1.0, 0))), bec, poil=False)
     if yeux:
         paire_yeux(a, "tete", H, oeil_dir, oeil_r, decolle=0.002)
     # les ailes

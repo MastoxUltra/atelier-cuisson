@@ -75,7 +75,7 @@ def construire():
     corps = fuseau([(f_, r_) for r_, f_ in pts], L, 52)
     x, y, z = corps.v[:, 0], corps.v[:, 1], corps.v[:, 2]
     f = z / L
-    corps.v[:, 1] *= 0.62                                                              # plat : bien moins haut que large
+    corps.v[:, 1] *= 0.80                                                              # un dos bombé, pas une planche
     th = np.abs(np.arctan2(x, corps.v[:, 1]))
     t = np.tile(OCRE, (len(z), 1))
     t[(f > 0.52) & (((f - 0.52) / 0.045) % 1.0 < 0.34) & (th < 2.0)] = BOUE            # les bandes du dos et de la queue
@@ -91,7 +91,7 @@ def construire():
         r = float(np.interp(f_, [p[1] for p in pts], [p[0] for p in pts]))
         for dec in (-0.35, 0.35):
             lat = np.cross(np.array(av), np.array(nq))
-            e = A.boule(1.0, 10, 6).etire(0.028, 0.036, 0.018).pose(tuple(np.array(c_) + np.array(nq) * (r * 0.62 + 0.004) + lat * dec * r * 0.9))
+            e = A.boule(1.0, 10, 6).etire(0.044, 0.056, 0.034).pose(tuple(np.array(c_) + np.array(nq) * (r * 0.62 + 0.004) + lat * dec * r * 0.9))
             ecailles = e if ecailles is None else ecailles + e
     a.piece("ecailles", ecailles, tuple(BOUE))
 
@@ -99,9 +99,9 @@ def construire():
     c1, av1, nq1 = fil.cadre(0.255 * L)
     lat1 = np.cross(np.array(av1), np.array(nq1))
     for nom, c in (("G", 1), ("D", -1)):
-        pos = np.array(c1) + np.array(nq1) * 0.078 + lat1 * c * 0.078
-        a.piece("bosse_" + nom, A.boule(1.0, 20, 10).etire(0.050, 0.058, 0.038), tuple(OCRE), pos=tuple(pos))
-        a.oeil("oeil_" + nom, Vector(pos) + Vector(nq1) * 0.030 + Vector(av1) * -0.008, Vector((c * 0.55, -0.45, 0.70)).normalized(), 0.0220)
+        pos = np.array(c1) + np.array(nq1) * 0.100 + lat1 * c * 0.078
+        a.piece("bosse_" + nom, A.boule(1.0, 20, 10).etire(0.072, 0.080, 0.062), tuple(OCRE), pos=tuple(pos))
+        a.oeil("oeil_" + nom, Vector(pos) + Vector(nq1) * 0.050 + Vector(av1) * -0.010, Vector((c * 0.50, -0.55, 0.65)).normalized(), 0.0340)
         c2, av2, nq2 = fil.cadre(0.040 * L)
         a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.014, 0.020, 0.011), CHARBON,
                 pos=tuple(np.array(c2) + np.array(nq2) * 0.030 + np.array([c * 0.020, 0.0, 0.0])), poil=False)

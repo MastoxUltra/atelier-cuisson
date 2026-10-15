@@ -85,10 +85,10 @@ def construire():
 
     # ----- les yeux : petits, sages, sur le côté des lobes ; un sourcil lourd -----
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("corps", RM @ Vector((c * 0.200, -0.120, 0.0)), R3 @ Vector((c * 0.92, -0.30, 0.38)))
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0175)
+        pos, n = a.surface("corps", RM @ Vector((c * 0.120, -0.150, 0.0)), R3 @ Vector((c * 0.25, -0.15, 1.0)))     # sur le dessus de la tête, devant : on les compte d'en haut
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0230)
         h = Vector((0, 0, 1))
-        a.piece("lourde_" + nom, K.paupiere(0.0175, 0.60), tuple(NOIR), mat=A.cadre(pos + n * 0.002, n, (h - n * n.dot(h)).normalized()), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.0230, 0.60), tuple(NOIR), mat=A.cadre(pos + n * 0.002, n, (h - n * n.dot(h)).normalized()), poil=False)
     a.tete = RM @ Vector((0.0, -0.26, 0.04))
 
     # ----- la queue : un long fouet qui part du croupion et se couche en S dans le sable ; l'aileron minuscule à sa base -----
