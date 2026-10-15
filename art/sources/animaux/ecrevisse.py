@@ -64,7 +64,7 @@ def construire():
         bras = O.tube_r([(c * 0.075, -0.180, 0.100), (c * 0.150, -0.260, 0.130), (c * 0.170, -0.340, 0.190), (c * 0.120, -0.380, 0.270)],
                         [0.030, 0.027, 0.024, 0.022], 14)
         a.piece("bras_" + nom, bras, tuple(LAQUE), poil=True)
-        p = O.pince(0.190, 0.100, 30.0, np.asarray(ORANGE, float), np.asarray(NOIR, float))
+        p = O.pince(0.190, 0.100, 30.0, np.asarray(ORANGE, float), np.array([0.12, 0.08, 0.07]))
         a.piece("pince_" + nom, p, None, mat=A.cadre(Vector((c * 0.116, -0.395, 0.290)), (c * 0.14, -0.55, 0.85), (0, 1, 0)), poil=False)
 
     # ----- les antennes : deux longs fouets qui partent du front ; les yeux perlés sur deux tiges -----

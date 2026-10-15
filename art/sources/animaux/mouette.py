@@ -55,11 +55,9 @@ def construire():
     haut_bec = A.tour(A.profil([(0.026, 0), (0.023, 0.040), (0.015, 0.082), (0.007, 0.112), (0, 0.126)], 4), 20).etire(0.80, 0.55, 1.0)
     bas_bec = A.tour(A.profil([(0.022, 0), (0.019, 0.040), (0.012, 0.080), (0.005, 0.106), (0, 0.118)], 4), 20).etire(0.78, 0.50, 1.0)
     a.piece("bec_haut", O.couche(haut_bec, A.cadre(H + Vector((0.0, -0.062, -0.008)), (0.0, -1.0, -0.12), (0, 1, 0))), JAUNE, poil=False)
-    a.piece("bec_bas", O.couche(bas_bec, A.cadre(H + Vector((0.0, -0.058, -0.030)), (0.0, -1.0, -0.62), (0, 1, 0))), JAUNE, poil=False)
+    a.piece("bec_bas", O.couche(bas_bec, A.cadre(H + Vector((0.0, -0.058, -0.022)), (0.0, -1.0, -0.14), (0, 1, 0))), JAUNE, poil=False)
     a.piece("point", A.boule(1.0, 14, 8).etire(0.012, 0.012, 0.008), ROUGE, mat=A.cadre(H + Vector((0.0, -0.120, -0.034)), (0.0, -1.0, -0.62), (0, 1, 0)),
             poil=False)
-    a.piece("gosier", A.boule(1.0, 20, 10).etire(0.020, 0.050, 0.016), M.hexa("#7a2a24"),
-            mat=A.cadre(H + Vector((0.0, -0.075, -0.018)), (0.0, -1.0, -0.40), (0, 1, 0)), poil=False)
     O.paire_yeux(a, "tete", H, (0.78, -0.50, 0.26), 0.0165, decolle=0.002)
 
     # ----- les ailes : deux grandes lames gris perle, un peu décollées, le bout noir ; la queue blanche -----

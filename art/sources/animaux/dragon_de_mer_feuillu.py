@@ -74,7 +74,7 @@ def construire():
     # ----- le visage : un petit œil rond au-dessus du museau ; la bouche au bout du tube ; une crête sur le front -----
     for nom, c in (("G", 1), ("D", -1)):
         p, n = O.sur_corps(fil, L, rayon, 0.915, 76, c, 1.0, 1.0, 0.002)
-        a.oeil("oeil_" + nom, p, n, 0.0155)
+        a.oeil("oeil_" + nom, p, n, 0.0225)                                  # la tête se lit : un œil plus gros
     tip, ati, nti = (Vector(q) for q in fil.cadre(0.995 * L))
     bout = A.boule(1.0, 14, 8).etire(0.016, 0.016, 0.014)
     a.piece("bout", O.teinte(bout, OCRE * 0.92), None, pos=tuple(tip), poil=False)

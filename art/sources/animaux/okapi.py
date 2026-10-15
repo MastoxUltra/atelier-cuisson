@@ -36,7 +36,7 @@ AVANT = Vector((math.sin(COL), -math.cos(COL), 0.0))
 FLANC = np.array([math.cos(COL), math.sin(COL), 0.0])
 BASE = Vector((0.0, -0.165, 0.600))           # le pied du cou, enfoui dans le poitrail
 ARC = [(0.0, 0.0), (0.022, 0.090), (0.048, 0.180), (0.072, 0.250), (0.090, 0.292)]   # (avance, monte) : dressé
-LACET, PIQUE, PENCHE = 0.0, 8.0, 0.0          # la tête DROITE, de face : les deux yeux visibles, symétriques
+LACET, PIQUE, PENCHE = 26.0, 8.0, 0.0         # la tête tournée vers la caméra (~25°) : les deux yeux visibles de face
 GROSSE = 1.45
 
 
@@ -141,7 +141,7 @@ def construire():
     # ----- les yeux : petits, noirs, vifs, grands ouverts -----
     centre = T @ Vector((0, 0, 0.085))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.82, 0.46, 0.25)))
+        pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.76, 0.12, 0.54)))
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0175)
 
     # ----- les oreilles : immenses, en cornet, la pointe noire, le dedans blanc. La gauche braquée devant, sur le
@@ -152,13 +152,13 @@ def construire():
         s = v.copy()
         s[:, 1] += 2.6 * v[:, 0] ** 2 * K.lisse(v[:, 2] / 0.04)
         return s
-    for nom, c, devant in (("G", 1, Vector((0.10, 0.30, 1.0))), ("D", -1, Vector((-1.0, 0.20, 0.35)))):
+    for nom, c, devant in (("G", 1, Vector((0.55, 0.30, 0.75))), ("D", -1, Vector((-0.55, 0.30, 0.75)))):     # les deux oreilles pareilles
         vers = (T3 @ Vector((c * 0.46, 0.88, -0.10))).normalized()
         racine = T @ Vector((c * 0.040, 0.044, 0.030))
         E = A.cadre(racine - vers * 0.012, vers, T3 @ devant)
         oreille = K.bandes(A.tour(po, 36).etire(1.0, 0.34, 1.0), [(0.200, SABLE), (9, NOIR)])
         a.piece("oreille_" + nom, oreille.sculpte(cornet), None, mat=E)
-        a.rustine("pavillon_" + nom, "oreille_" + nom, E @ Vector((0, 0, 0.105)), E.to_3x3() @ Vector((0, 1, 0)), 1.15, BLANC, 0.002, 0)
+        a.piece("pavillon_" + nom, A.tour(po, 28).etire(0.62, 0.30, 0.74).pose((0, 0.010, 0.012)).sculpte(cornet), BLANC, mat=E, poil=False)
 
     # ----- les ossicônes : deux courtes cornes de peau entre les oreilles -----
     oss = A.tour(A.profil([(0, 0), (0.018, 0.004), (0.014, 0.030), (0.008, 0.052), (0, 0.062)], 5), 16)

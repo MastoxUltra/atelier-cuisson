@@ -92,8 +92,8 @@ def construire():
         a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.016, 0.022, 0.012), SABOT,
                 pos=tuple(np.array(c2) - np.array(nq2) * 0.020 + np.array([c * 0.030, 0.0, 0.0])), poil=False)
         c3, av3, nq3 = fil.cadre(0.800 * L)
-        p, n = a.surface("bloc", Vector(c3), Vector(flanc * c * 0.92 + np.array(nq3) * 0.30 - np.array(av3) * 0.10))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0185)
+        p, n = a.surface("bloc", Vector(c3), Vector(flanc * c * 0.92 + np.array(nq3) * 0.38 - np.array(av3) * 0.36))
+        a.oeil("oeil_" + nom, p + n * 0.008, n, 0.0260)
         c4, av4, nq4 = fil.cadre(0.700 * L)
         E = A.cadre(Vector(c4) + Vector(nq4) * 0.150 + Vector((c * 0.075, 0.0, 0.0)), Vector((c * 0.55, 0.15, 0.80)), Vector((c * 0.3, -0.9, 0.0)))
         po = A.profil([(0, 0), (0.044, 0.010), (0.054, 0.040), (0.044, 0.074), (0.020, 0.094), (0, 0.102)], 6)
@@ -103,7 +103,7 @@ def construire():
     # ----- les pattes : courtes, épaisses, trois sabots devant ; l'avant gauche avancée à tâtons ; un moignon de queue -----
     def pilier(haut, bas, r):
         fl = K.Fil([haut, ((haut[0] + bas[0]) / 2, (haut[1] + bas[1]) / 2, (haut[2] + bas[2]) / 2), bas], (1, 0, 0))
-        m = fuseau([(0.0, r * 1.20), (0.40, r * 0.92), (0.86, r * 0.82), (1.0, r * 0.88)], fl.long, 40, 0.010)
+        m = fuseau([(0.0, r * 1.15), (0.30, r * 0.84), (0.62, r * 0.58), (0.86, r * 0.52), (1.0, r * 0.62)], fl.long, 40, 0.010)   # une patte qui s'affine à la cheville : plus de sacs
         m.teinte = np.tile(ARDOISE, (len(m.v), 1))
         return m.sculpte(fl.couche)
     for nom, x_, y_, r, av in (("av_G", 0.150, -0.440, 0.092, -0.140), ("av_D", -0.150, -0.440, 0.092, 0.0),

@@ -58,9 +58,6 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", H, Vector((c * 0.62, -0.70, 0.22)))
         a.piece("cerne_" + nom, A.tore(0.0215, 0.0045, 24, 6), ROUGE, mat=A.cadre(pos + n * 0.001, n), poil=False)
-        tri = A.boule(1.0, 16, 8).etire(0.030, 0.007, 0.012)
-        a.piece("triangle_" + nom, O.teinte(tri, np.array(GRIS)), None, pos=tuple(pos + Vector((0.0, 0.0, 0.030)) + n * 0.002),
-                rot=(0, 0, c * 18), poil=False)
 
     # ----- le bec : un grand triangle aplati sur les côtés, trois bandes (jaune, orange, bleu) ; une rainure -----
     bec = A.tour(A.profil([(0.062, 0), (0.060, 0.030), (0.048, 0.070), (0.026, 0.108), (0.008, 0.126), (0, 0.132)], 4), 28)

@@ -78,16 +78,22 @@ def construire():
     corps = corps.sculpte(fil.couche)
     a.piece("corps", corps, None)
     # des touffes de plumes-poils : cônes épais couchés vers l'arrière (plus de cartes plates)
-    franges = touffes(corps, 380, 0.062, 0.0105, 5, lambda t: tuple(np.asarray(TABAC) * (0.82 + 0.40 * t) + np.asarray(FONCE) * 0.12),
+    franges = touffes(corps, 300, 0.044, 0.0165, 5, lambda t: tuple(np.asarray(TABAC) * (0.82 + 0.40 * t) + np.asarray(FONCE) * 0.12),
                       dos_seul=False, sens=(0.0, 0.55, -0.20))
     a.piece("franges", franges, None, poil=False)
     centre, avant, nuque = fil.cadre(0.93 * L)
     C = Vector(centre)
 
+    # ----- la tête : une vraie petite tête ronde, en vue au bout du cou (plus noyée dans les touffes) -----
+    Hc = Vector(np.array(centre) + np.array(avant) * 0.040 + np.array(nuque) * 0.012)
+    tete_ = A.boule(1.0, 36, 18)
+    tete_.teinte = np.tile(np.asarray(TABAC, float) * 1.08, (len(tete_.v), 1))
+    a.piece("tete", tete_.etire(0.056, 0.062, 0.058), None, mat=A.cadre(Hc, Vector(avant), Vector(nuque)))
+
     # ----- le bec : long, fin, d'ivoire, légèrement recourbé, qui descend et fouille le sol ; les narines au bout -----
     dirige = Vector(avant * 0.78 + np.array([0.0, 0.0, -0.62]))
     dirige.normalize()
-    B = A.cadre(C + dirige * 0.040, dirige, Vector((0, 0, 1)))
+    B = A.cadre(Hc + dirige * 0.040, dirige, Vector((0, 0, 1)))
 
     def canne(v):
         s = v.copy()
@@ -95,14 +101,15 @@ def construire():
         return s
     bec = A.tour(A.profil([(0, 0), (0.020, 0.006), (0.016, 0.040), (0.011, 0.130), (0.008, 0.200), (0.005, 0.240), (0, 0.256)], 5), 24)
     a.piece("bec", bec.sculpte(canne), IVOIRE, mat=B, poil=False)
-    a.tete = C + dirige * 0.100
+    a.tete = Hc + dirige * 0.100
     for c in (1, -1):
-        p, n = a.surface("corps", C + Vector((0, 0, 0.012)), Vector((c * 0.80, -0.30, 0.30)))
-        a.oeil("oeil_" + ("G" if c > 0 else "D"), p + n * 0.003, n, 0.0098)
+        p, n = a.surface("tete", Hc, Vector(np.array(avant) * 0.60 + np.array(nuque) * 0.30 + np.cross(np.array(avant), np.array(nuque)) * c * 0.75))
+        a.oeil("oeil_" + ("G" if c > 0 else "D"), p + n * 0.004, n, 0.0155)
 
     # ----- les cuisses : d'énormes jambons, hauts sur la croupe ; les pattes : minces, les gros pieds à trois orteils -----
     for nom, c in (("G", 1), ("D", -1)):
-        a.piece("cuisse_" + nom, A.boule(1.0, 36, 18).etire(0.064, 0.094, 0.100), TABAC, pos=(c * 0.100, 0.120, 0.210), rot=(0, 0, c * 6))
+        a.piece("cuisse_" + nom, A.tube(A.courbe([(c * 0.098, 0.130, 0.250), (c * 0.106, 0.108, 0.180), (c * 0.108, 0.070, 0.120)], 5),
+                                         lambda t_: 0.044 - 0.016 * t_, 18), TABAC)       # une cuisse qui descend dans la patte, plus de boule
         chemin = [(c * 0.100, 0.100, 0.200), (c * 0.108, 0.070, 0.120), (c * 0.108, 0.030, 0.026)]
         a.piece("patte_" + nom, A.tube(A.courbe(chemin, 5), 0.020, 12), PATTE, poil=False)
         doigts = None
@@ -133,7 +140,7 @@ OS = [
     ('patte_ar_G', 'corps', (0.100, 0.124, 0.307)),
 ]
 
-PORTEURS = [
+PORTEURS = [('tete', 'corps'), 
     ('oeil_reflet', 'tete'), ('franges', 'corps'), ('cuisse', 'patte_ar', True), ('doigts', 'patte_ar', True),
     ('corps', 'corps'), ('patte', 'patte_ar', True), ('oeil', 'tete'), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'),
     ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),

@@ -50,7 +50,9 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         o = A.boule(1.0, 20, 10).etire(0.030, 0.034, 0.034)
         a.piece("globe_" + nom, O.teinte(o, np.array(OEIL)), None, pos=(c * 0.092, -0.158, 0.145), poil=False)
-    O.paire_yeux(a, "tete", H, (0.38, -0.92, 0.18), 0.0140, decolle=0.002)
+    for nom, c in (("G", 1), ("D", -1)):                            # DEUX yeux : une pupille vivante sur chaque globe (plus de boutons en plus)
+        pg, ng = a.surface("globe_" + nom, Vector((c * 0.092, -0.158, 0.145)), Vector((c * 0.40, -0.90, 0.25)))
+        a.oeil("oeil_" + nom, pg + ng * 0.002, ng, 0.0200)
     for nom, c in (("G", 1), ("D", -1)):
         ant = O.tube_r([(c * 0.020, -0.190, 0.178), (c * 0.036, -0.230, 0.210)], [0.0050, 0.0040], 8)
         a.piece("antenne_" + nom, O.teinte(ant, RAIE), None, poil=False)
@@ -59,7 +61,8 @@ def construire():
     # ----- les ailes : deux grandes lames fumées, nervurées, qui retombent en toit sur le dos et dépassent l'abdomen -----
     contour = [(0.0, 0.0), (0.05, -0.012), (0.11, -0.016), (0.16, 0.050), (0.18, 0.170), (0.150, 0.300), (0.07, 0.330), (0.00, 0.120)]
     for nom, c in (("G", 1), ("D", -1)):
-        m = A.decoupe(A.courbe(np.array(contour) * [c, 1], 5, fermee=True), 0.0050, 0.0020).peint(np.array(FUMEE))
+        m = A.decoupe(A.courbe(np.array(contour) * [c, 1], 5, fermee=True), 0.011, 0.0045).sculpte(
+            lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] + 0.55 * v[:, 0] ** 2 + 0.10 * (v[:, 1] - 0.15) ** 2], axis=1)).peint(np.array(FUMEE))      # bombée, pas un carton plat
         rep = A.repere((c * 0.034, -0.062, 0.210), (0, c * 34, 0))
         a.piece("aile_" + nom, m, None, mat=rep, poil=False)
         # les nervures : trois fils brodés d'un bout à l'autre de l'aile

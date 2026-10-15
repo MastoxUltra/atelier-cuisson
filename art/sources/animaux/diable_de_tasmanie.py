@@ -79,8 +79,8 @@ def construire():
     T = A.cadre(Vector((0.0, -0.400, 0.215)), Vector((0.50, -1.0, -0.22)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.082), (0.22, 0.118), (0.46, 0.114), (0.70, 0.094), (0.90, 0.074), (0.98, 0.048), (1.0, 0.0)], 0.290, 64, 0.005)
-    tete.v[:, 0] *= 1.28                                                           # une grosse tête large
-    tete.v[:, 1] *= 1.00
+    tete.v[:, 0] *= 1.40                                                           # une grosse tête large
+    tete.v[:, 1] *= 1.12
     tt = np.tile(CHARBON, (len(tete.v), 1))
     tt[(np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3) & (tete.v[:, 2] > 0.12)] = CENDRE
     tete.teinte = tt
@@ -90,7 +90,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         regard = T3 @ Vector((c * 0.62, 0.50, 0.50))
         p, n = a.surface("tete", T @ Vector((0, 0.0, 0.020)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0200)               # de vrais yeux noirs vivants, plus de disque gris
+        a.oeil("oeil_" + nom, p + n * 0.005, n, 0.0310)               # de vrais yeux noirs vivants, plus de disque gris
         # l'oreille : ronde, plantée haut sur le côté, le dedans qui rougit
         po, no = a.surface("tete", T @ Vector((0, 0.0, 0.0)), T3 @ Vector((c * 0.66, 0.72, -0.28)))
         face, dresse = T3 @ Vector((c * 0.55, 0.45, 0.70)), no + T3 @ Vector((0, 0.2, -0.9))

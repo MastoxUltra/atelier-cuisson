@@ -28,7 +28,7 @@ FIL = M.hexa("#8a7a58")
 
 # du bout de la queue (relevé) à la tête, posée au sol
 CHEMIN = [(0.00, 0.30, 0.290), (0.00, 0.35, 0.190), (0.00, 0.31, 0.100), (0.00, 0.21, 0.058), (0.00, 0.07, 0.050), (0.00, -0.07, 0.050),
-          (0.00, -0.19, 0.052), (0.00, -0.28, 0.056), (0.00, -0.34, 0.062)]
+          (0.00, -0.19, 0.062), (0.00, -0.28, 0.092), (0.00, -0.34, 0.125)]
 
 
 def rayon(f):
@@ -59,7 +59,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         centre, direction = fil.vise(0.972 * L, 0.20, c * 0.82, 0.55)
         pos, n = a.surface("corps", centre, direction)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0105)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0165)
     cc, dd = fil.vise(0.995 * L, 0.0, 0.0, -0.12)
     q = a.trace("corps", cc, [dd], 0.002)
     if q:

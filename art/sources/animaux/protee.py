@@ -31,7 +31,7 @@ CHEMIN = [(0.32, 0.72, 0.016), (0.34, 0.62, 0.022), (0.28, 0.52, 0.030), (0.16, 
           (-0.12, 0.14, 0.050), (-0.08, 0.02, 0.052), (0.00, -0.08, 0.054), (0.08, -0.18, 0.054), (0.10, -0.29, 0.054), (0.04, -0.39, 0.054),
           (-0.04, -0.46, 0.056), (-0.12, -0.52, 0.060), (-0.20, -0.57, 0.064)]
 CORPS = O.interp([(0.0, 0.0), (0.02, 0.008), (0.12, 0.020), (0.34, 0.036), (0.52, 0.048), (0.70, 0.052), (0.82, 0.050),
-                  (0.88, 0.046), (0.93, 0.040), (0.965, 0.034), (0.985, 0.026), (1.0, 0.0)])
+                  (0.86, 0.052), (0.92, 0.060), (0.96, 0.056), (0.985, 0.040), (1.0, 0.0)])
 
 
 def construire():
@@ -63,10 +63,9 @@ def construire():
 
     # ----- le visage : deux points rosés sous la peau, une bouche fine, deux narines -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.945 * L, 0.10, c * 0.80, 0.60)
+        centre, direction = fil.vise(0.950 * L, 0.55, c * 0.50, 0.45)               # devant : les deux yeux se voient de la caméra à 25°
         pos, n = a.surface("corps", centre, direction)
-        point = A.boule(1.0, 10, 6).etire(0.0075, 0.0075, 0.0040)
-        a.piece("oeil_" + nom, O.couche(O.teinte(point, OEIL), A.cadre(pos + n * 0.0005, n, (0, 0, 1))), None, poil=False)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0130)                           # des yeux lisibles : la tête se voit
         pts_b = []
         for u_ in np.linspace(0.0, 1.0, 9):
             cc, dd = fil.vise((0.998 - 0.060 * u_) * L, 0.0, c * 1.0, -0.30 + 0.06 * u_)

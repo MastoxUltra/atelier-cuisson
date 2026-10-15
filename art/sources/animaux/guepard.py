@@ -105,7 +105,7 @@ def construire():
         a.piece("pied_ar_" + nom, A.boule(1.0, 20, 10).etire(0.040, 0.090, 0.026), tuple(CREME), pos=(c * 0.132, -0.050, 0.026), rot=(0, 0, c * 6))
 
     # ----- la tête : toute petite, le museau court ; de grandes oreilles rondes dressées, le dos noir à tache blanche -----
-    T = A.cadre(Vector((0.0, -0.060, 1.130)), Vector((0.0, -1.0, -0.10)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(Vector((0.0, -0.060, 1.130)), Vector((0.46, -1.0, -0.10)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.08, 0.075), (0.30, 0.094), (0.58, 0.080), (0.78, 0.066), (0.90, 0.056), (0.96, 0.042), (0.99, 0.024), (1.0, 0.0)], 0.215, 56, 0.004)   # petite et ronde
     tt = np.where(mouchetures(tete.v, 0.030, 0.0075, 5)[:, None], NOIR, ABRICOT)
