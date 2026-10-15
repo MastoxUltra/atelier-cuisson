@@ -72,6 +72,8 @@ GONFLAGE = {                    # le gonflage (3.) : ses réglages
     "arrondi": 0.030,           # le rayon de l'arrondi : ce qui est plus aigu s'arrondit, en part de la bête (0 : pas d'arrondi)
     "pression": 0.3,            # le gonflage g : une boule de rayon r s'élargit d'environ g r / L, un tube de 2 à 3 fois
                                 # plus, un fond plat bombe (0 : pas de pression)
+    "fins": 2.0,                # les parties fines ou plates sont plus gonflées : la pression fois (épaisseur médiane / épaisseur
+                                # locale) à cette puissance, de 1 à 20 fois (une queue, une oreille, un pied plat ; 0 : non)
     "dedans": 0.06,             # la peau ne rentre pas de plus que cette part de son épaisseur locale
     "dehors": 0.30,             # ... ni ne sort de plus que cette part
     "plafond": 0.05,            # ... ni de plus que cette part de la bête
@@ -79,6 +81,9 @@ GONFLAGE = {                    # le gonflage (3.) : ses réglages
     "images": 50,               # les images du simulateur de tissu
 }
 ESPION = None                   # pour les essais : appelé avec (a, P, Q, L, h) juste après la décimation de la peau
+COUPE_MIN = 0.60                # sur la base gonflée, le bord des paupières lourdes à au moins 0,60 rayon au-dessus du milieu
+EPAISSEUR_PAUPIERE = 0.30       # de l'œil (l'auteur, 15/10 : au moins 0,5) ; et fines (0,30 rayon au lieu de 0,62) : l'œil ouvert
+MOUSTACHES = ("moustache", "vibrisse")   # refaites souples sur la base gonflée : courbes, retombantes, plus fines au bout
 
 
 def _dire(*m):
@@ -665,6 +670,15 @@ def fusionner(a, gonfle=None):
         _dire("cuisson : les groupes %s -> « %s »" % (", ".join(sorted(groupes)), g0))
 
     _recoller(a, peau, ancienne_surface)
+    if gonfle:                                                       # la base gonflée : des yeux ouverts, des moustaches souples
+        try:
+            paup = _paupieres_ouvertes(a)
+            mous = _moustaches(a, peau)
+            _dire("paupières : %s ; %d moustaches souples" % (", ".join(paup) or "aucune lourde", mous))
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            _dire("paupières, moustaches : RATÉ (voir l'erreur au-dessus)")
     if gonflee is not None:
         _suivre(a, liens, P, gonflee, Q, h, L)
     _dire("fini en %.1f s" % (time.time() - t0))
@@ -1046,7 +1060,7 @@ def _pointes(X0, T, E, rayon, zmin):
     return X, faites
 
 
-def _ressorts(X1, T, E, deg, g, L, iterations, X0, n0, dedans, dehors, sol, zmin):
+def _ressorts(X1, T, E, deg, g, L, iterations, X0, n0, dedans, dehors, sol, zmin, facteur=1.0):
     """La pression, en numpy : chaque arête est un ressort à sa longueur de départ, chaque point est poussé le long de sa
     normale ; à l'équilibre, une boule de rayon r s'étire d'environ g r / L (un tube deux à trois fois plus), un fond plat
     bombe. Pas de dynamique : des pas de relaxation (ressorts projetés, à la Jacobi). iterations <= 0 : selon la maille.
@@ -1056,7 +1070,7 @@ def _ressorts(X1, T, E, deg, g, L, iterations, X0, n0, dedans, dehors, sol, zmin
     l0 = np.linalg.norm(X1[i1] - X1[i0], axis=1)
     l2 = (np.bincount(i0, weights=l0 ** 2, minlength=n) + np.bincount(i1, weights=l0 ** 2, minlength=n)) / deg
     om = 0.9
-    pas = g * om * l2 / (4.0 * L)
+    pas = g * om * l2 / (4.0 * L) * facteur     # facteur : plus de pression dans les parties fines (gonfler, « fins »)
     if iterations <= 0:                         # assez de pas pour qu'un ventre (un dixième de la bête) trouve son équilibre
         lmed = float(np.median(np.sqrt(l2)))
         iterations = int(min(9000, max(1500, 30.0 * (0.1 * L / max(lmed, 1e-9)) ** 2)))
@@ -1191,7 +1205,10 @@ def gonfler(P, F, L, h, reglages=None):
                 Y[:, 2] = np.maximum(Y[:, 2], zmin)
                 Y[sol, 2] = P[sol, 2]
         if methode == "ressorts":
-            Y, pas_faits = _ressorts(X, T, E, deg, r["pression"], L, int(r["iterations"]), P, n0, dedans, dehors, sol, zmin)
+            facteur = 1.0
+            if r["fins"] > 0:                                        # une queue, une oreille, un pied plat : gonflés eux aussi
+                facteur = np.clip((float(np.median(t)) / t) ** r["fins"], 1.0, 20.0)
+            Y, pas_faits = _ressorts(X, T, E, deg, r["pression"], L, int(r["iterations"]), P, n0, dedans, dehors, sol, zmin, facteur)
         X = Y
     X = _borner(X, P, n0, dedans, dehors)
     X[:, 2] = np.maximum(X[:, 2], zmin)
@@ -1210,6 +1227,102 @@ def gonfler(P, F, L, h, reglages=None):
                  100 * np.mean(un >= dehors * 0.999), 1000 * float(np.median(t)), t1 - t0, time.time() - t1))
     _dire("gonflage :", infos)
     return X, infos
+
+
+def _repeser(p, n):
+    """Une pièce refaite avec n points : sa teinte et ses poids d'os (la moyenne de chacun) suivent."""
+    p["teinte"] = np.tile(np.asarray(p["teinte"], float).reshape(-1, 3).mean(axis=0), (n, 1))
+    if p.get("poids"):
+        p["poids"] = {o: np.full(n, float(np.mean(w))) for o, w in p["poids"].items()}
+
+
+def _paupieres_ouvertes(a):
+    """Sur la base gonflée, les paupières lourdes (« lourde… ») refaites : le bord à COUPE_MIN rayon au moins au-dessus du
+    milieu de l'œil, fines (EPAISSEUR_PAUPIERE rayon), le bord horizontal. l'auteur (15/10) : jamais d'œil mi-clos ni grognon ;
+    une paupière épaisse cache l'œil vu de trois quarts. Rend la liste « nom : coupe avant -> après »."""
+    import atelier as A
+    e = float(a.echelle)
+    toutes = a._toutes()
+    yeux = []
+    for nom, pos, vers, r, paire in a._boutons:
+        for k, nm in enumerate([nom + "_G", nom + "_D"] if paire else [nom]):
+            ps = [p for p in toutes if p["nom"] == nm]
+            if not ps:
+                continue
+            z = np.array(vers, float) * ([1.0, 1.0, 1.0] if k == 0 else [-1.0, 1.0, 1.0])
+            yeux.append((np.vstack([p["monde"] for p in ps]).mean(axis=0), z / max(np.linalg.norm(z), 1e-12), float(r) * e))
+    faites = []
+    if not yeux:
+        return faites
+    boule = A.boule(1.0, 32, 16)
+    for p in toutes:
+        if not p["nom"].lower().startswith("lourde") or not len(p["monde"]):
+            continue
+        m = p["monde"].mean(axis=0)
+        c, z, R = min(yeux, key=lambda y_: float(np.linalg.norm(y_[0] - m)))
+        if np.linalg.norm(c - m) > 2.5 * R:
+            continue
+        x = np.cross([0.0, 0.0, 1.0], z)
+        if np.linalg.norm(x) < 1e-6:
+            x = np.cross([0.0, 1.0, 0.0], z)
+        x /= np.linalg.norm(x)
+        y = np.cross(z, x)
+        avant = float(((p["monde"] - c) @ y).min() / R)              # la coupe d'aujourd'hui (le bas de la paupière)
+        coupe = min(max(COUPE_MIN, avant), 0.9)
+        s = boule.v * [1.30 * R, 1.30 * R, EPAISSEUR_PAUPIERE * R]
+        s[:, 1] = np.maximum(s[:, 1], coupe * R)
+        p["monde"] = c + s[:, 0:1] * x + s[:, 1:2] * y + s[:, 2:3] * z
+        p["loc"] = s / e
+        p["faces"] = [tuple(int(i) for i in f) for f in boule.f]
+        _repeser(p, len(s))
+        faites.append("%s %.2f -> %.2f" % (p["nom"], avant, coupe))
+    return faites
+
+
+def _moustaches(a, peau):
+    """Sur la base gonflée, les moustaches (MOUSTACHES) refaites souples : le même départ et la même direction, mais elles
+    retombent en courbe (un quart de leur longueur au bout) et s'affinent jusqu'au tiers de leur épaisseur. Rend leur nombre."""
+    import atelier as A
+    V, F, d = [], [], 0
+    for p in peau:
+        V.append(p["monde"])
+        F += [tuple(i + d for i in f) for f in p["faces"]]
+        d += len(p["monde"])
+    arbre = _ecorce(np.vstack(V), F)
+    e = float(a.echelle)
+    faites = 0
+    for p in a._toutes():
+        if p.get("fusion") or not p["nom"].lower().startswith(MOUSTACHES) or len(p["monde"]) < 8:
+            continue
+        X = np.asarray(p["monde"], float)
+        if (len(X) - 2) % 6 == 0 and len(X) >= 14:                   # un fil brodé (A.tube à 6 côtés) : ses anneaux
+            anneaux = X[:-2].reshape(-1, 6, 3)
+            chemin = anneaux.mean(axis=1)
+            rayon = float(np.median(np.linalg.norm(anneaux - chemin[:, None, :], axis=2)))
+        else:                                                        # autre chose : de bout en bout, en ligne droite
+            c0 = X.mean(axis=0)
+            axe = np.linalg.svd(X - c0, full_matrices=False)[2][0]
+            t_ = (X - c0) @ axe
+            chemin = np.array([X[int(np.argmin(t_))], X[int(np.argmax(t_))]])
+            rayon = float(np.median(np.linalg.norm((X - c0) - np.outer(t_, axe), axis=1)))
+        if (arbre.find_nearest(chemin[-1].tolist())[3] or 0.0) < (arbre.find_nearest(chemin[0].tolist())[3] or 0.0):
+            chemin = chemin[::-1]                                    # la racine d'abord (le bout le plus près de la peau)
+        long_ = float(np.linalg.norm(np.diff(chemin, axis=0), axis=1).sum())
+        if long_ < 1e-6:
+            continue
+        if len(chemin) < 3:
+            chemin = np.array([chemin[0] + (chemin[-1] - chemin[0]) * u for u in np.linspace(0.0, 1.0, 4)])
+        u = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(chemin, axis=0), axis=1))]) / long_
+        chemin = chemin + np.outer(0.25 * long_ * u ** 2, [0.0, 0.0, -1.0])     # elle retombe, de plus en plus vers le bout
+        chemin = A.courbe(chemin, 4)
+        r0 = 0.85 * rayon
+        m = A.tube(chemin, lambda f: r0 * (1.0 - 0.67 * f), 6)
+        p["monde"] = np.asarray(m.v, float)
+        p["loc"] = p["monde"] / e
+        p["faces"] = [tuple(int(i) for i in f) for f in m.f]
+        _repeser(p, len(m.v))
+        faites += 1
+    return faites
 
 
 def _champ(P, T, U):

@@ -117,7 +117,9 @@ def construire():
         return s * [0.046, 0.044, 0.016]
     for nom, c in (("G", 1), ("D", -1)):
         E = RT @ A.cadre(Vector((c * 0.118, 0.026, 0.098)), (c * 0.42, -0.30, 0.85), (0, 0.2, 1.0))
-        a.piece("oreille_" + nom, A.boule(1.0, 28, 14).sculpte(coupe), None, mat=E)
+        ore = A.boule(1.0, 28, 14).sculpte(coupe)
+        ore.teinte = np.where((ore.v[:, 2] > 0.004)[:, None], NOISETTE * 0.78, NOISETTE * 0.95)      # le creux plus sombre, le dos du ton du crâne
+        a.piece("oreille_" + nom, ore, None, mat=E)
 
     # ----- les bras : épais en haut, en jambon, qui s'affinent au poignet et finissent en larges pattes à griffes -----
     haut = {"G": [(0.270, 0.020, 0.745), (0.400, 0.000, 0.800), (0.500, -0.070, 0.920), (0.550, -0.120, 1.020)],
