@@ -70,10 +70,23 @@ def construire():
             contour = aile(rx, ry, pointe, 0.010) * np.array([c, 1.0])
             if c < 0:
                 contour = contour[::-1]
+            # le bord festonné : de petites vagues sur le contour (Cohérence : plus d'assiettes lisses)
+            cx, cy = contour.mean(axis=0)
+            ang = np.arctan2(contour[:, 1] - cy, contour[:, 0] - cx)
+            fest = 1.0 + 0.045 * np.sin(12 * ang)
+            contour = np.stack([cx + (contour[:, 0] - cx) * fest, cy + (contour[:, 1] - cy) * fest], axis=1)
+            Rc = float(np.linalg.norm(contour - np.array([cx, cy]), axis=1).max())
+
+            def voute(v, cx=cx, cy=cy, Rc=Rc):
+                s_ = v.copy()
+                d = np.minimum(np.hypot(v[:, 0] - cx, v[:, 1] - cy) / Rc, 1.0)
+                s_[:, 2] += 0.024 * (1.0 - d ** 2)                                   # l'aile bombée : une voûte, pas une assiette
+                return s_
             pos = (c * 0.014, y0, 0.064)
             rot = (0, -c * 12, c * balayage)
             for niveau, ech, epaisseur, ecart in (("dessous", 1.00, 0.004, 0.0000), ("bord", 0.98, 0.004, 0.0035), ("bleu", 0.82, 0.004, 0.0075)):
                 m = A.decoupe(contour * ech, epaisseur, casse=0.0016)
+                m = m.sculpte(voute)
                 ajoute(niveau, m.pose((0, 0, ecart), (0, 0, 0)).pose(pos, rot))
             M_ = A.repere(pos, rot)
             for k in range(0, len(contour), 6):

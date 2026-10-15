@@ -26,7 +26,7 @@ NOIR = np.array(M.hexa("#2d384f"))            # la dominante (registre : noir bl
 BLANC = np.array(M.hexa("#f6f4ee"))           # le ventre, les croissants des épaules
 GRIS = np.array(M.hexa("#a7adb7"))            # le bord du ventre, les fentes
 FIL = M.hexa("#171d2b")
-ROLL = 34.0                                   # elle penche de tout le corps : l'aile gauche monte, la droite frôle le sable
+ROLL = 0.0                                    # à plat : les ailes horizontales, le bout relevé (Cohérence, 15/10 : « posée sur la tranche »)
 
 
 def planforme(v):

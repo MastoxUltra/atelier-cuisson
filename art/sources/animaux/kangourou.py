@@ -75,7 +75,7 @@ def construire():
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0215)
         po = A.profil([(0, 0), (0.036, 0.012), (0.056, 0.070), (0.054, 0.140), (0.036, 0.205), (0.014, 0.248), (0, 0.262)], 6)
         vers = (H3 @ Vector((c * 0.42, 0.18, 0.88))).normalized()
-        E = A.cadre(H @ Vector((c * 0.075, 0.070, 0.080)) - vers * 0.015, vers, H3 @ Vector((c * 0.3, 0.9, -0.1)))
+        E = A.cadre(H @ Vector((c * 0.058, 0.082, 0.004)) - vers * 0.030, vers, H3 @ Vector((c * 0.3, 0.9, -0.1)))   # plantées sur le crâne
         oreille = K.bandes(A.tour(po, 36).etire(1.0, 0.30, 1.0), [(0.200, ROUX), (9, BRUN)])
         a.piece("oreille_" + nom, oreille, None, mat=E)
         a.piece("pavillon_" + nom, A.tour(po, 28).etire(0.60, 0.30, 0.70).pose((0, 0.008, 0.012)), CLAIR, mat=E, poil=False)

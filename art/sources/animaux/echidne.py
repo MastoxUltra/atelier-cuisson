@@ -28,6 +28,42 @@ TETE = Vector((0.0, -0.200, 0.115))
 LACET = 22.0
 
 
+def touffes(maille, nb, longueur, rayon, graine, couleur, dos_seul=True, sens=(0.0, 0.0, 0.0)):
+    """Des touffes en cônes épais plantés sur la surface d'une pièce (plus de cartes plates) : nb cônes d'une longueur et
+    d'un rayon de base donnés, dirigés vers l'extérieur (un peu vers « sens »), colorés par couleur(t) (t : 0 base, 1 pointe)."""
+    rng = np.random.default_rng(graine)
+    v = np.asarray(maille.v, float)
+    centre = v.mean(axis=0)
+    choisis = np.nonzero(v[:, 2] > centre[2] + (0.0 if dos_seul else -9.0))[0]
+    choisis = rng.choice(choisis, size=min(nb, len(choisis)), replace=False)
+    profil = A.profil([(0, 0), (rayon, 0.004), (rayon * 0.75, longueur * 0.45), (rayon * 0.36, longueur * 0.80), (0, longueur)], 4)
+    cone = A.tour(profil, 8)
+    cone.teinte = np.stack([np.array(couleur(z / longueur)) for z in cone.v[:, 2]])
+    sortie = None
+    for i in choisis:
+        d = v[i] - centre
+        d = d / max(np.linalg.norm(d), 1e-9) + np.asarray(sens)
+        d = d / max(np.linalg.norm(d), 1e-9)
+        m = cone.copy() if hasattr(cone, "copy") else cone
+        pos = Vector(tuple(v[i] - d * 0.004))
+        haut = Vector((0.0, 0.0, 1.0)) if abs(d[2]) < 0.95 else Vector((0.0, 1.0, 0.0))
+        t = A.cadre(pos, Vector(tuple(d)), haut)
+        m = m.pose((0, 0, 0)) if False else m
+        piece = _poser(cone, t)
+        sortie = piece if sortie is None else sortie + piece
+    return sortie
+
+
+def _poser(maille, rep):
+    """Une copie de la maille portée dans le repère rep (une matrice 4x4)."""
+    import copy
+    m = copy.deepcopy(maille)
+    M3 = np.array(rep.to_3x3())
+    tr = np.array(rep.to_translation())
+    m.v = np.asarray(m.v, float) @ M3.T + tr
+    return m
+
+
 def construire():
     a = K.Animal("echidne")
     a.taille = 0.50
@@ -40,9 +76,9 @@ def construire():
     dos = A.boule(1.0, 48, 24).sculpte(dome)
     dos.teinte = np.tile(np.asarray(PRUNE, float), (len(dos.v), 1))
     a.piece("corps", dos, None, pos=CORPS)
-    piquants = G.franges(dos, 0.080, 0.016, 0.022, 0.030,
-                         lambda rang, t: tuple(np.asarray(CREME) * (0.88 + 0.12 * (rang % 2)) * (0.7 + 0.3 * t) + np.asarray(POINTE) * (0.25 * (1 - t))),
-                         5, 1, 0.10, 0.98)
+    # des piquants en cônes épais, plantés serrés sur le dos (plus de lamelles plates)
+    piquants = touffes(dos, 340, 0.075, 0.0125, 3, lambda t: tuple(np.asarray(CREME) * (1 - 0.55 * t * t) + np.asarray(POINTE) * (0.55 * t * t)),
+                       dos_seul=True, sens=(0.0, 0.10, 0.0))
     a.piece("piquants", piquants, None, pos=CORPS, poil=False)
 
     # ----- la tête : une petite boule ronde sans cou, qui se prolonge en long bec fin, courbé vers le bas -----

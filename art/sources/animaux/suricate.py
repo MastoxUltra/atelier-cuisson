@@ -73,7 +73,9 @@ def construire():
 
     # ----- la tête : un COIN mince, le front plat, le museau pointu et le nez noir ; les grandes taches noires autour des
     #       yeux ; de petites oreilles en croissant, plantées bas sur les côtés -----
-    H = A.cadre(Vector((0.0, -0.030, 0.545)), Vector((0.34, -1.0, 0.04)).normalized(), Vector((0, 0, 1)))
+    # le cou : un tube qui monte du haut du tronc et ENTRE dans la tête (plus de tête flottante)
+    a.piece("cou", A.tube(A.courbe([(0.0, 0.030, 0.350), (0.0, 0.005, 0.455), (0.0, -0.022, 0.530)], 5), lambda t: 0.052 - 0.006 * t, 20), tuple(FAUVE))
+    H = A.cadre(Vector((0.0, -0.030, 0.545)), Vector((0.0, -1.0, 0.04)).normalized(), Vector((0, 0, 1)))
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.10, 0.052), (0.34, 0.060), (0.62, 0.042), (0.86, 0.026), (0.97, 0.017), (1.0, 0.0)], 0.210, 40, 0.005)
     tete.v[:, 0] *= 0.82
@@ -82,10 +84,10 @@ def construire():
     a.piece("nez", A.boule(1.0, 16, 8).etire(0.013, 0.011, 0.012), tuple(NOIR), mat=H @ A.repere((0, 0.004, 0.166)), poil=False)
     a.tete = H @ Vector((0, 0.0, 0.110))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.60, 0.20, 0.30))
+        regard = H3 @ Vector((c * 0.52, 0.30, 0.58))                         # sur l'avant de la tête : les deux yeux se voient de face
         a.rustine("tache_" + nom, "tete", H.to_translation(), regard, 0.42, tuple(NOIR), 0.003, 0)
         p, n = a.surface("tete", H.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0185)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0230)
         po = A.profil([(0, 0), (0.016, 0.006), (0.021, 0.020), (0.016, 0.034), (0.006, 0.042), (0, 0.046)], 5)
         a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.40, 1.0), tuple(NOIR),
                 mat=A.cadre(H @ Vector((c * 0.050, 0.020, -0.040)), H3 @ Vector((c * 0.86, 0.16, 0.10)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
@@ -129,6 +131,7 @@ OS = [
 ]
 
 PORTEURS = [
+    ('cou', 'corps'),
     ('oeil_reflet', 'tete'), ('oreille', 'oreille', True), ('orteils', 'patte_av', True),
     ('cuisse', 'patte_ar', True), ('corps', 'corps'), ('queue', 'queue'), ('tache', 'corps'), ('tete', 'tete'),
     ('bras', 'patte_av', True), ('main', 'patte_av', True), ('oeil', 'tete'), ('pied', 'patte_av', True),

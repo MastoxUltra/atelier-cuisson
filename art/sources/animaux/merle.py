@@ -109,6 +109,99 @@ def construire():
         a.piece(nom, tige + pied, PATTE, poil=False)
     return a
 
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py merle). Les mesures sont celles du modèle (avant a.taille). Gardé par l'auteur le
+# 15/10 (4e dessin). Sa pose de repos : penché vers la pelouse, la tête couchée, il écoute le ver.
+
+from poses import Pose, borne, cloche, onde
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, 0.020, 0.128)),          # le milieu du fuseau
+    ("tete", "corps", (0.003, -0.072, 0.150)),         # la nuque, où la tête s'emmanche sur le corps
+    ("aile_G", "corps", (0.036, -0.010, 0.142)),       # l'épaule de l'aile (la droite : son miroir)
+    ("queue", "corps", (0.0, 0.088, 0.140)),           # le croupion
+    ("patte_g", "corps", (0.020, 0.010, 0.094)),       # la hanche ; les pattes, l'une en avant, l'autre derrière :
+    ("patte_d", "corps", (-0.020, 0.010, 0.094)),      #   chacune son os nommé à la main
+]
+
+PORTEURS = [("corps", "corps"), ("dos", "corps"),
+            ("tete", "tete"), ("crane", "tete"), ("cerne", "tete"), ("oeil", "tete"), ("bec", "tete"),
+            ("aile", "aile", True), ("aile_bord", "aile", True),
+            ("queue", "queue"), ("patte_g", "patte_g"), ("patte_d", "patte_d"),
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+
+def repos(t):
+    """Il écoute la pelouse : il respire vite, penche la tête d'un côté puis de l'autre, la queue qui tressaute à
+    chaque arrêt ; il cligne."""
+    p = Pose()
+    p.add("corps", ech=(1 + 0.015 * onde(t, 6), 1, 1 + 0.020 * onde(t, 6)))
+    ecoute = cloche(t, 0.30, 0.12) - cloche(t, 0.72, 0.12)
+    p.add("tete", rot=(4 * cloche(t, 0.30, 0.12), 14 * ecoute, 6 * ecoute))
+    p.add("queue", rot=(-14 * (cloche(t, 0.50, 0.03) + cloche(t, 0.92, 0.03)), 0, 0))
+    p.ouvert = 1 - cloche(t, 0.12, 0.03) - cloche(t, 0.60, 0.03)
+    return p
+
+
+def avance(t):
+    """Sa course sautillée sur l'herbe : deux petits bonds par boucle, les deux pattes ensemble, la queue qui balance
+    à chaque réception, la tête qui reste en avant."""
+    p = Pose()
+    bond = max(0.0, math.sin(2 * math.tau * t))
+    p.add("corps", pos=(0, 0, 0.018 * bond), rot=(-6 * bond, 0, 0))
+    for os_ in ("patte_g", "patte_d"):
+        p.add(os_, rot=(-26 * bond, 0, 0))
+    p.add("tete", rot=(5 * bond, 0, 0))
+    p.add("queue", rot=(18 * bond - 6, 0, 0))
+    p.add("aile_G", rot=(0, 0, 6 * bond))
+    return p
+
+
+def mange(t):
+    """Il plonge le bec dans la pelouse, tire le ver d'un coup sec, se redresse et l'avale."""
+    p = Pose()
+    bas = cloche(t, 0.30, 0.10) + cloche(t, 0.62, 0.10)
+    tire = cloche(t, 0.40, 0.03) + cloche(t, 0.72, 0.03)
+    p.add("corps", rot=(16 * bas, 0, 0))
+    p.add("tete", rot=(30 * bas - 12 * tire, 0, 0))
+    p.add("queue", rot=(-18 * bas, 0, 0))
+    p.ouvert = 1 - cloche(t, 0.88, 0.03)
+    return p
+
+
+def joie(t):
+    """Sa fête : il gonfle le jabot, bat des ailes deux fois en sautant sur place, la queue en éventail, et retombe à
+    l'écoute."""
+    p = Pose()
+    saut = cloche(t, 0.45, 0.16)
+    bat = onde(t, 4) * cloche(t, 0.45, 0.20)
+    p.add("corps", pos=(0, 0, 0.040 * saut), rot=(-14 * saut, 0, 0), ech=(1 + 0.06 * saut, 1, 1 + 0.06 * saut))
+    p.add("aile_G", rot=(0, 0, 55 * bat * bat + 10 * saut))
+    p.add("tete", rot=(-18 * saut, 0, 0))
+    p.add("queue", rot=(-20 * saut, 0, 0), ech=(1 + 0.4 * saut, 1, 1))
+    for os_ in ("patte_g", "patte_d"):
+        p.add(os_, rot=(-20 * saut, 0, 0))
+    return p
+
+
+def dort(t):
+    """En boule, gonflé contre le froid, les pattes cachées sous lui, la tête rentrée dans les épaules, le bec dans
+    les plumes du dos ; il respire lentement."""
+    p = Pose()
+    r = onde(t, 1)
+    p.add("corps", pos=(0, 0, -0.060), rot=(-10, 0, 0), ech=(1.10 + 0.015 * r, 1, 1.10 + 0.020 * r))
+    p.add("tete", rot=(-20, 0, 70), pos=(0, 0.012, -0.012))
+    p.add("patte_g", rot=(-70, 0, 0))
+    p.add("patte_d", rot=(-70, 0, 0))
+    p.add("queue", rot=(10, 0, 0))
+    p.ouvert = 0.0
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}
+
 
 if __name__ == "__main__":
     K.planche(construire, "Merle")

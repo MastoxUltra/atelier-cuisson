@@ -20,9 +20,9 @@ import atelier as A
 import matieres as M
 import peluche as K
 
-FUME = M.hexa("#fffdfa")                      # la dominante : blanc de neige (le poil le fonce à peine)
-SOMBRE = M.hexa("#d9d4de")                    # le bas des pattes : gris pâle
-CREME = M.hexa("#f2eef6")                     # les joues, le dessous du museau, le bout du panache, le dedans des oreilles : blanc bleuté
+FUME = M.hexa("#dcefff")                      # la dominante : un bleu ciel très clair (l'auteur, 15/10 : blanc, il faisait la robe sauvage)
+SOMBRE = M.hexa("#b4d2ec")                    # le bas des pattes : le bleu un ton plus soutenu
+CREME = M.hexa("#f4f9ff")                     # les joues, le dessous du museau, le bout du panache, le dedans des oreilles : blanc bleuté
 AMBRE = M.hexa("#ffb12a")                     # l'accent : les yeux
 CHARBON = M.hexa("#2b2626")                   # la truffe
 CORPS = Vector((0.0, 0.03, 0.200))

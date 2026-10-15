@@ -78,8 +78,9 @@ def construire():
         a.piece("tourelle_" + nom, A.boule(1.0, 28, 14).etire(0.036, 0.036, 0.036), tuple(ROSE), pos=tuple(base))
         a.piece("cerne_" + nom, A.boule(1.0, 28, 14).etire(0.030, 0.030, 0.030), tuple(TURQUOISE),
                 pos=tuple(base + H3 @ Vector((c * 0.012, -0.012, 0.004))), poil=False)
-        p, n = a.surface("tourelle_" + nom, base, H3 @ Vector((c * 0.80, -0.50, 0.25)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0120)
+        # la pupille noire AU BOUT de la tourelle : posée sur le cerne turquoise (sa surface), pas dessous
+        p, n = a.surface("cerne_" + nom, base, H3 @ Vector((c * 0.80, -0.50, 0.25)))
+        a.oeil("oeil_" + nom, p + n * 0.002, n, 0.0145)
 
     # ----- les pattes : minces, deux doigts opposés en pince au bout ; la gauche avant levée ; la queue en escargot -----
     def pince(bout, c):

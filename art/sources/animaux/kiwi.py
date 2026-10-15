@@ -30,6 +30,42 @@ GALBE = [(0.0, 0.0), (0.035, 0.030), (0.090, 0.080), (0.140, 0.240), (0.150, 0.4
          (0.050, 0.915), (0.052, 0.965), (0, 1.0)]
 
 
+def touffes(maille, nb, longueur, rayon, graine, couleur, dos_seul=True, sens=(0.0, 0.0, 0.0)):
+    """Des touffes en cônes épais plantés sur la surface d'une pièce (plus de cartes plates) : nb cônes d'une longueur et
+    d'un rayon de base donnés, dirigés vers l'extérieur (un peu vers « sens »), colorés par couleur(t) (t : 0 base, 1 pointe)."""
+    rng = np.random.default_rng(graine)
+    v = np.asarray(maille.v, float)
+    centre = v.mean(axis=0)
+    choisis = np.nonzero(v[:, 2] > centre[2] + (0.0 if dos_seul else -9.0))[0]
+    choisis = rng.choice(choisis, size=min(nb, len(choisis)), replace=False)
+    profil = A.profil([(0, 0), (rayon, 0.004), (rayon * 0.75, longueur * 0.45), (rayon * 0.36, longueur * 0.80), (0, longueur)], 4)
+    cone = A.tour(profil, 8)
+    cone.teinte = np.stack([np.array(couleur(z / longueur)) for z in cone.v[:, 2]])
+    sortie = None
+    for i in choisis:
+        d = v[i] - centre
+        d = d / max(np.linalg.norm(d), 1e-9) + np.asarray(sens)
+        d = d / max(np.linalg.norm(d), 1e-9)
+        m = cone.copy() if hasattr(cone, "copy") else cone
+        pos = Vector(tuple(v[i] - d * 0.004))
+        haut = Vector((0.0, 0.0, 1.0)) if abs(d[2]) < 0.95 else Vector((0.0, 1.0, 0.0))
+        t = A.cadre(pos, Vector(tuple(d)), haut)
+        m = m.pose((0, 0, 0)) if False else m
+        piece = _poser(cone, t)
+        sortie = piece if sortie is None else sortie + piece
+    return sortie
+
+
+def _poser(maille, rep):
+    """Une copie de la maille portée dans le repère rep (une matrice 4x4)."""
+    import copy
+    m = copy.deepcopy(maille)
+    M3 = np.array(rep.to_3x3())
+    tr = np.array(rep.to_translation())
+    m.v = np.asarray(m.v, float) @ M3.T + tr
+    return m
+
+
 def construire():
     a = K.Animal("kiwi")
     a.taille = 0.60
@@ -41,9 +77,9 @@ def construire():
     corps.teinte = np.tile(np.asarray(TABAC, float), (len(corps.v), 1))
     corps = corps.sculpte(fil.couche)
     a.piece("corps", corps, None)
-    franges = G.franges(corps, 0.070, 0.026, 0.026, 0.020,
-                        lambda rang, t: tuple(np.asarray(TABAC) * (0.86 + 0.24 * (rang % 2)) * (0.78 + 0.30 * t) + np.asarray(FONCE) * 0.10),
-                        3, 1, 0.04, 0.80)
+    # des touffes de plumes-poils : cônes épais couchés vers l'arrière (plus de cartes plates)
+    franges = touffes(corps, 380, 0.062, 0.0105, 5, lambda t: tuple(np.asarray(TABAC) * (0.82 + 0.40 * t) + np.asarray(FONCE) * 0.12),
+                      dos_seul=False, sens=(0.0, 0.55, -0.20))
     a.piece("franges", franges, None, poil=False)
     centre, avant, nuque = fil.cadre(0.93 * L)
     C = Vector(centre)

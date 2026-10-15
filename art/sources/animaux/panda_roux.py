@@ -76,18 +76,14 @@ def construire():
     a.tete = TETE + Vector((0.0, -0.17, 0.0))
 
     # ----- les bras : levés à demi, les coudes au dehors, de grosses pattes sombres aux trois griffes ; les jambes courtes -----
-    for nom, c, pts in (("G", 1, [(0.185, 0.010, 0.470), (0.290, -0.050, 0.520), (0.300, -0.150, 0.620), (0.250, -0.215, 0.700)]),
-                        ("D", -1, [(-0.185, 0.010, 0.470), (-0.300, -0.060, 0.490), (-0.350, -0.160, 0.550), (-0.330, -0.250, 0.630)])):
+    for nom, c, pts in (("G", 1, [(0.185, 0.010, 0.470), (0.250, -0.030, 0.370), (0.215, -0.110, 0.300), (0.140, -0.170, 0.270)]),
+                        ("D", -1, [(-0.185, 0.010, 0.470), (-0.250, -0.030, 0.370), (-0.215, -0.110, 0.300), (-0.140, -0.170, 0.270)])):
         bras = O.tube_r(pts, [0.074, 0.062, 0.054, 0.050], 18)
         bras.teinte = np.tile(SOMBRE, (len(bras.v), 1))
         fin = Vector(pts[-1])
         main = A.boule(1.0, 20, 10).etire(0.056, 0.050, 0.046).pose(tuple(fin))
         main.teinte = np.tile(SOMBRE * 0.9, (len(main.v), 1))
         ens = bras + main
-        for k, dx in enumerate((-0.028, 0.0, 0.028)):
-            g = O.griffe(0.034, 0.0072)
-            g.teinte = np.tile(np.array([0.93, 0.88, 0.76]), (len(g.v), 1))
-            ens = ens + O.couche(g, A.cadre(fin + Vector((dx, -0.044, 0.014)), (0.0, -1.0, 0.25), (0, 0, 1)))
         a.piece("bras_" + nom, ens, None)
         cuisse = O.tube_r([(c * 0.130, 0.080, 0.230), (c * 0.150, 0.010, 0.120), (c * 0.150, -0.040, 0.044)], [0.098, 0.080, 0.062], 18)
         a.piece("jambe_" + nom, O.teinte(cuisse, SOMBRE), None)

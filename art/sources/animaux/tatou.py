@@ -2,7 +2,7 @@
 DÔME de la carapace posé sur le dos comme une coque bombée, découpée en bandes articulées étroites (le bouclier large
 des épaules, les bandes du milieu qui se resserrent, le bouclier de la croupe), le dessous nu et plus clair ; une petite
 tête en coin au museau pointu, deux yeux, de longues oreilles en tuyau fermé sur les côtés ; des pattes courtes aux
-griffes de pelle, une queue en cône cuirassé. Le blindé timide : le museau au ras du sol qui renifle, la carapace en
+griffes de pelle, une longue queue annelée qui s'effile. Le blindé timide : le museau au ras du sol qui renifle, la carapace en
 dôme, une patte avant levée ; il est à un souffle de se rouler en boule.
 
     python tatou.py        fabrique la fiche art/apercus/animaux/tatou.png (cousu main, palier 2)
@@ -119,9 +119,10 @@ def construire():
             gr = gr.pose((0, 0, 0), (-78, 0, 0)).pose((k_ * 0.020, -0.020, 0.0), (0, 0, k_ * 8))
             g = gr if g is None else g + gr
         a.piece("griffes_" + nom, g, GRIFFE, pos=(bas[0], bas[1] - 0.016, bas[2] - 0.006), poil=False)
-    qf = K.Fil([(0.0, 0.240, 0.115), (0.0, 0.380, 0.075), (0.0, 0.500, 0.040)], (1, 0, 0))
-    queue = fuseau([(0.0, 0.066), (0.40, 0.048), (0.80, 0.024), (1.0, 0.0)], qf.long, 32, 0.005)
-    queue.teinte = np.where(((queue.v[:, 2] / 0.040) % 1.0 < 0.16)[:, None], tuple(JOINT), tuple(PLAQUE))
+    # la queue : LONGUE et fine, annelée, qui s'effile jusqu'à la pointe (plus de cône ni de boule)
+    qf = K.Fil([(0.0, 0.240, 0.115), (0.0, 0.420, 0.092), (0.0, 0.620, 0.058), (0.0, 0.820, 0.030)], (1, 0, 0))
+    queue = fuseau([(0.0, 0.052), (0.35, 0.036), (0.75, 0.020), (0.97, 0.010), (1.0, 0.0)], qf.long, 32, 0.004)
+    queue.teinte = np.where(((queue.v[:, 2] / 0.034) % 1.0 < 0.18)[:, None], tuple(JOINT), tuple(PLAQUE))
     a.piece("queue", queue.sculpte(qf.couche), None)
     return a
 
@@ -137,16 +138,16 @@ if __name__ == "__main__":
 
 from poses import Pose, borne, cloche, onde
 
-JAMBE = 0.142                                        # de l'épaule (ou de la hanche) au sol
+JAMBE = 0.138                                        # de l'épaule (ou de la hanche) au sol
 
 OS = [
     ('racine', None, (0, 0, 0)),
     ('corps', 'racine', (0.000, 0.146, 0.215)),
     ('tete', 'corps', (0.007, -0.279, 0.155)),
     ('oreille_G', 'tete', (0.056, -0.309, 0.197)),
-    ('patte_av_G', 'corps', (0.102, -0.195, 0.139)),
-    ('patte_ar_G', 'corps', (0.107, 0.113, 0.146)),
-    ('queue', 'corps', (-0.000, 0.268, 0.158)),
+    ('patte_av_G', 'corps', (0.101, -0.187, 0.136)),
+    ('patte_ar_G', 'corps', (0.106, 0.121, 0.141)),
+    ('queue', 'corps', (-0.000, 0.261, 0.133)),
 ]
 
 PORTEURS = [
@@ -206,7 +207,7 @@ def joie(t):
     vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
     salut = cloche(t, 0.72, 0.16, False)
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.043 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.042 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_av', rot=(-22 * vol, 0, 0))
     p.paire('patte_ar', rot=(18 * vol, 0, 0))
     p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
@@ -220,7 +221,7 @@ def dort(t):
     p = Pose()
     r = onde(t, 1)
     p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.078), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.add('corps', pos=(0, 0, -0.076), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
     p.paire('patte_av', rot=(-68, 0, 14))
     p.paire('patte_ar', rot=(66, 0, 10))
     p.add('tete', rot=(32, 4, 40))

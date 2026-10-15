@@ -108,10 +108,10 @@ def construire():
     a.piece("tete", tete.etire(0.062, 0.036, 0.098), None, mat=T, poil=False)
     a.tete = T @ Vector((0, 0.0, 0.080))
     for nom, c in (("G", 1), ("D", -1)):
-        vers = T3 @ Vector((c * 0.82, 0.54, 0.22))
+        vers = T3 @ Vector((c * 1.00, 0.12, 0.34))                      # sur le flanc de la tête : posés sur la surface, plus au-dessus
         pe, ne = a.surface("tete", T.to_translation(), vers)
-        a.piece("bille_" + nom, A.boule(1.0, 20, 10).etire(0.026, 0.026, 0.016), OR, mat=A.cadre(pe + ne * 0.0015, ne), poil=False)
-        a.bouton("oeil_" + nom, pe + ne * 0.004, ne, 0.0125)
+        a.piece("bille_" + nom, A.boule(1.0, 20, 10).etire(0.026, 0.026, 0.016), OR, mat=A.cadre(pe + ne * 0.0004, ne), poil=False)
+        a.bouton("oeil_" + nom, pe + ne * 0.0022, ne, 0.0125)
         a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.008, 0.008, 0.005), NOIR, mat=A.cadre(T @ Vector((c * 0.026, 0.034, 0.080)), T3 @ Vector((c * 0.2, 0.9, 0.3))), poil=False)
     base = T @ Vector((0, -0.005, 0.094))
     tige = [tuple(base), tuple(base + T3 @ Vector((0, -0.004, 0.040))), tuple(base + T3 @ Vector((0, 0.0, 0.080)))]

@@ -62,8 +62,8 @@ def construire():
 
     # ----- le corps, le cou et la tête d'un seul tenant : la croupe mince et haute, le dos qui monte à la bosse des épaules,
     #       le cou énorme, la grosse tête basse ; la masse sombre devant, l'arrière-train clair derrière -----
-    chemin = [(0.0, y, z) for y, z in ((0.980, 0.800), (0.700, 0.880), (0.350, 0.950), (0.000, 1.020), (-0.350, 1.060), (-0.680, 0.950),
-                                       (-0.960, 0.720), (-1.150, 0.520), (-1.230, 0.400))]
+    chemin = [(0.0, y, z) for y, z in ((0.980, 0.800), (0.700, 0.880), (0.350, 0.950), (0.000, 1.020), (-0.350, 1.060), (-0.680, 0.960),
+                                       (-0.940, 0.900), (-1.080, 0.800), (-1.150, 0.730))]       # la tête portée à hauteur des épaules
     fil = K.Fil(chemin, (1, 0, 0))
     L = fil.long
     pts = [(0.0, 0.0), (0.02, 0.150), (0.08, 0.205), (0.20, 0.232), (0.34, 0.225), (0.46, 0.250), (0.56, 0.330), (0.66, 0.345),
@@ -98,11 +98,13 @@ def construire():
     a.piece("barbe", A.boule(1.0, 28, 14).etire(0.070, 0.150, 0.080), tuple(NOIR), mat=Mh @ A.repere((0, -0.220, 0.130)))
     for nom, c in (("G", 1), ("D", -1)):
         base = Mh @ Vector((c * 0.170, 0.110, 0.020))
-        bout = Mh @ Vector((c * 0.300, 0.230, 0.100))
-        milieu = Mh @ Vector((c * 0.245, 0.150, 0.050))
-        a.piece("corne_" + nom, A.tube(A.courbe([tuple(base), tuple(milieu), tuple(bout)], 5), lambda t: 0.034 - 0.020 * t, 12), CORNE, poil=False)
-        p, n = a.surface("tete", centre, M3 @ Vector((c * 0.90, 0.20, 0.35)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0200)
+        bout = Mh @ Vector((c * 0.360, 0.300, 0.140))
+        milieu = Mh @ Vector((c * 0.290, 0.180, 0.060))
+        a.piece("corne_" + nom, A.tube(A.courbe([tuple(base), tuple(milieu), tuple(bout)], 5), lambda t: 0.046 - 0.024 * t, 14), CORNE, poil=False)
+        dir_ = M3 @ Vector((c * 0.62, 0.34, 0.66))                                   # sur l'avant du crâne : visible de face
+        a.rustine("cerne_" + nom, "tete", centre, dir_, 0.30, tuple(TABAC), 0.004, 0)       # un cerne clair : l'œil se lit dans le poil
+        p, n = a.surface("tete", centre, dir_)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0300)
         a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.020, 0.020, 0.012), CORNE, mat=Mh @ A.repere((c * 0.050, -0.070, 0.340)), poil=False)
 
     # ----- les pattes : les avant épaisses, en culottes de laine sombres ; les arrière minces et claires ; sabots noirs -----
@@ -146,6 +148,7 @@ OS = [
 ]
 
 PORTEURS = [
+    ('cerne', 'tete'),
     ('oeil_reflet', 'tete'), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True), ('criniere', 'corps'),
     ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True), ('pinceau', 'queue'), ('museau', 'tete'),
     ('narine', 'tete'), ('corps', 'corps'), ('queue', 'queue'), ('barbe', 'tete'), ('corne', 'tete'),
