@@ -501,7 +501,7 @@ def _fabriquer(nom, avec_apercus=True):
     liste_os = list(module.OS) + [(n, groupe_de.get(voisine + "_G", groupe_de.get(voisine, "corps")), t) for n, voisine, t in lids]
     liste_os = tous_les_os(liste_os) + [(n, _os_de(a, piece), t) for n, piece, t in piques]
     if fondre:
-        fusion.fusionner(a, K.gonflage_demande(module))
+        fusion.fusionner(a, K.gonflage_demande(module), getattr(module, "GONFLAGE_REGLAGES", None))
         liste_os = fusion.os_suivent(a, liste_os, k, {o[0] for o in tous_les_os(list(module.OS))})   # le gonflage déplace paupières et épingles
 
     hauts = monter_hauts(a)
@@ -583,7 +583,7 @@ def _essayer(nom, lesquelles=()):
     liste_os = tous_les_os(list(module.OS) + [(n, groupe_de.get(voisine + "_G", groupe_de.get(voisine, "corps")), t) for n, voisine, t in lids])
     liste_os += [(n, _os_de(a, piece), t) for n, piece, t in piques]
     if fondre:
-        fusion.fusionner(a, K.gonflage_demande(module))
+        fusion.fusionner(a, K.gonflage_demande(module), getattr(module, "GONFLAGE_REGLAGES", None))
         liste_os = fusion.os_suivent(a, liste_os, k, {o[0] for o in tous_les_os(list(module.OS))})   # le gonflage déplace paupières et épingles
     connus = {o[0] for o in liste_os}
     for p in a._toutes():

@@ -685,14 +685,14 @@ def fusionner(a, gonfle=None, reglages=None):
     # ce que la peau reprend des morceaux d'origine
     liens, origine = [], []
     nouvelles = _habiller(a, P, Q, M, h, L, liens, origine)
+    base = reglages_bete(a, M, P, L, reglages) if (gonfle or ESPION is not None) else {}
     if ESPION is not None:
-        ESPION(a, P, Q, L, h, origine)
+        ESPION(a, P, Q, L, h, origine, base)
 
     # le gonflage (3.) : calculé ici (la couleur et les os sont pris à la peau d'avant), posé après le recollage
     gonflee = None
     if gonfle:
         try:
-            base = reglages_bete(a, M, P, L, reglages)
             gonflee, _infos = gonfler(P, Q, L, h, None, origine, base)
         except Exception:
             import traceback
