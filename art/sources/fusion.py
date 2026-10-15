@@ -589,10 +589,31 @@ def _choisir(a, h_essai, L):
     return pris, apart
 
 
-def fusionner(a, gonfle=None):
+def reglages_bete(a, M, P, L, reglages=None):
+    """Le réglage du gonflage propre à la bête : automatique (une bête haute sur pattes, dont le bas du corps, le plus gros
+    morceau, est à plus de JAMBES_LONGUES de la bête au-dessus du sol : JAMBES_LONGUES_REGLAGES), puis GONFLAGE_REGLAGES =
+    {...} du fichier de la bête (passé ici, ou pris au fichier lancé), qui l'emporte."""
+    base = {}
+    if M:
+        corps = max(M, key=lambda m: m.volume)
+        haut_ = float(corps.bas[2] - float(np.asarray(P)[:, 2].min()))
+        if haut_ > JAMBES_LONGUES * L:
+            base.update(JAMBES_LONGUES_REGLAGES)
+            _dire("haute sur pattes (le bas du corps « %s » à %.0f %% de la bête) : %s" % (
+                corps.p["nom"], 100 * haut_ / L, ", ".join("%s %s" % kv for kv in sorted(JAMBES_LONGUES_REGLAGES.items()))))
+    if reglages is None:
+        reglages = getattr(a, "gonflage_reglages", None) or getattr(sys.modules.get("__main__"), "GONFLAGE_REGLAGES", None)
+    if reglages:
+        base.update(reglages)
+        _dire("réglage de la bête : %s" % ", ".join("%s %s" % kv for kv in sorted(reglages.items())))
+    return base
+
+
+def fusionner(a, gonfle=None, reglages=None):
     """La peau d'une seule pièce (voir le haut du fichier). À appeler une fois l'animal à sa taille ; dans l'usine,
     après porter() (les os de chaque pièce) et le calcul des os des paupières. Rend le nombre de pièces fondues.
-    gonfle : le gonflage (3.) ; None : celui que demandent la ligne de commande et l'environnement (peluche.gonflage_demande)."""
+    gonfle : le gonflage (3.) ; None : celui que demandent la ligne de commande et l'environnement (peluche.gonflage_demande).
+    reglages : GONFLAGE_REGLAGES du fichier de la bête (sinon pris au fichier lancé, voir reglages_bete)."""
     if gonfle is None:
         import peluche
         gonfle = peluche.gonflage_demande()
@@ -661,23 +682,23 @@ def fusionner(a, gonfle=None):
     t3 = time.time()
     _dire("peau : %d points, %d triangles, %d morceau(x) d'un seul tenant (%s) (%.1f s)" % (
         len(P), sum(len(f) - 2 for f in Q), len(morceaux_peau), ", ".join(str(x) for x in sorted(morceaux_peau, reverse=True)[:6]), t3 - t2))
+    # ce que la peau reprend des morceaux d'origine
+    liens, origine = [], []
+    nouvelles = _habiller(a, P, Q, M, h, L, liens, origine)
     if ESPION is not None:
-        ESPION(a, P, Q, L, h)
+        ESPION(a, P, Q, L, h, origine)
 
-    # le gonflage (3.) : calculé ici, posé après le recollage (la couleur et les os sont pris à la peau d'avant)
+    # le gonflage (3.) : calculé ici (la couleur et les os sont pris à la peau d'avant), posé après le recollage
     gonflee = None
     if gonfle:
         try:
-            gonflee, _infos = gonfler(P, Q, L, h)
+            base = reglages_bete(a, M, P, L, reglages)
+            gonflee, _infos = gonfler(P, Q, L, h, None, origine, base)
         except Exception:
             import traceback
             traceback.print_exc()
             _dire("GONFLAGE RATÉ : la peau reste comme fondue (voir l'erreur au-dessus)")
             gonflee = None
-
-    # ce que la peau reprend des morceaux d'origine
-    liens = []
-    nouvelles = _habiller(a, P, Q, M, h, L, liens)
     ancienne_surface = (M, h, L)
     fondues = {id(m.p) for m in M}
     restes = {}
@@ -730,7 +751,7 @@ def fusionner(a, gonfle=None):
     return len(fondues)
 
 
-def _habiller(a, P, Q, M, h, L, liens=None):
+def _habiller(a, P, Q, M, h, L, liens=None, origine=None):
     """Couleur, tissu, longueur du poil et poids des os de chaque point de la peau, pris aux morceaux d'origine.
     Rend {clé du tissu : [pièces]} (une pièce par tissu et par longueur de poil). liens : une liste où ranger
     (pièce, numéros de ses points dans P), pour le gonflage."""
@@ -758,6 +779,8 @@ def _habiller(a, P, Q, M, h, L, liens=None):
     if len(seuls):                                                   # loin de tout (rare) : le morceau au centre le plus proche
         centres = np.array([m.v.mean(axis=0) for m in M])
         dom[seuls] = np.argmin(((P[seuls, None, :] - centres[None]) ** 2).sum(axis=2), axis=1)
+    if origine is not None:                                          # le nom de la pièce d'origine de chaque point (gonflage)
+        origine.extend(str(M[c].p["nom"]).lower() for c in dom.tolist())
     teinte = np.ones((n, 3))
     zone = np.zeros(n, np.int64)                                     # 0 poil, 1 feutrine
     poil_k = np.ones(n)
@@ -1324,6 +1347,16 @@ def _paupieres_ouvertes(a):
     """Sur la base gonflée, les paupières lourdes (« lourde… ») refaites : le bord à COUPE_MIN rayon au moins au-dessus du
     milieu de l'œil, fines (EPAISSEUR_PAUPIERE rayon), le bord horizontal. l'auteur (15/10) : jamais d'œil mi-clos ni grognon ;
     une paupière épaisse cache l'œil vu de trois quarts. Rend la liste « nom : coupe avant -> après »."""
+    if PAUPIERES_LOURDES == "retirer":                               # l'œil ouvert, sans trait au-dessus (Principal, 15/10)
+        faites = []
+        for cle, j in list(a._tissus.items()):
+            lourdes = [p for p in j.pieces if p["nom"].lower().startswith("lourde")]
+            if lourdes:
+                faites += ["%s retirée" % p["nom"] for p in lourdes]
+                j.pieces = [p for p in j.pieces if not p["nom"].lower().startswith("lourde")]
+                if not j.pieces:
+                    del a._tissus[cle]
+        return faites
     import atelier as A
     e = float(a.echelle)
     toutes = a._toutes()
