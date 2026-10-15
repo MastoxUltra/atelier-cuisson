@@ -34,14 +34,14 @@ def construire():
     a.taille = 0.62
 
     r = O.oiseau(a, dos=CENDRE, ventre=VENTRE, tete=ROUGE, aile=CENDRE * 0.96, queue=NOIR, bec=BEC, patte=PATTE, long=0.40, ray=0.140,
-                 incline=26.0, z0=0.185, tete_r=(0.054, 0.064, 0.054), tete_pos=(0.0, -0.118, 0.108), bec_long=0.050, bec_ray=0.016,
+                 incline=26.0, z0=0.185, tete_r=(0.070, 0.078, 0.068), tete_pos=(0.0, -0.108, 0.088), bec_long=0.050, bec_ray=0.016,
                  aile_dim=(0.030, 0.118, 0.215), aile_pos=(0.0, 0.020, 0.0), queue_dim=(0.014, 0.115, 0.105), queue_haut=-6.0,
-                 patte_long=0.150, patte_ray=0.017, oeil_r=0.0140, oeil_dir=(0.78, -0.50, 0.20), bout_aile=NOIR)
+                 patte_long=0.140, patte_ray=0.024, oeil_r=0.0140, oeil_dir=(0.78, -0.50, 0.20), bout_aile=NOIR)
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # ----- le cou nu : un tube rouge orangé de l'épaule à la tête, la caroncule jaune qui pend dessous -----
     cou = O.tube_r([tuple(haut + Vector((0.0, -0.020, -0.025))), tuple(haut + Vector((0.0, -0.075, 0.040))), tuple(H + Vector((0.0, 0.010, -0.040)))],
-                   [0.062, 0.050, 0.046], 16)
+                   [0.080, 0.066, 0.060], 18)
     a.piece("cou", O.teinte(cou, ROUGE), None)
     caro = A.boule(1.0, 24, 12).etire(0.050, 0.046, 0.058)
     a.piece("caroncule", O.teinte(caro, JAUNE), None, pos=tuple(haut + Vector((0.0, -0.060, 0.000))), poil=False)
@@ -66,7 +66,7 @@ def construire():
 # ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
 from rig_auto import rig
 if __name__ != "__main__":
-    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "oiseau")
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "oiseau")
 
 
 if __name__ == "__main__":

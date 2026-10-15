@@ -40,9 +40,9 @@ def construire():
         t[(ang > 2.35)] = CLAIR
         t[(ang < 0.85)] = SABLE * 0.92
         return t
-    rayon = O.interp([(0.0, 0.0), (0.05, 0.110), (0.18, 0.165), (0.45, 0.185), (0.75, 0.178), (0.93, 0.148), (1.0, 0.105)])
-    O.corps_h(a, "corps", (0.0, 0.40, 0.330), 0.82, rayon, peint, None, cotes=52, pitch=-2.0,
-              deforme=O.gabarit(poitrail=0.10, taille=0.0, croupe=0.14, garrot=0.06, ventre=0.0))
+    rayon = O.interp([(0.0, 0.0), (0.04, 0.115), (0.15, 0.178), (0.40, 0.205), (0.68, 0.200), (0.88, 0.178), (0.96, 0.140), (1.0, 0.040)])
+    O.corps_h(a, "corps", (0.0, 0.42, 0.340), 0.82, rayon, peint, None, cotes=52, pitch=-2.0,
+              deforme=O.gabarit(poitrail=0.06, taille=0.0, croupe=0.04, garrot=0.04, ventre=0.0))
 
     # ----- la tête : large, carrée, le front plat ; le museau émoussé et sombre ; les narines en haut du nez -----
     RT = A.repere(H, (4, 0, 14))
@@ -68,9 +68,9 @@ def construire():
 
     # ----- les pattes courtes et fortes, les pieds palmés à gros doigts ; pas de queue -----
     for sgn, nom in ((1, "G"), (-1, "D")):
-        O.jambe(a, "avant_" + nom, (sgn * 0.110, -0.240, 0.300), (sgn * 0.116, -0.280, 0.044), 0.075, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
+        O.jambe(a, "avant_" + nom, (sgn * 0.120, -0.230, 0.320), (sgn * 0.124, -0.265, 0.044), 0.088, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
                 sorte="av", plie=0.020, pied_dim=(0.054, 0.082, 0.026), griffes=0)
-        O.jambe(a, "arriere_" + nom, (sgn * 0.118, 0.560, 0.318), (sgn * 0.122, 0.590, 0.044), 0.088, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
+        O.jambe(a, "arriere_" + nom, (sgn * 0.125, 0.580, 0.330), (sgn * 0.130, 0.610, 0.044), 0.100, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
                 sorte="ar", plie=0.045, pied_dim=(0.056, 0.086, 0.026), griffes=0)
     return a
 
@@ -78,7 +78,7 @@ def construire():
 # ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
 from rig_auto import rig
 if __name__ != "__main__":
-    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "quad")
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "quad")
 
 
 if __name__ == "__main__":

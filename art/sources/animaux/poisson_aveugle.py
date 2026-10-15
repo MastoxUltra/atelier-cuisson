@@ -29,8 +29,8 @@ CREUX = np.array(M.hexa("#b3c1d4"))           # les creux des yeux absents
 FIL = M.hexa("#7a8aa0")
 
 # de la tête à la queue, couché sur le ventre, un peu courbé
-CHEMIN = [(0.02, -0.40, 0.080), (0.00, -0.28, 0.092), (-0.03, -0.12, 0.100), (-0.02, 0.06, 0.100), (0.03, 0.22, 0.092), (0.09, 0.36, 0.080),
-          (0.14, 0.46, 0.074)]
+CHEMIN = [(0.02, -0.40, 0.090), (0.00, -0.28, 0.102), (-0.03, -0.12, 0.100), (-0.02, 0.06, 0.100), (0.03, 0.22, 0.102), (0.09, 0.36, 0.090),
+          (0.14, 0.46, 0.084)]
 
 
 def rayon(f):
@@ -61,12 +61,12 @@ def construire():
 
     # ----- les nageoires : la queue en fourche, le dos, le ventre, les pectorales, étalées et pâles -----
     c1, av1, nq1 = (Vector(q) for q in fil.cadre(L))
-    caudale = O.nageoire([(0, 0.016), (0.06, 0.07), (0.16, 0.15), (0.11, 0.0), (0.16, -0.15), (0.06, -0.07), (0, -0.016)], 0.020, NAGEOIRE)
+    caudale = O.nageoire([(0, 0.014), (0.05, 0.055), (0.13, 0.115), (0.09, 0.0), (0.13, -0.115), (0.05, -0.055), (0, -0.014)], 0.020, NAGEOIRE)
     a.piece("caudale", O.couche(caudale, O.plan_vertical(c1 - av1 * 0.02, av1)), None, poil=False)
-    dorsale = O.nageoire([(0, 0), (0.05, 0.11), (0.11, 0.13), (0.16, 0.04), (0.19, 0)], 0.020, NAGEOIRE * 0.97)
+    dorsale = O.nageoire([(0, 0), (0.04, 0.075), (0.09, 0.090), (0.13, 0.03), (0.15, 0)], 0.020, NAGEOIRE * 0.97)
     cd, ad, nd = (Vector(q) for q in fil.cadre(0.46 * L))
     a.piece("dorsale", O.couche(dorsale, O.plan_dos(cd + nd * rayon(0.46) * 0.90 - Vector((0, 0.05, 0)), nd)), None, poil=False)
-    anale = O.nageoire([(0, 0), (0.04, -0.07), (0.10, -0.09), (0.14, -0.02), (0.16, 0)], 0.020, NAGEOIRE * 0.97)
+    anale = O.nageoire([(0, 0), (0.03, -0.05), (0.08, -0.065), (0.11, -0.015), (0.13, 0)], 0.020, NAGEOIRE * 0.97)
     ca, aa, na = (Vector(q) for q in fil.cadre(0.64 * L))
     a.piece("anale", O.couche(anale, O.plan_dos(ca - na * rayon(0.64) * 0.55 - Vector((0, 0.04, 0)), na)), None, poil=False)
     for nom, c in (("G", 1), ("D", -1)):
@@ -105,7 +105,7 @@ def construire():
 # ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
 from rig_auto import rig
 if __name__ != "__main__":
-    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "poisson")
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "poisson")
 
 
 if __name__ == "__main__":

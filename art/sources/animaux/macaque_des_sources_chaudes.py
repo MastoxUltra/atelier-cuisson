@@ -149,7 +149,7 @@ def construire():
 # ---------------------------------------------------------------- pour le jeu : squelette et animations (rig_auto.py)
 from rig_auto import rig
 if __name__ != "__main__":
-    OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "quad")
+    OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "quad")
 
 
 if __name__ == "__main__":
