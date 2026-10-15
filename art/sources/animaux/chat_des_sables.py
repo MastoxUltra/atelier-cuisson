@@ -88,7 +88,7 @@ def construire():
         a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.17, OR, 0.003, 0)
         p, n = a.surface("tete", T.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0170)
-        a.piece("raie_" + nom, K.paupiere(0.0215, 0.58), tuple(RAYE), mat=A.cadre(p + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
+        # (les raies brunes en paupière retirées : elles faisaient des sourcils fâchés et des yeux mi-clos)
         po = A.profil([(0, 0), (0.054, 0.010), (0.056, 0.034), (0.044, 0.070), (0.026, 0.104), (0.010, 0.130), (0, 0.142)], 7)
         vers = (T3 @ Vector((c * 0.78, 0.60, -0.14))).normalized()
         E = A.cadre(T @ Vector((c * 0.088, 0.040, -0.016)) - vers * 0.010, vers, T3 @ Vector((c * 0.2, 0.0, 1.0)))

@@ -103,15 +103,15 @@ def construire():
             pb, nb = a.surface("machoire", JC, d_)
         except ValueError:
             continue
-        long = 0.060 + 0.050 * rng.random()
-        sens = Vector((0.0, 0.18, 1.0)).normalized()
+        long = 0.150 if k_ in (2, 6) else 0.032 + 0.045 * rng.random()          # des longueurs inégales, deux grands crocs qui dépassent
+        sens = Vector((0.12 * math.sin(k_ * 1.7), 0.18, 1.0)).normalized()
         dent = A.tour(A.profil([(0.017, 0), (0.0115, 0.026), (0.0050, 0.056), (0, long)], 3), 8)
         a.piece("dent_bas%d" % k_, couche(dent, A.cadre(pb - sens * 0.010, sens, (0, 1, 0))), DENT, poil=False)
     # les grands crocs du haut : plantés dans la lèvre, longs, un peu courbés vers l'intérieur
     courbe_h = A.courbe([tuple(p_) for p_ in lèvre], 3)
-    for k in range(4, len(courbe_h) - 4, 3):
+    for k_h, k in enumerate(range(4, len(courbe_h) - 4, 3)):
         base = Vector(tuple(courbe_h[k]))
-        long = 0.060 + 0.055 * rng.random()
+        long = 0.170 if k_h % 4 == 1 else 0.034 + 0.050 * rng.random()          # quelques grands crocs, des petites dents entre
         sens = Vector((0.0, 0.22, -1.0)).normalized()
         dent = A.tour(A.profil([(0.018, 0), (0.0120, 0.026), (0.0052, 0.058), (0, long)], 3), 8)
         a.piece("dent_haut%d" % k, couche(dent, A.cadre(base - sens * 0.010, sens, (0, 1, 0))), DENT, poil=False)
