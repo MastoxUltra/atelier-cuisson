@@ -1,11 +1,14 @@
-"""L'ours en peluche, deuxième dessin : l'ours brun adulte des sapins, debout sur ses pattes de derrière, noisette cendré,
-les jambes et les bras plus sombres, une énorme bosse de muscle entre les épaules givrée de clair. La tête est large et
-lourde, le front bas sous les sourcils, de petits yeux enfoncés sous la paupière, des oreilles basses sur les côtés, un
-long museau carré au nez noir, la gueule entrouverte sur une langue rose et quatre crocs ; un bras levé, les griffes
-longues en avant, l'autre abaissé devant lui. Il se dresse pour paraître plus grand, et il y parvient fort bien.
+"""L'ours en peluche, troisième dessin : l'ours brun adulte des sapins, debout sur ses pattes de derrière, noisette cendré,
+les jambes et les bras plus sombres. Les cinq traits de l'ours brun (trois photos de l'espèce, 15/10) : une masse
+trapue, la poitrine profonde et une bosse de muscle au-dessus des épaules ; une tête large et ronde, les bajoues
+pleines, les petites oreilles rondes plantées loin l'une de l'autre sur les coins du crâne ; un museau moyen, large,
+plus clair, au gros nez noir ; de petits yeux rapprochés, calmes ; des membres épais qui finissent en larges pattes à
+griffes pâles. Debout, un bras levé de côté comme pour saluer (il ne cache plus la tête), l'autre qui pend devant le
+ventre. Bouche fermée : un trait cousu, pas de crocs (le contrôleur voyait des crocs détachés).
 
     python ours.py        fabrique la fiche art/apercus/animaux/ours.png (style du palier : B, peluche de magasin)
-    (le premier dessin, jugé le 15/10 : « le nounours de supermarché »)
+    (1er dessin : « le nounours de supermarché » ; 2e : « très géométrique » ; 3e : volumes de la marmotte gardée —
+    poire bombée, bajoues, pattes en mitaines et orteils, plus aucun cylindre à bout coupé ; base gonflée de l'Artiste)
 """
 import math
 import os
@@ -18,106 +21,151 @@ import numpy as np
 from mathutils import Vector
 
 import atelier as A
+import garnitures as G
 import matieres as M
 import peluche as K
 import outils_a as O
 
+GONFLAGE = True                               # la base aux volumes de l'Artiste (fusion + gonflage), validée le 15/10
+
 NOISETTE = np.array(M.hexa("#7a5c46"))        # la dominante (registre : brun noisette cendré #6e5846), un peu plus chaud (style B)
-CLAIR = np.array(M.hexa("#a88c70"))           # le museau, le givre de la bosse
+CLAIR = np.array(M.hexa("#a88c70"))           # le museau, le ventre, le givre de la bosse
 SOMBRE = np.array(M.hexa("#5a4435"))          # les bras, les jambes
 GRIFFE = M.hexa("#e8dcc4")
-DENT = M.hexa("#f2ead8")
 NEZ = M.hexa("#16110e")
-LANGUE = M.hexa("#c8606e")
 FIL = M.hexa("#2a1c14")
+
+CORPS = Vector((0.0, 0.040, 0.100))
+TETE = Vector((0.0, -0.165, 0.905))
+
+
+def gauss(x):
+    return np.exp(-x * x)
+
+
+def mitaine(long, large, haut):
+    """Une patte : une boule bombée au bout franc (jamais un cylindre), longue sur Z."""
+    return A.boule(1.0, 28, 14).sculpte(lambda v: K.emousse(v, 0.86)).etire(large, haut, long)
 
 
 def construire():
     a = K.Animal("ours")
     a.taille = 2.50
 
-    # ----- le corps : une grosse poire debout, les épaules très larges, la bosse, le ventre rond ; le dos givré de clair -----
-    pc = A.profil([(0, 0.0), (0.120, 0.012), (0.215, 0.080), (0.255, 0.200), (0.272, 0.340), (0.285, 0.480), (0.255, 0.600), (0.180, 0.680), (0.090, 0.720), (0, 0.740)], 6)
-    corps = A.tour(pc, 56)
+    # ----- le corps : une poire bombée et dressée, les épaules larges, la bosse entre elles, le ventre rond ; le ventre clair -----
+    pc = A.profil([(0, 0.0), (0.125, 0.010), (0.222, 0.080), (0.262, 0.200), (0.276, 0.340), (0.284, 0.470), (0.258, 0.590),
+                   (0.190, 0.672), (0.100, 0.716), (0, 0.738)], 6)
+    corps = A.tour(pc, 48)
+    G.sillons(corps, [12], 0.004, 1.1)
     ang = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     z = corps.v[:, 2]
     t = np.tile(NOISETTE, (len(ang), 1))
-    t[(ang > 2.2) & (z < 0.55)] = CLAIR * 0.92                                         # le ventre
-    t[(ang < 1.10) & (z > 0.50)] = NOISETTE * 0.55 + CLAIR * 0.45                      # le dos givré
-    t[z < 0.14] = SOMBRE
+    t[(ang > 2.25) & (z > 0.10) & (z < 0.60)] = CLAIR * 0.92                          # le ventre
+    t[(ang < 1.0) & (z > 0.50)] = NOISETTE * 0.60 + CLAIR * 0.40                      # le dos givré
+    t[z < 0.12] = SOMBRE
     corps.teinte = t
 
-    def bosse(v):
+    def campe(v):
         s = v.copy()
-        s[:, 1] += 0.100 * np.exp(-((v[:, 2] - 0.60) / 0.11) ** 2) * (v[:, 1] > 0)        # la bosse entre les épaules
-        s[:, 2] += 0.045 * np.exp(-((v[:, 2] - 0.60) / 0.14) ** 2) * (v[:, 1] > 0)
-        s[:, 1] -= 0.050 * np.exp(-((v[:, 2] - 0.30) / 0.20) ** 2) * (v[:, 1] < 0)        # le ventre rond
+        zz = v[:, 2]
+        dos = v[:, 1] > 0
+        s[:, 1] += 0.095 * gauss((zz - 0.60) / 0.11) * dos                            # la bosse entre les épaules
+        s[:, 2] += 0.040 * gauss((zz - 0.60) / 0.14) * dos
+        s[:, 1] -= 0.055 * gauss((zz - 0.30) / 0.20) * (~dos)                         # le ventre rond
+        s[:, 1] += 0.06 * zz                                                          # un peu renversé en arrière
         return s
-    a.piece("corps", corps.sculpte(bosse), None, mat=A.repere((0.0, 0.050, 0.110), (-8, 0, 0)))
+    a.piece("corps", corps.sculpte(campe), None, pos=CORPS)
 
-    # ----- la tête : large et lourde, le front bas sous les sourcils, les joues pleines ; un long museau carré, le nez noir -----
-    H = Vector((0.0, -0.170, 0.880))
-    RT = A.repere(H, (8, 0, -14))                                                      # le nez un peu baissé, de trois quarts
-    crane = A.boule(1.0, 52, 26)
-    for c in (1, -1):
-        crane.sculpte(lambda v, c=c: K.bosse(v, (c * 0.9, -0.35, -0.30), 0.24, 0.34))   # les grosses joues
-        crane.sculpte(lambda v, c=c: K.bosse(v, (c * 0.45, -0.70, 0.36), 0.14, 0.18))   # les arcades
-    crane.teinte = np.tile(NOISETTE, (len(crane.v), 1))
-    a.piece("tete", crane.etire(0.168, 0.150, 0.140), None, mat=RT)
-    museau = A.boule(1.0, 36, 18).sculpte(lambda v: K.emousse(v, 0.55)).etire(0.082, 0.150, 0.070)
-    a.piece("museau", O.teinte(museau, CLAIR), None, mat=RT @ A.repere((0.0, -0.188, -0.034), (-8, 0, 0)))
-    a.piece("nez", A.boule(1.0, 18, 10).etire(0.044, 0.030, 0.032), NEZ, mat=RT @ A.repere((0.0, -0.328, -0.006)), poil=False)
-    # la mâchoire du bas : abaissée, la langue, deux crocs dessous ; deux crocs dessus
-    charn = RT @ A.repere((0.0, -0.090, -0.082))                                       # la charnière
-    jaune = charn @ A.repere((0, 0, 0), (26, 0, 0))
-    mach = A.boule(1.0, 32, 16).sculpte(lambda v: K.emousse(v, 0.6)).etire(0.062, 0.122, 0.034)
-    a.piece("machoire", O.teinte(mach, CLAIR * 0.9), None, mat=jaune @ A.repere((0.0, -0.118, -0.010)))
-    a.piece("langue", A.boule(1.0, 20, 8).etire(0.032, 0.080, 0.010), LANGUE, mat=jaune @ A.repere((0.0, -0.125, 0.014)), poil=False)
-    # les crocs : chaque base est PLANTÉE dans la peau (le point de surface cherché au rayon), sans le moindre jour
-    MUZ = RT @ A.repere((0.0, -0.188, -0.034), (-8, 0, 0))
-    JAW = jaune @ A.repere((0.0, -0.118, -0.010))
-    bas_m = (MUZ.to_3x3() @ Vector((0.0, 0.0, -1.0))).normalized()
-    haut_j = (JAW.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
-    for c in (1, -1):
-        pu, nu = a.surface("museau", MUZ @ Vector((c * 0.046, -0.085, 0.0)), bas_m)
-        dir_u = (bas_m + (RT.to_3x3() @ Vector((0.0, -0.10, 0.0)))).normalized()
-        haut_ = O.pointe(0.046, 0.0105, 8)
-        a.piece("croc_haut_%d" % c, O.couche(O.teinte(haut_, np.array(DENT)), A.cadre(pu - dir_u * 0.011, dir_u, (0, 1, 0))), None, poil=False)
-        pb, nb = a.surface("machoire", JAW @ Vector((c * 0.034, -0.030, 0.0)), haut_j)
-        dir_b = (haut_j + (RT.to_3x3() @ Vector((0.0, -0.10, 0.0)))).normalized()
-        bas_ = O.pointe(0.038, 0.0095, 8)
-        a.piece("croc_bas_%d" % c, O.couche(O.teinte(bas_, np.array(DENT)), A.cadre(pb - dir_b * 0.010, dir_b, (0, 1, 0))), None, poil=False)
-    # de petits yeux enfoncés sous une lourde paupière : le regard noir
-    O.paire_yeux(a, "tete", H, (0.62, -0.74, 0.20), 0.0160, couleur_lourde=tuple(NOISETTE * 0.9), coupe=0.18, decolle=0.001, R=RT)
+    # ----- la tête : large et ronde, les bajoues pleines, le front bas ; le dessous du visage plus clair -----
+    RT = A.repere(TETE, (6, 0, -10))
+
+    def crane(v):
+        for c in (1, -1):
+            v = K.bosse(v, (c * 0.9, -0.35, -0.30), 0.30, 0.34)                       # les bajoues
+            v = K.bosse(v, (c * 0.45, -0.70, 0.40), 0.10, 0.18)                       # les arcades
+        v = K.emousse(v, 0.90)
+        return v * [0.170, 0.150, 0.140]
+    tete = A.boule(1.0, 56, 28)
+    u = tete.v / np.maximum(np.linalg.norm(tete.v, axis=1, keepdims=True), 1e-9)
+    tt = np.tile(NOISETTE, (len(u), 1))
+    tt[(u[:, 2] < -0.30) & (u[:, 1] < 0.10)] = NOISETTE * 0.55 + CLAIR * 0.45          # les joues et le menton plus clairs
+    tete.teinte = tt
+    a.piece("tete", tete.sculpte(crane), None, mat=RT)
+    a.tete = RT @ Vector((0.0, -0.20, -0.02))
+
+    # ----- le museau : moyen, large, plus clair, le gros nez noir, la bouche fermée d'un trait cousu -----
+    MZ = RT @ A.repere((0.0, -0.172, -0.044), (-6, 0, 0))
+    museau = A.boule(1.0, 40, 20).sculpte(lambda v: K.emousse(v, 0.80)).etire(0.084, 0.108, 0.068)
+    museau.teinte = np.tile(CLAIR, (len(museau.v), 1))
+    a.piece("museau", museau, None, mat=MZ)
+    a.piece("nez", A.boule(1.0, 20, 10).etire(0.040, 0.027, 0.030), NEZ, mat=RT @ A.repere((0.0, -0.274, -0.026)), poil=False)
+    MZ3 = MZ.to_3x3()
+    centre = MZ @ Vector((0.0, 0.0, 0.0))
+    levre = [a.trace("museau", centre, [MZ3 @ Vector(d)])[0] for d in ((0, -0.95, 0.20), (0, -1.0, -0.20), (0, -0.85, -0.55))]
+    a.broderie("levre", A.courbe(levre, 4), 0.0030, FIL)
     for nom, c in (("G", 1), ("D", -1)):
-        ore = A.boule(1.0, 24, 12).etire(0.040, 0.026, 0.040)
-        a.piece("oreille_" + nom, O.teinte(ore, NOISETTE * 0.9), None, mat=RT @ A.repere((c * 0.150, 0.050, 0.092)))
-    a.tete = H + Vector((0.0, -0.28, 0.0))
+        bouche = [a.trace("museau", centre, [MZ3 @ Vector((c * x, -0.85, -0.55 + 0.20 * x))])[0] for x in (0.0, 0.30, 0.55, 0.75)]
+        a.broderie("bouche_" + nom, A.courbe(bouche, 4), 0.0030, FIL)
 
-    # ----- les bras : épais, un levé, les griffes longues en avant ; l'autre abaissé devant lui -----
-    haut = {"G": [(0.270, 0.010, 0.760), (0.420, -0.030, 0.860), (0.470, -0.150, 0.960), (0.430, -0.270, 1.040)],
-            "D": [(-0.270, 0.010, 0.760), (-0.380, -0.050, 0.680), (-0.400, -0.190, 0.610), (-0.360, -0.320, 0.570)]}
+    # ----- les yeux : petits, rapprochés, ouverts et pareils (la tête est tournée : R=RT) ; pas de paupière lourde -----
+    O.paire_yeux(a, "tete", TETE, (0.58, -0.76, 0.20), 0.0165, decolle=0.002, R=RT)
+
+    # ----- les oreilles : de petits bols ronds, loin l'un de l'autre sur les coins du crâne -----
+    def coupe(v):
+        s = v.copy()
+        s[:, 2] += 1.5 * (v[:, 0] ** 2 + v[:, 1] ** 2)
+        return s * [0.046, 0.044, 0.016]
+    for nom, c in (("G", 1), ("D", -1)):
+        E = RT @ A.cadre(Vector((c * 0.118, 0.026, 0.098)), (c * 0.42, -0.30, 0.85), (0, 0.2, 1.0))
+        a.piece("oreille_" + nom, A.boule(1.0, 28, 14).sculpte(coupe), None, mat=E)
+
+    # ----- les bras : épais en haut, en jambon, qui s'affinent au poignet et finissent en larges pattes à griffes -----
+    haut = {"G": [(0.270, 0.020, 0.745), (0.400, 0.000, 0.800), (0.500, -0.070, 0.920), (0.550, -0.120, 1.020)],
+            "D": [(-0.270, 0.020, 0.745), (-0.385, 0.000, 0.620), (-0.365, -0.110, 0.500), (-0.305, -0.200, 0.440)]}
+    paw_dir = {"G": Vector((0.30, -0.35, 0.88)), "D": Vector((0.30, -0.80, -0.50))}
     for nom, c in (("G", 1), ("D", -1)):
         pts = haut[nom]
-        bras = O.tube_r(pts, [0.135, 0.112, 0.098, 0.088], 22)
-        a.piece("bras_" + nom, O.teinte(bras, SOMBRE), None)
-        fin = Vector(pts[-1])
-        patte = A.boule(1.0, 28, 14).etire(0.082, 0.080, 0.064).pose(tuple(fin))
-        a.piece("main_" + nom, O.teinte(patte, SOMBRE * 0.88), None)
-        for k, dx in enumerate((-0.044, -0.015, 0.015, 0.044)):
-            g = O.couche(O.teinte(O.griffe(0.072, 0.0125), np.array(GRIFFE)), A.cadre(fin + Vector((dx, -0.070, 0.004)), (0.0, -1.0, -0.25), (0, 0, 1)))
+        rayons = [0.140, 0.128, 0.108, 0.092]
+        bras = A.tube(A.courbe(pts, 6), lambda t_: float(np.interp(t_, np.linspace(0, 1, len(rayons)), rayons)), 22)
+        bras.teinte = np.tile(SOMBRE, (len(bras.v), 1))
+        a.piece("bras_" + nom, bras, None)
+        d = paw_dir[nom].normalized()
+        fin = Vector(pts[-1]) + d * 0.050
+        patte = mitaine(0.115, 0.088, 0.075)
+        patte.teinte = np.tile(SOMBRE * 0.88, (len(patte.v), 1))
+        a.piece("main_" + nom, patte, None, mat=A.cadre(fin, d, (0, 0, 1)))
+        side = d.cross(Vector((0, 0, 1))).normalized()
+        for k, dx in enumerate((-0.040, -0.014, 0.014, 0.040)):
+            g = O.couche(O.teinte(O.griffe(0.060, 0.0115), np.array(GRIFFE)),
+                         A.cadre(fin + d * 0.100 + side * dx - Vector((0, 0, 0.004)), d + Vector((0, 0, -0.18)), (0, 0, 1)))
             a.piece("griffe_%s%d" % (nom, k), g, None, poil=False)
-        # les jambes de derrière : fortes et courtes, les grands pieds plantés
-        cuisse = O.tube_r([(c * 0.180, 0.080, 0.320), (c * 0.200, -0.010, 0.190), (c * 0.185, -0.060, 0.060)], [0.150, 0.120, 0.092], 22)
-        a.piece("cuisse_" + nom, O.teinte(cuisse, SOMBRE), None)
-        pied = A.boule(1.0, 32, 14).sculpte(lambda v: K.emousse(v, 0.8)).etire(0.092, 0.170, 0.040)
-        a.piece("pied_" + nom, O.teinte(pied, SOMBRE * 0.85), None, pos=(c * 0.190, -0.130, 0.040), rot=(0, 0, c * -10), poil=False)
-        for k, dx in enumerate((-0.040, -0.013, 0.013, 0.040)):
-            g = O.couche(O.teinte(O.griffe(0.052, 0.0105), np.array(GRIFFE)), A.cadre(Vector((c * 0.190 + dx, -0.292, 0.046)), (0.0, -1.0, -0.10), (0, 0, 1)))
+
+    # ----- les jambes : la cuisse en poire, le bas de jambe qui s'affine, le large pied plantigrade à orteils et griffes -----
+    for nom, c in (("G", 1), ("D", -1)):
+        cuisse = A.boule(1.0, 32, 16).sculpte(lambda v: K.emousse(v, 0.88)).etire(0.125, 0.150, 0.150)
+        cuisse.teinte = np.tile(SOMBRE, (len(cuisse.v), 1))
+        a.piece("cuisse_" + nom, cuisse, None, pos=(c * 0.185, 0.040, 0.275), rot=(10, 0, c * 6))
+        pts = [(c * 0.195, 0.010, 0.250), (c * 0.200, -0.040, 0.150), (c * 0.198, -0.085, 0.075)]
+        ray = [0.118, 0.098, 0.088]
+        jambe = A.tube(A.courbe(pts, 6), lambda t_: float(np.interp(t_, np.linspace(0, 1, len(ray)), ray)), 22)
+        jambe.teinte = np.tile(SOMBRE, (len(jambe.v), 1))
+        a.piece("jambe_" + nom, jambe, None)
+        pied = A.boule(1.0, 32, 16).sculpte(lambda v: K.emousse(v, 0.86)).etire(0.100, 0.185, 0.050)
+        pied.teinte = np.tile(SOMBRE * 0.85, (len(pied.v), 1))
+        a.piece("pied_" + nom, pied, None, pos=(c * 0.198, -0.140, 0.050), rot=(0, 0, c * -8), poil=False)
+        for k, dx in enumerate((-0.062, -0.031, 0.0, 0.031, 0.062)):
+            xx = c * 0.198 + dx
+            yy = -0.318 - 0.008 * (2 - abs(k - 2))
+            orteil = A.boule(1.0, 16, 8).etire(0.0285, 0.030, 0.030)
+            orteil.teinte = np.tile(SOMBRE * 0.82, (len(orteil.v), 1))
+            a.piece("orteil_%s%d" % (nom, k), orteil, None, pos=(xx, yy, 0.032), poil=False)
+            g = O.couche(O.teinte(O.griffe(0.046, 0.0105), np.array(GRIFFE)), A.cadre(Vector((xx, yy - 0.020, 0.030)), (0.0, -1.0, -0.12), (0, 0, 1)))
             a.piece("griffe_pied_%s%d" % (nom, k), g, None, poil=False)
 
-    # ----- la queue : un moignon rond, juste une boule derrière -----
-    a.piece("queue", O.teinte(A.boule(1.0, 20, 10).etire(0.050, 0.050, 0.050), NOISETTE), None, pos=(0.0, 0.320, 0.260))
+    # ----- la queue : un moignon rond derrière -----
+    queue = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.9)).etire(0.060, 0.062, 0.058)
+    queue.teinte = np.tile(NOISETTE, (len(queue.v), 1))
+    a.piece("queue", queue, None, pos=(0.0, 0.340, 0.250))
     return a
 
 

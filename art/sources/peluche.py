@@ -388,12 +388,23 @@ def _jardin(bas, haut):
 
 def fusion_demandee(module=None):
     """La base fusionnée (fusion.py), ÉTEINTE par défaut : « fusion » sur la ligne de commande, BIBELOTS_FUSION=1, ou
-    FUSION = True dans le fichier de la bête ; « sans-fusion » l'éteint toujours."""
+    FUSION = True dans le fichier de la bête ; « sans-fusion » l'éteint toujours. Le gonflage (gonflage_demande) l'allume aussi."""
     if "sans-fusion" in sys.argv:
         return False
     if "fusion" in sys.argv[1:] or os.environ.get("BIBELOTS_FUSION") == "1":
         return True
-    return bool(getattr(module, "FUSION", False))
+    return bool(getattr(module, "FUSION", False)) or gonflage_demande(module)
+
+
+def gonflage_demande(module=None):
+    """Le gonflage des volumes sur la base fusionnée (fusion.gonfler : des volumes ronds et rembourrés), ÉTEINT par défaut :
+    « gonflage » sur la ligne de commande, BIBELOTS_GONFLAGE=1, ou GONFLAGE = True dans le fichier de la bête ;
+    « sans-gonflage » (ou « sans-fusion ») l'éteint toujours."""
+    if "sans-gonflage" in sys.argv or "sans-fusion" in sys.argv:
+        return False
+    if "gonflage" in sys.argv[1:] or os.environ.get("BIBELOTS_GONFLAGE") == "1":
+        return True
+    return bool(getattr(module, "GONFLAGE", False))
 
 
 def planche(construire, titre=None):
@@ -412,7 +423,7 @@ def _planche(construire, titre=None):
     if fusion_demandee(sys.modules.get("__main__")):         # éteinte par défaut : voir fusion.py
         import fusion
         fusion.symetriser(a)
-        fusion.fusionner(a)
+        fusion.fusionner(a, gonflage_demande(sys.modules.get("__main__")))
     a.monter()
     bas, haut = a.boite()
     _jardin(bas, haut)

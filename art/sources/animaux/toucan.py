@@ -18,6 +18,8 @@ import atelier as A
 import matieres as M
 import peluche as K
 
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
+
 NOIR = M.hexa("#2b3140")                      # la dominante : noir bleuté (le poil le fonce : on le prend un peu clair)
 CREME = M.hexa("#fffbec")                     # la gorge et la poitrine
 CITRON = M.hexa("#fff04a")                    # l'accent : le bec, à la base

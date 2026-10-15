@@ -8,6 +8,8 @@
     python usine.py machine             dit seulement si la machine est libre et froide (rien n'est lancé)
     python usine.py canard fusion       sur la base fusionnée (une peau d'une seule pièce, voir fusion.py) ; éteinte par
                                         défaut, vaut aussi pour « essai » ; FUSION = True dans le fichier de la bête l'allume
+    python usine.py canard gonflage     la base fusionnée, gonflée (des volumes ronds et rembourrés : fusion.gonfler) ;
+                                        éteint par défaut, vaut aussi pour « essai » ; GONFLAGE = True dans le fichier l'allume
 
 L'usine ménage la machine : une seule fabrication à la fois (un verrou), rien tant qu'un jeu tourne ou que la carte
 graphique est chaude, et un repos après chaque passe de cuisson. Elle attend d'elle-même, puis renonce au bout de 30 minutes.
@@ -499,7 +501,8 @@ def _fabriquer(nom, avec_apercus=True):
     liste_os = list(module.OS) + [(n, groupe_de.get(voisine + "_G", groupe_de.get(voisine, "corps")), t) for n, voisine, t in lids]
     liste_os = tous_les_os(liste_os) + [(n, _os_de(a, piece), t) for n, piece, t in piques]
     if fondre:
-        fusion.fusionner(a)
+        fusion.fusionner(a, K.gonflage_demande(module))
+        liste_os = fusion.os_suivent(a, liste_os, k, {o[0] for o in tous_les_os(list(module.OS))})   # le gonflage déplace paupières et épingles
 
     hauts = monter_hauts(a)
     bas = monter_bas(a)
@@ -580,7 +583,8 @@ def _essayer(nom, lesquelles=()):
     liste_os = tous_les_os(list(module.OS) + [(n, groupe_de.get(voisine + "_G", groupe_de.get(voisine, "corps")), t) for n, voisine, t in lids])
     liste_os += [(n, _os_de(a, piece), t) for n, piece, t in piques]
     if fondre:
-        fusion.fusionner(a)
+        fusion.fusionner(a, K.gonflage_demande(module))
+        liste_os = fusion.os_suivent(a, liste_os, k, {o[0] for o in tous_les_os(list(module.OS))})   # le gonflage déplace paupières et épingles
     connus = {o[0] for o in liste_os}
     for p in a._toutes():
         for o in (list(p["poids"]) if p.get("poids") else [p["os"]]):
@@ -617,6 +621,6 @@ if __name__ == "__main__":
     if sys.argv[1] == "machine":
         os.system('"%s" "%s"' % (sys.executable, os.path.join(ICI, "machine.py")))
     elif "essai" in sys.argv:
-        essayer(sys.argv[1], [x for x in sys.argv[2:] if x not in ("essai", "fusion", "sans-fusion")])
+        essayer(sys.argv[1], [x for x in sys.argv[2:] if x not in ("essai", "fusion", "sans-fusion", "gonflage", "sans-gonflage")])
     else:
         fabriquer(sys.argv[1], "sans-apercus" not in sys.argv)

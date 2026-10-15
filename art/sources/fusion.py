@@ -26,6 +26,20 @@ Ce qu'elle fait, une fois l'animal bâti (le fichier de la bête ne change pas) 
    détails cousus (rustines, coutures, broderies) suivent la surface point par point.
    Dans l'usine, tout ce qui suivait un os de la peau est rangé dans un seul groupe de cuisson (celui du corps) : la
    peau est cuite d'un tenant. Les paupières qui clignent et les épingles gardent le leur.
+3. gonfler(), dans fusionner() quand le gonflage est demandé (ÉTEINT par défaut : « gonflage » sur la ligne de commande,
+   BIBELOTS_GONFLAGE=1 ou GONFLAGE = True dans le fichier de la bête, voir peluche.gonflage_demande ; il allume aussi la
+   fusion ; « sans-gonflage » l'éteint) : des volumes ronds et rembourrés, à l'échelle de la bête, sur la peau décimée :
+     - l'arrondi : la peau suit sa courbure moyenne le temps qu'une arête s'arrondisse au rayon voulu (ARRONDI fois la
+       bête) : les bouts de tube coupés net, les pointes de cône, les coins s'arrondissent, les creux aux jonctions se
+       remplissent ;
+     - la pression : la peau devient un tissu (des ressorts le long des arêtes, à leur longueur d'origine) qu'on
+       rembourre : les faces planes bombent, les ventres s'arrondissent, comme une peluche qu'on remplit. Deux façons :
+       « ressorts » (numpy, pas à pas, sans dynamique) ou « tissu » (le simulateur de tissu de Blender, sa pression) ;
+     - des bornes : la peau ne rentre ni ne sort de plus qu'une part de son épaisseur locale (une queue fine, une oreille
+       ne fondent pas), ni de plus qu'une part de la bête ; les points posés au sol y restent.
+   La couleur, le tissu, le poil et les poids des os sont pris AVANT le gonflage (les points gardent leur place sur le
+   tissu) ; les yeux (d'un geste, le même pour les deux), les pièces posées et les détails cousus suivent le déplacement
+   de la peau. Les réglages : GONFLAGE (plus bas), ou BIBELOTS_GONFLAGE_REGLAGE="methode=tissu,pression=1.5".
 """
 import math
 import os
@@ -52,6 +66,18 @@ CONGE_MAX = 0.12        # ... au plus cette part de la bête
 TROP_FIN = 2.5          # un morceau plus fin que ce nombre de voxels reste à part
 LISSAGE = 18            # passes de lissage (6 : les formes restaient géométriques, 15/10)
 TRIANGLES = (20000, 120000)   # la peau finale : le nombre de triangles d'origine, entre ces bornes
+GONFLAGE = {                    # le gonflage (3.) : ses réglages
+    "methode": "ressorts",      # « ressorts » (numpy) ou « tissu » (le simulateur de tissu de Blender)
+    "arrondi": 0.030,           # le rayon de l'arrondi : ce qui est plus aigu s'arrondit, en part de la bête (0 : pas d'arrondi)
+    "pression": 0.3,            # le gonflage g : une boule de rayon r s'élargit d'environ g r / L, un tube de 2 à 3 fois
+                                # plus, un fond plat bombe (0 : pas de pression)
+    "dedans": 0.06,             # la peau ne rentre pas de plus que cette part de son épaisseur locale
+    "dehors": 0.30,             # ... ni ne sort de plus que cette part
+    "plafond": 0.05,            # ... ni de plus que cette part de la bête
+    "iterations": 0,            # les pas des ressorts (0 : selon la maille, 1500 à 9000)
+    "images": 50,               # les images du simulateur de tissu
+}
+ESPION = None                   # pour les essais : appelé avec (a, P, Q, L, h) juste après la décimation de la peau
 
 
 def _dire(*m):
@@ -515,9 +541,13 @@ def _choisir(a, h_essai, L):
     return pris, apart
 
 
-def fusionner(a):
+def fusionner(a, gonfle=None):
     """La peau d'une seule pièce (voir le haut du fichier). À appeler une fois l'animal à sa taille ; dans l'usine,
-    après porter() (les os de chaque pièce) et le calcul des os des paupières. Rend le nombre de pièces fondues."""
+    après porter() (les os de chaque pièce) et le calcul des os des paupières. Rend le nombre de pièces fondues.
+    gonfle : le gonflage (3.) ; None : celui que demandent la ligne de commande et l'environnement (peluche.gonflage_demande)."""
+    if gonfle is None:
+        import peluche
+        gonfle = peluche.gonflage_demande()
     t0 = time.time()
     if a.echelle == 1.0 and a.taille:
         a.a_taille()
@@ -580,9 +610,23 @@ def fusionner(a):
     t3 = time.time()
     _dire("peau : %d points, %d triangles, %d morceau(x) d'un seul tenant (%s) (%.1f s)" % (
         len(P), sum(len(f) - 2 for f in Q), len(morceaux_peau), ", ".join(str(x) for x in sorted(morceaux_peau, reverse=True)[:6]), t3 - t2))
+    if ESPION is not None:
+        ESPION(a, P, Q, L, h)
+
+    # le gonflage (3.) : calculé ici, posé après le recollage (la couleur et les os sont pris à la peau d'avant)
+    gonflee = None
+    if gonfle:
+        try:
+            gonflee, _infos = gonfler(P, Q, L, h)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            _dire("GONFLAGE RATÉ : la peau reste comme fondue (voir l'erreur au-dessus)")
+            gonflee = None
 
     # ce que la peau reprend des morceaux d'origine
-    nouvelles = _habiller(a, P, Q, M, h, L)
+    liens = []
+    nouvelles = _habiller(a, P, Q, M, h, L, liens)
     ancienne_surface = (M, h, L)
     fondues = {id(m.p) for m in M}
     restes = {}
@@ -620,13 +664,16 @@ def fusionner(a):
         _dire("cuisson : les groupes %s -> « %s »" % (", ".join(sorted(groupes)), g0))
 
     _recoller(a, peau, ancienne_surface)
+    if gonflee is not None:
+        _suivre(a, liens, P, gonflee, Q, h, L)
     _dire("fini en %.1f s" % (time.time() - t0))
     return len(fondues)
 
 
-def _habiller(a, P, Q, M, h, L):
+def _habiller(a, P, Q, M, h, L, liens=None):
     """Couleur, tissu, longueur du poil et poids des os de chaque point de la peau, pris aux morceaux d'origine.
-    Rend {clé du tissu : [pièces]} (une pièce par tissu et par longueur de poil)."""
+    Rend {clé du tissu : [pièces]} (une pièce par tissu et par longueur de poil). liens : une liste où ranger
+    (pièce, numéros de ses points dans P), pour le gonflage."""
     n = len(P)
     dmin = np.full(n, np.inf)
     dom = np.full(n, -1)
@@ -712,6 +759,8 @@ def _habiller(a, P, Q, M, h, L):
         # deux longueurs de poil -> deux tissus (l'usine règle la longueur de chaque objet de cuisson à part)
         cle = (None, None) if k_ == 1.0 else (None, "")
         sorties.setdefault(cle, []).append(p)
+        if liens is not None:
+            liens.append((p, vidx))
     return sorties
 
 
@@ -742,8 +791,10 @@ def _recoller(a, peau, ancienne):
 
     bosse_max = CONGE_MAX * L / 6.0 + 2 * h                            # le plus que la peau puisse sortir (congé, lissage)
 
-    def ecart(q, n, portee):
-        """De combien la peau est sortie (ou rentrée) le long de n, au-dessus des points q de la surface d'avant."""
+    def ecart(q, n, portee, rentre=None):
+        """De combien la peau est sortie (ou rentrée) le long de n, au-dessus des points q de la surface d'avant.
+        rentre : de combien elle peut être rentrée au plus (2 voxels par défaut ; plus pour les pièces posées : un bout de
+        museau ou d'oreille fin rentre d'un centimètre au lissage, la truffe et l'ourlet doivent suivre, essai du 15/10)."""
         de = np.zeros(len(q))
         for k_, (qq, nn) in enumerate(zip(q.tolist(), n.tolist())):
             if nn == [0.0, 0.0, 0.0]:
@@ -752,7 +803,7 @@ def _recoller(a, peau, ancienne):
             r = arbre_peau.ray_cast(o, -Vector(nn), 2 * portee)
             if r[0] is not None:
                 de[k_] = portee - r[3]
-        de[(de > bosse_max) | (de < -2 * h)] = 0.0                      # touché autre chose (un bras devant le corps)
+        de[(de > bosse_max) | (de < -(2 * h if rentre is None else rentre))] = 0.0      # touché autre chose (un bras devant le corps)
         return de
 
     portee = bosse_max + h
@@ -779,17 +830,31 @@ def _recoller(a, peau, ancienne):
                 p["monde"] = p["monde"] + nn * de
                 deja.add(id(p))
             bouges.append("%s %+.1f mm" % (nom + ("_D" if signe < 0 else ""), 1000 * de))
-    # les pièces posées (truffe, griffes, dents, ourlets) : chacune d'un seul geste, le long de la peau sous elle
+    # les pièces posées (truffe, griffes, dents) : chacune d'un seul geste, le long de la peau sous elle ; celles qui sont
+    # couchées sur la peau (ourlet, intérieur d'oreille) la suivent point par point (essai du 15/10 : la pointe de l'oreille
+    # du raton rentrait au lissage, l'ourlet restait et sortait comme une corne blanche)
     posees = []
+    couchees = ("ourlet", "interieur", "dedans_")
     for p in a._toutes():
         if p.get("fusion") or id(p) in deja or not p["nom"].lower().startswith(DURS):
             continue
         X = p["monde"]
-        c = X.mean(axis=0)
-        dist, q, n = vieille_surface(c[None], portee + 0.5 * float(np.ptp(X, axis=0).max()))
-        if abs(dist[0]) >= portee + 0.5 * float(np.ptp(X, axis=0).max()) or not n[0].any():
+        ext = 0.5 * float(np.ptp(X, axis=0).max())
+        if p["nom"].lower().startswith(couchees):
+            dist, q, n = vieille_surface(X, portee + ext)
+            sur = (np.abs(dist) < portee + ext) & np.any(n != 0.0, axis=1)
+            if sur.any():
+                de = np.zeros(len(X))
+                de[sur] = ecart(q[sur], n[sur], portee, bosse_max)
+                p["monde"] = X + n * de[:, None]
+                posees.append("%s %+.1f..%+.1f mm" % (p["nom"], 1000 * de.min(), 1000 * de.max()))
+            deja.add(id(p))
             continue
-        de = ecart(q, n, portee)[0]
+        c = X.mean(axis=0)
+        dist, q, n = vieille_surface(c[None], portee + ext)
+        if abs(dist[0]) >= portee + ext or not n[0].any():
+            continue
+        de = ecart(q, n, portee, bosse_max)[0]
         if abs(de) >= 0.05 * h:
             p["monde"] = X + n[0] * de
             posees.append("%s %+.1f mm" % (p["nom"], 1000 * de))
@@ -812,7 +877,366 @@ def _recoller(a, peau, ancienne):
     _dire("recollés : yeux %s ; posées %s ; %d détails cousus suivent la peau" % (", ".join(bouges) or "en place", ", ".join(posees) or "en place", details))
 
 
-# ---------------------------------------------------------------- 3. le soudage du maillage du jeu (usine.monter_bas)
+# ---------------------------------------------------------------- 3. le gonflage : des volumes ronds et rembourrés
+
+def _reglages(autres=None):
+    """GONFLAGE, corrigé par BIBELOTS_GONFLAGE_REGLAGE (« methode=tissu,pression=1.5 »), puis par « autres »."""
+    r = dict(GONFLAGE)
+    for morceau in os.environ.get("BIBELOTS_GONFLAGE_REGLAGE", "").split(","):
+        k, _egal, v = morceau.partition("=")
+        k, v = k.strip(), v.strip()
+        if k in r and v:
+            r[k] = v if isinstance(r[k], str) else type(r[k])(float(v))
+    r.update(autres or {})
+    return r
+
+
+def _par_sommet(T, valeurs, n):
+    """La somme sur chaque sommet d'une valeur portée par chaque triangle ((m,) ou (m, 3))."""
+    if valeurs.ndim == 1:
+        return sum(np.bincount(T[:, k], weights=valeurs, minlength=n) for k in range(3))
+    return np.stack([sum(np.bincount(T[:, k], weights=valeurs[:, j], minlength=n) for k in range(3)) for j in range(3)], axis=1)
+
+
+def _normales(X, T):
+    """Les normales des sommets (pondérées par l'aire des triangles), unitaires."""
+    c = np.cross(X[T[:, 1]] - X[T[:, 0]], X[T[:, 2]] - X[T[:, 0]])
+    nv = _par_sommet(T, c, len(X))
+    return nv / np.maximum(np.linalg.norm(nv, axis=1, keepdims=True), 1e-18)
+
+
+def _voisins(X, E, deg):
+    """La moyenne des voisins de chaque sommet (X : (n,) ou (n, 3))."""
+    n = len(X)
+    if X.ndim == 1:
+        return (np.bincount(E[:, 0], weights=X[E[:, 1]], minlength=n) + np.bincount(E[:, 1], weights=X[E[:, 0]], minlength=n)) / deg
+    s = np.stack([np.bincount(E[:, 0], weights=X[E[:, 1], j], minlength=n) +
+                  np.bincount(E[:, 1], weights=X[E[:, 0], j], minlength=n) for j in range(3)], axis=1)
+    return s / deg[:, None]
+
+
+def _volume(X, T):
+    return float(np.einsum("ij,ij->i", X[T[:, 0]], np.cross(X[T[:, 1]], X[T[:, 2]])).sum() / 6.0)
+
+
+def _epaisseur(X, T, nv, L):
+    """L'épaisseur locale de la peau sous chaque point : le rayon lancé vers l'intérieur, jusqu'à l'autre face."""
+    arbre = BVHTree.FromPolygons(X.tolist(), T.tolist())
+    e = 1e-4 * L
+    t = np.full(len(X), 0.5 * L)
+    rc = arbre.ray_cast
+    ok = np.linalg.norm(nv, axis=1) > 0.5
+    for i, o, d in zip(np.nonzero(ok)[0].tolist(), (X[ok] - nv[ok] * e).tolist(), (-nv[ok]).tolist()):
+        r = rc(o, d, L)
+        if r[0] is not None:
+            t[i] = r[3] + e
+    return np.minimum(t, 0.5 * L)
+
+
+def _borner(X, X0, n0, dedans, dehors):
+    """Le long de la normale d'origine, la peau ne rentre pas de plus que « dedans » ni ne sort de plus que « dehors »."""
+    u = np.einsum("ij,ij->i", X - X0, n0)
+    return X + (np.clip(u, -dedans, dehors) - u)[:, None] * n0
+
+
+def _arrondir(X0, T, E, deg, n0, rayon, t, dedans, dehors, sol):
+    """L'arrondi : ce qui est plus aigu qu'une boule de ce rayon (une arête, un bout de tube coupé net, une pointe de cône,
+    un creux à une jonction) suit sa courbure moyenne (chaque point vers la moyenne de ses voisins, le long de sa normale),
+    jusqu'à n'être plus aigu ; ce qui est déjà plus doux (une joue, un ventre, un tube plus épais que le rayon) ne bouge pas,
+    ni un tube fin sur sa longueur (le seuil suit aussi l'épaisseur locale t). Rend les points et le nombre de passes."""
+    n = len(X0)
+    lg = np.linalg.norm(X0[E[:, 1]] - X0[E[:, 0]], axis=1)
+    lv = (np.bincount(E[:, 0], weights=lg, minlength=n) + np.bincount(E[:, 1], weights=lg, minlength=n)) / deg
+    l2 = (np.bincount(E[:, 0], weights=lg ** 2, minlength=n) + np.bincount(E[:, 1], weights=lg ** 2, minlength=n)) / deg
+    lref = max(float(np.percentile(lv, 30)), 1e-9)
+    kap = 0.4 * np.minimum(1.0, (lref / np.maximum(lv, 1e-12)) ** 2)     # le même pas de temps partout (les grands triangles)
+    passes = int(min(600, math.ceil(3.0 * (rayon / lref) ** 2 / 0.4)))
+    # la moyenne des voisins s'écarte de l2 H / 2 le long de la normale (H : la courbure moyenne) ; au-dessous du seuil, rien
+    seuil = 0.5 * l2 * np.maximum(1.0 / rayon, 1.2 / np.maximum(t, 1e-9))
+    X = X0.copy()
+    z0 = X0[sol, 2]
+    nn = n0
+    for k in range(passes):
+        if k % 3 == 0:
+            nn = _normales(X, T)
+        d = np.einsum("ij,ij->i", _voisins(X, E, deg) - X, nn)
+        d = np.sign(d) * np.maximum(np.abs(d) - seuil, 0.0)
+        X = _borner(X + (kap * d)[:, None] * nn, X0, n0, dedans, dehors)
+        X[sol, 2] = z0
+    return X, passes
+
+
+def _ressorts(X1, T, E, deg, g, L, iterations, X0, n0, dedans, dehors, sol, zmin):
+    """La pression, en numpy : chaque arête est un ressort à sa longueur de départ, chaque point est poussé le long de sa
+    normale ; à l'équilibre, une boule de rayon r s'étire d'environ g r / L (un tube deux à trois fois plus), un fond plat
+    bombe. Pas de dynamique : des pas de relaxation (ressorts projetés, à la Jacobi). iterations <= 0 : selon la maille.
+    Rend les points et le nombre de pas faits."""
+    n = len(X1)
+    i0, i1 = E[:, 0], E[:, 1]
+    l0 = np.linalg.norm(X1[i1] - X1[i0], axis=1)
+    l2 = (np.bincount(i0, weights=l0 ** 2, minlength=n) + np.bincount(i1, weights=l0 ** 2, minlength=n)) / deg
+    om = 0.9
+    pas = g * om * l2 / (4.0 * L)
+    if iterations <= 0:                         # assez de pas pour qu'un ventre (un dixième de la bête) trouve son équilibre
+        lmed = float(np.median(np.sqrt(l2)))
+        iterations = int(min(9000, max(1500, 30.0 * (0.1 * L / max(lmed, 1e-9)) ** 2)))
+    X = X1.copy()
+    z0 = X1[sol, 2]
+    nn = n0
+    temoin, k = X.copy(), 0
+    for k in range(iterations):
+        if k % 2 == 0:
+            nn = _normales(X, T)
+        X = X + pas[:, None] * nn
+        d = X[i1] - X[i0]
+        lg = np.linalg.norm(d, axis=1)
+        c = d * (0.5 * (lg - l0) / np.maximum(lg, 1e-12))[:, None]
+        corr = np.stack([np.bincount(i0, weights=c[:, j], minlength=n) - np.bincount(i1, weights=c[:, j], minlength=n)
+                         for j in range(3)], axis=1)
+        X = X + om * corr / deg[:, None]
+        if k % 10 == 9:
+            X = _borner(X, X0, n0, dedans, dehors)
+        X[:, 2] = np.maximum(X[:, 2], zmin)
+        X[sol, 2] = z0
+        if k % 500 == 499:                      # l'équilibre : en 500 pas, plus rien ne bouge (moins de 2 % de la poussée)
+            if np.linalg.norm(X - temoin, axis=1).mean() < 0.02 * 500 * float(pas.mean()):
+                break
+            temoin = X.copy()
+    return X, k + 1
+
+
+def _regler(objet, **valeurs):
+    """Règle des propriétés de Blender une à une : une propriété qui manque est dite, pas fatale."""
+    for k, v in valeurs.items():
+        try:
+            setattr(objet, k, v)
+        except Exception as e:
+            _dire("tissu : réglage « %s » refusé (%s)" % (k, str(e)[:80]))
+
+
+def _tissu(X1, T, L, g, images):
+    """La pression du simulateur de tissu de Blender (modificateur Cloth, « Pressure ») : la peau ramenée à 1 m, sans gravité
+    ni collision, gonflée pendant « images » images ; le volume visé (+35 %) borne le gonflage quoi qu'il arrive.
+    Rend les points (même ordre), ou None si le tissu n'a pas bougé."""
+    c = 0.5 * (X1.min(axis=0) + X1.max(axis=0))
+    Xn = (X1 - c) / L
+    E = _aretes(T)
+    l_moy = float(np.linalg.norm(Xn[E[:, 1]] - Xn[E[:, 0]], axis=1).mean())
+    vol = abs(_volume(Xn, T))
+    raideur = 15.0
+    # des ressorts de raideur r (force r x allongement relatif) en triangles d'arête l : une tension de 1,73 r / l par unité de
+    # longueur ; une boule de rayon R s'étire alors de p l R / (3,46 r) : g a le même sens qu'aux ressorts numpy (g R / L)
+    p = 3.46 * g * raideur / max(l_moy, 1e-6)
+    gain = max(0.35, p / 10000.0)                # le volume visé : la pression tombe à zéro quand il est atteint
+    ob = _vers_blender(Xn, T, "gonflage")
+    mod = ob.modifiers.new("tissu", "CLOTH")
+    cs = mod.settings
+    _regler(cs, quality=6, mass=0.15, air_damping=5.0, bending_model="ANGULAR", tension_stiffness=raideur,
+            compression_stiffness=raideur, shear_stiffness=raideur, bending_stiffness=0.05, tension_damping=5.0,
+            compression_damping=5.0, shear_damping=5.0, use_pressure=True, uniform_pressure_force=0.0, use_pressure_volume=True,
+            target_volume=vol * (1.0 + gain), pressure_factor=float(min(10000.0, p / gain)), fluid_density=0.0)
+    _regler(cs.effector_weights, gravity=0.0)
+    _regler(mod.collision_settings, use_collision=False, use_self_collision=False)
+    _regler(mod.point_cache, frame_start=1, frame_end=images)
+    sc = bpy.context.scene
+    avant = (sc.frame_current, sc.frame_start, sc.frame_end)
+    sc.frame_start, sc.frame_end = 1, max(images, sc.frame_end)
+    t0 = time.time()
+    for f in range(1, images + 1):
+        sc.frame_set(f)
+    V, _F = _depuis_blender(ob)
+    sc.frame_start, sc.frame_end = avant[1], avant[2]
+    sc.frame_set(avant[0])
+    if len(V) != len(X1) or not np.isfinite(V).all():
+        _dire("tissu : la maille revenue ne va pas (%d points pour %d)" % (len(V), len(X1)))
+        return None
+    bouge = np.linalg.norm(V - Xn, axis=1)
+    _dire("tissu : %d images en %.1f s ; pression %.0f (échelle %.0f), arête moyenne %.4f ; volume %+.1f %% ; déplacement moyen %.4f, "
+          "max %.4f (bête ramenée à 1)" % (images, time.time() - t0, p, min(10000.0, p / gain), l_moy, 100 * (abs(_volume(V, T)) / vol - 1),
+                                          bouge.mean(), bouge.max()))
+    if bouge.max() < 1e-6:
+        return None
+    return V * L + c
+
+
+def gonfler(P, F, L, h, reglages=None):
+    """Le gonflage de la peau (P, F) d'une bête de taille L (voir le haut du fichier) : rend les nouveaux points (même ordre)
+    et une ligne de compte rendu. reglages : un dictionnaire qui corrige GONFLAGE."""
+    r = _reglages(reglages)
+    t0 = time.time()
+    P = np.asarray(P, float)
+    if isinstance(F, np.ndarray) and F.ndim == 2 and F.shape[1] == 3:
+        T = F.astype(np.int64)
+    else:
+        T = _triangles(F)
+    if _volume(P, T) < 0:                                            # les normales vers l'extérieur
+        T = T[:, [0, 2, 1]]
+    n = len(P)
+    E = _aretes(T)
+    deg = np.maximum(np.bincount(E[:, 0], minlength=n) + np.bincount(E[:, 1], minlength=n), 1).astype(float)
+    n0 = _normales(P, T)
+    t = np.maximum(_epaisseur(P, T, n0, L), TROP_FIN * h)             # rien de plus fin n'a été fondu
+    for _ in range(3):
+        t = 0.5 * t + 0.5 * _voisins(t, E, deg)
+    dedans = r["dedans"] * t
+    dehors = np.minimum(r["dehors"] * t, r["plafond"] * L)
+    zmin = float(P[:, 2].min())
+    sol = np.nonzero(P[:, 2] <= zmin + 0.004 * L)[0]                  # posés au sol : ils y restent
+    X, passes, pas_faits = P, 0, 0
+    if r["arrondi"] > 0:
+        X, passes = _arrondir(P, T, E, deg, n0, r["arrondi"] * L, t, dedans, dehors, sol)
+    t1 = time.time()
+    methode = r["methode"]
+    if r["pression"] > 0:
+        Y = None
+        if methode == "tissu":
+            Y = _tissu(X, T, L, r["pression"], int(r["images"]))
+            if Y is None:
+                _dire("tissu : rien n'a bougé, je passe aux ressorts")
+                methode = "ressorts"
+            else:
+                u = Y - X                                            # les plis fins du tissu, lissés
+                for _ in range(3):
+                    u = 0.5 * u + 0.5 * _voisins(u, E, deg)
+                Y = X + u
+                Y[:, 2] = np.maximum(Y[:, 2], zmin)
+                Y[sol, 2] = P[sol, 2]
+        if methode == "ressorts":
+            Y, pas_faits = _ressorts(X, T, E, deg, r["pression"], L, int(r["iterations"]), P, n0, dedans, dehors, sol, zmin)
+        X = Y
+    X = _borner(X, P, n0, dedans, dehors)
+    X[:, 2] = np.maximum(X[:, 2], zmin)
+    if not np.isfinite(X).all():
+        _dire("GONFLAGE : des points perdus (NaN) ; la peau reste comme fondue")
+        return P.copy(), "raté"
+    u = X - P
+    un = np.einsum("ij,ij->i", u, n0)
+    lu = np.linalg.norm(u, axis=1)
+    v0, v1 = abs(_volume(P, T)), abs(_volume(X, T))
+    infos = ("arrondi %.0f mm (%d passes) ; %s g=%.2f%s ; volume %+.1f %% ; déplacement moyen %.1f mm, max %.1f mm "
+             "(sorti jusqu'à %.1f, rentré jusqu'à %.1f) ; bornés : %d %% dedans, %d %% dehors ; épaisseur médiane %.0f mm (%.1f s + %.1f s)" % (
+                 1000 * r["arrondi"] * L, passes, methode if r["pression"] > 0 else "sans pression", r["pression"],
+                 (" (%d pas)" % pas_faits) if pas_faits else "", 100 * (v1 / v0 - 1),
+                 1000 * lu.mean(), 1000 * lu.max(), 1000 * un.max(), -1000 * un.min(), 100 * np.mean(un <= -dedans * 0.999),
+                 100 * np.mean(un >= dehors * 0.999), 1000 * float(np.median(t)), t1 - t0, time.time() - t1))
+    _dire("gonflage :", infos)
+    return X, infos
+
+
+def _champ(P, T, U):
+    """Le déplacement U de la peau P, prolongé à tout point : celui du point de la peau (d'avant) le plus proche."""
+    arbre = BVHTree.FromPolygons(P.tolist(), T.tolist())
+
+    def champ(X):
+        X = np.asarray(X, float).reshape(-1, 3)
+        q = np.zeros_like(X)
+        fi = np.full(len(X), -1, np.int64)
+        for k, x in enumerate(X.tolist()):
+            r = arbre.find_nearest(x)
+            if r[0] is not None:
+                q[k], fi[k] = r[0], r[2]
+        sortie = np.zeros_like(X)
+        ok = fi >= 0
+        if not ok.any():
+            return sortie
+        tri = T[fi[ok]]
+        a_, b_, c_ = P[tri[:, 0]], P[tri[:, 1]], P[tri[:, 2]]
+        v0, v1, v2 = b_ - a_, c_ - a_, q[ok] - a_
+        d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+        d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+        den = d00 * d11 - d01 * d01
+        sur = np.abs(den) > 1e-30
+        den = np.where(sur, den, 1.0)
+        wv = np.where(sur, (d11 * d20 - d01 * d21) / den, 1.0 / 3.0)
+        ww = np.where(sur, (d00 * d21 - d01 * d20) / den, 1.0 / 3.0)
+        w = np.clip(np.stack([1.0 - wv - ww, wv, ww], axis=1), 0.0, 1.0)
+        w /= np.maximum(w.sum(axis=1, keepdims=True), 1e-12)
+        sortie[ok] = w[:, 0:1] * U[tri[:, 0]] + w[:, 1:2] * U[tri[:, 1]] + w[:, 2:3] * U[tri[:, 2]]
+        return sortie
+    return champ
+
+
+def _suivre(a, liens, P, X, Q, h, L):
+    """La peau gonflée prend sa place ; les yeux (et ce qui leur est collé) suivent d'un seul geste, le même des deux côtés
+    pour une paire ; une pièce qui épouse la peau (rustine, couture, ourlet) la suit point par point, les autres (truffe,
+    griffes, dents, moustaches) d'un seul geste, celui de leur point le plus proche de la peau."""
+    T = _triangles(Q)
+    if _volume(P, T) < 0:
+        T = T[:, [0, 2, 1]]
+    champ = _champ(P, T, X - P)
+    for p, vidx in liens:
+        p["monde"] = X[vidx].copy()                                  # « loc » (le repère du tissu) reste celui d'avant
+    deja = {id(p) for p, _v in liens}
+    e = float(a.echelle)
+    yeux, boutons = [], []
+    gestes = {}
+    for nom, pos, vers, r, paire in a._boutons:
+        cs = [np.array(pos, float) * e]
+        if paire:
+            cs.append(cs[0] * [-1.0, 1.0, 1.0])
+        ds = champ(np.array(cs))
+        if paire:
+            m = 0.5 * (ds[0] + ds[1] * [-1.0, 1.0, 1.0])
+            ds = np.array([m, m * [-1.0, 1.0, 1.0]])
+        gestes[nom] = (cs, ds, np.array(vers, float))
+    for nom in list(gestes):                     # deux yeux posés un à un (« _G », « _D ») : à la même hauteur sur la peau
+        autre = nom[:-2] + "_D"
+        if nom.endswith("_G") and autre in gestes and len(gestes[nom][1]) == 1 and len(gestes[autre][1]) == 1:
+            (cg, dg, ng), (cd, dd, nd) = gestes[nom], gestes[autre]
+            s = 0.5 * (float(dg[0] @ ng) + float(dd[0] @ nd))
+            gestes[nom] = (cg, dg + (s - float(dg[0] @ ng)) * ng, ng)
+            gestes[autre] = (cd, dd + (s - float(dd[0] @ nd)) * nd, nd)
+    for nom, pos, vers, r, paire in list(a._boutons):
+        cs, ds, _n = gestes[nom]
+        for c, d in zip(cs, ds):
+            for p in a._toutes():
+                if p.get("fusion") or id(p) in deja:
+                    continue
+                if np.linalg.norm(p["monde"].mean(axis=0) - c) < 1.8 * r * e and np.ptp(p["monde"], axis=0).max() < 4.5 * r * e:
+                    p["monde"] = p["monde"] + d
+                    deja.add(id(p))
+        yeux.append("%s %.1f mm" % (nom, 1000 * np.linalg.norm(ds[0])))
+        boutons.append((nom, Vector(np.array(pos, float) + ds[0] / e), vers, r, paire))
+    a._boutons = boutons
+    arbre = BVHTree.FromPolygons(P.tolist(), T.tolist())
+    colle = max(3.0 * h, 0.012 * L)
+    suit, geste = 0, 0
+    for p in a._toutes():
+        if p.get("fusion") or id(p) in deja or not len(p["monde"]):
+            continue
+        Xp = p["monde"]
+        dist = np.array([(arbre.find_nearest(x)[3] or 0.0) for x in Xp.tolist()])
+        if np.percentile(dist, 80) < colle:
+            p["monde"] = Xp + champ(Xp)
+            suit += 1
+        else:
+            p["monde"] = Xp + champ(Xp[int(np.argmin(dist))])[0]
+            geste += 1
+        deja.add(id(p))
+    if a.tete is not None:
+        a.tete = Vector(np.array(a.tete, float) + champ(np.array(a.tete, float))[0])
+    a._champ_gonflage = champ
+    _dire("gonflage posé : yeux %s ; %d pièces suivent la peau point par point, %d d'un seul geste" % (
+        ", ".join(yeux) or "aucun", suit, geste))
+
+
+def os_suivent(a, liste, k, garder=()):
+    """Les os posés sur la peau (paupières, épingles) suivent le gonflage : liste de (nom, parent, tête) dans les mesures du
+    modèle (avant a.taille, facteur k). Ceux de « garder » (les os de la bête) ne bougent pas."""
+    champ = getattr(a, "_champ_gonflage", None)
+    if champ is None:
+        return liste
+    sortie = []
+    for n, parent, t in liste:
+        if n in garder:
+            sortie.append((n, parent, t))
+            continue
+        d = champ(np.array(t, float) * k)[0] / k
+        sortie.append((n, parent, tuple(float(x) for x in np.array(t, float) + d)))
+    return sortie
+
+
+# ---------------------------------------------------------------- 4. le soudage du maillage du jeu (usine.monter_bas)
 
 def souder(ob, pieces):
     """Les pièces de la peau (une par tissu) se touchent bord à bord : on soude leurs points communs avant d'alléger,

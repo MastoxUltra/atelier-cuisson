@@ -75,8 +75,8 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         cape = A.boule(1.0, 36, 18)
         cape.teinte = np.where((cape.v[:, 2] > 0.35)[:, None], tuple(PLUME), tuple(BRUN))
-        a.piece("aile_" + nom, cape.etire(0.050, 0.200, 0.270), None, pos=(c * 0.170, 0.070, 0.390), rot=(-16, 0, c * 7))
-        a.piece("plumes_" + nom, A.boule(1.0, 24, 12).etire(0.030, 0.210, 0.034), tuple(CHARBON), pos=(c * 0.115, 0.290, 0.210), rot=(-34, 0, c * -8))
+        a.piece("aile_" + nom, cape.etire(0.085, 0.230, 0.165), None, pos=(c * 0.150, 0.080, 0.360), rot=(-18, 0, c * 3))
+        a.piece("plumes_" + nom, A.boule(1.0, 24, 12).etire(0.040, 0.230, 0.046), tuple(CHARBON), pos=(c * 0.100, 0.310, 0.200), rot=(-36, 0, c * -5))
     a.piece("queue", A.boule(1.0, 24, 12).etire(0.070, 0.030, 0.150), tuple(BRUN), pos=(0.0, 0.290, 0.150), rot=(38, 0, 0))
 
     # ----- le cou nu et ridé, qui s'étire hors de la collerette ; la tête chauve ; le bec crochu -----
@@ -139,8 +139,8 @@ OS = [
     ('cou', 'corps', (-0.002, -0.074, 0.559)),
     ('tete', 'cou', (-0.004, -0.225, 0.808)),
     ('patte_av_G', 'corps', (0.080, -0.004, 0.167)),
-    ('aile_G', 'corps', (0.165, 0.110, 0.650)),
-    ('queue', 'corps', (0.001, 0.175, 0.295)),
+    ('aile_G', 'corps', (0.151, 0.053, 0.527)),
+    ('queue', 'corps', (-0.000, 0.169, 0.318)),
 ]
 
 PORTEURS = [

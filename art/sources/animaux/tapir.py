@@ -20,6 +20,8 @@ import atelier as A
 import matieres as M
 import peluche as K
 
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
+
 
 def propres(points, eps=2e-4):
     """Les points d'un tracé sans doublons consécutifs (deux points identiques à la suite déforment un tube en NaN)."""

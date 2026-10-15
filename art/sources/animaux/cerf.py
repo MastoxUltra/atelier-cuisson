@@ -1,8 +1,12 @@
-"""Le cerf en peluche, deuxième dessin (l'auteur, 15/10 : « il manque de prestance, c'est un animal imposant ») : le seigneur du bois, majestueux et un brin vaniteux. Un grand corps de velours châtaigne, haut
+"""(Troisième dessin, 15/10 au soir, d'après le contrôleur et des photos du cerf élaphe au brame : la ramure courbe et
+pointue, la crinière en mèches plates couchées, le corps lourd et les jambes fortes, les yeux ouverts, et le gonflage.
+Cinq traits : la ramure en lyre courbe à andouillers pointus ; l'encolure épaisse à crinière ; le corps profond aux
+épaules fortes ; la tête longue au museau effilé ; le miroir crème sous une queue courte.)
+Le cerf en peluche, deuxième dessin (l'auteur, 15/10 : « il manque de prestance, c'est un animal imposant ») : le seigneur du bois, majestueux et un brin vaniteux. Un grand corps de velours châtaigne, haut
 sur pattes, le poitrail bombé et le ventre levretté ; l'encolure épaisse, plus sombre, qui porte sous la gorge une
 lourde crinière de rut en mèches brun noir. La tête haute, le menton levé, tournée vers nous juste assez pour qu'on
 voie sa ramure : immense, ivoire, deux merrains qui montent en lyre et s'ouvrent au sommet en couronne de trois
-andouillers, presque aussi haute que lui. Deux petits yeux sous de lourdes paupières : il nous regarde de haut. Il a
+andouillers, presque aussi haute que lui. Deux yeux vifs, grands ouverts : il nous regarde de haut. Il a
 fait un pas en avant de l'antérieur gauche, comme on pose pour un portrait. Le ventre, le dedans des oreilles et le
 miroir autour de sa courte queue sont crème ; le bas des jambes et les sabots, brun noir.
 
@@ -20,6 +24,8 @@ from mathutils import Matrix, Vector
 import atelier as A
 import matieres as M
 import peluche as K
+
+GONFLAGE = True                                # la base aux volumes de l'Artiste (fusion.py) : des volumes rembourrés, pas des tubes
 
 CHATAIGNE = M.hexa("#8a5a3c")                 # la robe
 SOMBRE = M.hexa("#573626")                    # l'encolure, le bas des jambes
@@ -39,7 +45,7 @@ ARC = [(0.0, 0.0), (0.024, 0.110), (0.046, 0.215), (0.068, 0.300), (0.088, 0.360
 LACET, PIQUE, PENCHE = 24.0, -2.0, -6.0       # la tête : tournée vers nous, le nez presque à l'horizontale (le menton levé)
 GROSSE = 1.50                                 # une grosse tête de peluche
 RAMURE = 1.05                                 # la ramure, à l'échelle de la tête
-ALLONGE = 1.35                                # les andouillers, plus longs que nature
+ALLONGE = 1.60                                # les andouillers, longs et pointus (courts, ils faisaient chevilles)
 
 
 def gauss(x):
@@ -97,8 +103,8 @@ def tourner(a, degres):
 
 # la ramure, dans le repère de la tête (avant l'échelle GROSSE) : X la gauche, Y le dessus du crâne, Z vers le nez.
 # Le merrain s'ouvre large, part en arrière puis remonte : une lyre. Chaque andouiller : son chemin, et son rayon au départ.
-MERRAIN = [(0.034, 0.056, 0.040), (0.070, 0.105, 0.020), (0.130, 0.175, -0.030), (0.195, 0.250, -0.075),
-           (0.245, 0.330, -0.080), (0.270, 0.410, -0.045), (0.272, 0.470, 0.010)]
+MERRAIN = [(0.034, 0.056, 0.040), (0.075, 0.100, 0.010), (0.140, 0.160, -0.060), (0.205, 0.240, -0.110),
+           (0.250, 0.330, -0.105), (0.270, 0.410, -0.055), (0.268, 0.470, 0.015)]      # courbe : en arrière, puis il remonte vers l'avant
 ANDOUILLERS = [
     ([(0.064, 0.098, 0.025), (0.085, 0.112, 0.090), (0.095, 0.145, 0.150)], 0.012),     # l'andouiller d'œil, sur le front
     ([(0.115, 0.160, -0.020), (0.145, 0.190, 0.050), (0.160, 0.235, 0.095)], 0.011),    # le second
@@ -117,8 +123,8 @@ def construire():
 
     # ----- le corps : tourné de la croupe au poitrail, puis couché ; dans la pièce, X est la gauche, Y le dos, Z l'avant.
     #       Le poitrail profond, le ventre qui remonte vers les flancs (levretté), une croupe ronde. -----
-    corps = A.tour(A.profil([(0, 0), (0.110, 0.010), (0.156, 0.060), (0.170, 0.130), (0.162, 0.220), (0.162, 0.300),
-                             (0.184, 0.400), (0.194, 0.470), (0.158, 0.550), (0, 0.605)], 6), 48)       # le poitrail large et profond
+    corps = A.tour(A.profil([(0, 0), (0.122, 0.010), (0.174, 0.060), (0.190, 0.130), (0.184, 0.220), (0.186, 0.300),
+                             (0.208, 0.400), (0.218, 0.470), (0.176, 0.550), (0, 0.605)], 6), 48)       # lourd : un corps de biche ne fait pas un cerf       # le poitrail large et profond
     v0 = corps.v
     dessous = np.abs(np.arctan2(v0[:, 0], v0[:, 1])) > 2.30
     ventre = dessous & (v0[:, 2] > 0.10) & (v0[:, 2] < 0.46)
@@ -138,7 +144,7 @@ def construire():
     # ----- l'encolure : une pièce couchée le long de son arc, épaisse (c'est la saison du brame), plus sombre -----
     enc = K.Fil([tuple(BASE + AVANT * u + Vector((0, 0, z))) for u, z in ARC], FLANC)
     L = enc.long
-    parts, rayons = [0.03, 0.15, 0.35, 0.55, 0.75, 0.90, 0.985], [0.168, 0.156, 0.134, 0.114, 0.098, 0.088, 0.076]
+    parts, rayons = [0.03, 0.15, 0.35, 0.55, 0.75, 0.90, 0.985], [0.182, 0.170, 0.148, 0.126, 0.106, 0.094, 0.080]
     pc = A.profil([(0, 0)] + [(r, p * L) for r, p in zip(rayons, parts)] + [(0, 1.01 * L)], 6)
     a.piece("cou", A.tour(pc, 48).etire(0.80, 1.0, 1.0).sculpte(enc.couche), SOMBRE)
 
@@ -153,9 +159,9 @@ def construire():
         gorge = -nq * math.cos(ang) + cote
         depart = c_ + gorge * r * 0.80
         bas = np.array([0.0, 0.0, -1.0])
-        chemin = [depart - gorge * 0.012, depart + gorge * 0.030 + bas * 0.020, depart + gorge * 0.045 + bas * long * 0.55 - av * 0.015,
-                  depart + gorge * 0.040 + bas * long - av * 0.040]
-        m = meche(chemin, 0.034 if i % 2 else 0.040, FLANC if ang == 0 else gorge, 0.75, 12)
+        chemin = [depart - gorge * 0.012, depart + gorge * 0.024 + bas * 0.016 - av * 0.012, depart + gorge * 0.030 + bas * long * 0.45 - av * 0.040,
+                  depart + gorge * 0.022 + bas * long * 0.75 - av * 0.075]      # couchées vers le poitrail
+        m = meche(chemin, 0.044 if i % 2 else 0.052, FLANC if ang == 0 else gorge, 0.38, 12)     # plates et larges : épaisses, elles pendaient en boudins
         criniere = m if criniere is None else criniere + m
     a.piece("criniere", criniere, CRIN)
 
@@ -183,12 +189,12 @@ def construire():
         return s
     a.piece("tete", tete.sculpte(fine), None, mat=T)
 
-    # ----- les yeux : petits, vivants, haut sur les côtés, sous de lourdes paupières : il nous toise -----
+    # ----- les yeux : vivants, haut sur les côtés, grands ouverts (mi-clos, l'auteur y lit de la tristesse) -----
     centre = T @ Vector((0, 0, 0.090))
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.80, 0.50, 0.22)))
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0150)
-        a.piece("lourde_" + nom, K.paupiere(0.0150, 0.08), SOMBRE, mat=A.cadre(pos + n * 0.003, n, T3 @ Vector((0, 1, -0.25))), poil=False)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0160)
+        a.piece("lourde_" + nom, K.paupiere(0.0160, 0.60), SOMBRE, mat=A.cadre(pos + n * 0.003, n, T3 @ Vector((0, 1, -0.25))), poil=False)
 
     # ----- les oreilles : moyennes, en cornet, portées de côté sous la ramure ; le dedans crème -----
     po = A.profil([(0, 0), (0.022, 0.010), (0.032, 0.040), (0.029, 0.075), (0.013, 0.104), (0, 0.114)], 6)
@@ -203,13 +209,13 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         monde = lambda q: tuple(T @ (Vector((c * q[0], q[1], q[2])) * RAMURE + Vector((0, 0.008, 0.006))))
         # le merrain épais, brun noisette, perlé à la base (la meule), qui blanchit vers le haut ; des andouillers forts
-        bois = K.tube_peint(A.courbe([monde(q) for q in MERRAIN], 8), lambda t: 0.062 - 0.026 * t + 0.016 * gauss(t / 0.05),
-                            [(0.55, MERRAIN_BRUN), (0.8, tuple((np.asarray(MERRAIN_BRUN) + np.asarray(IVOIRE)) / 2)), (9, IVOIRE)], 18)
+        bois = K.tube_peint(A.courbe([monde(q) for q in MERRAIN], 8), lambda t: 0.060 - 0.030 * t + 0.014 * gauss(t / 0.05),
+                            [(0.80, MERRAIN_BRUN), (9, IVOIRE)], 18)          # brun d'un bout à l'autre, ivoire au sommet : sans bagues
         for chemin, r0 in ANDOUILLERS:
             q0 = np.array(chemin[0])
             chemin = [tuple(q0 + (np.array(q) - q0) * ALLONGE) for q in chemin]
-            bois = bois + K.tube_peint(A.courbe([monde(q) for q in chemin], 8), lambda t, r0=r0: 2.9 * r0 * (1 - 0.62 * t),
-                                       [(0.35, MERRAIN_BRUN), (0.6, tuple((np.asarray(MERRAIN_BRUN) + np.asarray(IVOIRE)) / 2)), (9, IVOIRE)], 14)
+            bois = bois + K.tube_peint(A.courbe([monde(q) for q in chemin], 8), lambda t, r0=r0: 2.4 * r0 * (1 - 0.82 * t),
+                                       [(0.70, MERRAIN_BRUN), (9, IVOIRE)], 14)    # pointus, la pointe ivoire
         a.piece("bois_" + nom, bois, None, poil=False)
 
     # ----- la queue : courte, brun noir, plaquée sur le miroir crème -----
@@ -218,8 +224,8 @@ def construire():
 
     # ----- les jambes : longues, fines au canon, la cuisse pleine. Il a fait un pas de l'antérieur gauche ;
     #       le postérieur gauche est resté en arrière. Les quatre sont posées. -----
-    epaule = [0.080, 0.068, 0.052, 0.038, 0.029, 0.031, 0.027]
-    hanche = [0.098, 0.084, 0.048, 0.033, 0.029, 0.031, 0.027]
+    epaule = [0.098, 0.084, 0.064, 0.046, 0.035, 0.037, 0.032]     # fortes : fines, elles faisaient biche
+    hanche = [0.120, 0.104, 0.062, 0.042, 0.035, 0.037, 0.032]
     pattes = (("avant_G", [(0.052, -0.210, 0.650), (0.082, -0.225, 0.530), (0.086, -0.250, 0.390), (0.088, -0.278, 0.270),
                            (0.088, -0.296, 0.150), (0.088, -0.310, 0.062), (0.088, -0.318, 0.034)], epaule, 0.55),
               ("avant_D", [(-0.052, -0.200, 0.650), (-0.082, -0.200, 0.530), (-0.086, -0.196, 0.390), (-0.088, -0.192, 0.270),
