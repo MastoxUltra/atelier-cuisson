@@ -35,10 +35,26 @@ def propres(points, eps=2e-4):
 ENCRE = np.array(M.hexa("#4a4650"))           # la dominante : noir d'encre velouté (le poil le fonce : on le prend plus clair)
 BLANC = np.array(M.hexa("#fffaf2"))           # les plumes des ailes et de la queue
 ROSE = np.array(M.hexa("#e8a8a0"))            # le cou, les jambes
-BEC = M.hexa("#b88070")                         # le bec : rose sombre, bien plus foncé que la tête
+BEC = M.hexa("#c89484")                         # le bec : rose sombre, plus foncé que la tête
 OEIL = M.hexa("#7a4a30")
 CHARBON = M.hexa("#3a3236")
 LACET = 30.0
+
+
+def lisser(r, n=5):
+    k = np.ones(n) / n
+    return np.convolve(np.pad(r, n // 2, mode="edge"), k, "valid")
+
+
+def fuseau(points, longueur, cotes=36, pas=0.006):
+    """Le cou du flamant rose gardé par l'auteur : une pièce tournée très finement échantillonnée (fraction, rayon), couchée
+    ensuite le long d'une courbe ; les deux bouts se referment en calotte arrondie."""
+    s = np.arange(pas, longueur - pas, pas)
+    f, r = zip(*points)
+    rayons = lisser(np.interp(s / longueur, f, r), 7)
+    c0, c1 = max(float(r[0]) * 0.9, 0.004), max(float(r[-1]) * 0.9, 0.004)
+    rayons = rayons * np.sqrt(np.clip(1.0 - (np.maximum(c0 - s, 0.0) / c0) ** 2, 0.0, 1.0)) * np.sqrt(np.clip(1.0 - (np.maximum(s - (longueur - c1), 0.0) / c1) ** 2, 0.0, 1.0))
+    return A.tour([(0.0, 0.0)] + [(float(ri), float(si)) for ri, si in zip(rayons, s)] + [(0.0, float(longueur))], cotes)
 
 
 def construire():
@@ -62,25 +78,32 @@ def construire():
     for k, (dx, dy, dz, rx) in enumerate(((0.0, 0.350, 0.880, -34), (0.090, 0.340, 0.840, -22), (-0.090, 0.340, 0.840, -22))):
         a.piece("queue_%d" % k, A.boule(1.0, 28, 14).etire(0.070, 0.050, 0.180), tuple(BLANC), pos=(dx, dy, dz), rot=(rx, 0, dx * 90))
 
-    # ----- le cou : très long, rosé, en S doux, mince ; la tête minuscule, le bec plat et large, le grand œil à cils -----
-    cou = A.tube(A.courbe(propres([(0.0, -0.180, 0.900), (0.0, -0.290, 1.120), (0.0, -0.200, 1.360), (0.0, -0.250, 1.600)]), 6),
-                 lambda t: 0.092 - 0.054 * t ** 0.8, 20)         # épais à la base, qui s'amincit : plus un tube
+    # ----- le cou et la tête, refaits comme ceux du flamant rose gardé : un cou d'une pièce, épais à la base, qui s'amincit
+    #       en S doux ; une tête ronde ; un bec plat et large, rose sombre, la pointe noire -----
+    BASE = Vector((0.0, -0.150, 0.900))
+    pts = ((0.0, 0.0), (0.050, 0.200), (0.110, 0.430), (0.120, 0.640), (0.090, 0.840), (0.130, 0.755))
+    pts = ((0.0, 0.0), (-0.040, 0.230), (-0.115, 0.470), (-0.095, 0.680), (-0.140, 0.900), (-0.110, 0.755))
+    chemin = ((0.0, 0.0), (-0.060, 0.200), (-0.130, 0.420), (-0.110, 0.620), (-0.130, 0.800))
+    enc = K.Fil([tuple(BASE + Vector((0, u, z))) for u, z in chemin], (1, 0, 0))
+    Lc = enc.long
+    cou = fuseau([(0.0, 0.090), (0.12, 0.066), (0.45, 0.040), (0.85, 0.034), (1.0, 0.040)], Lc, 36)
     cou.teinte = np.tile(ROSE, (len(cou.v), 1))
-    a.piece("cou", cou, None, poil=False)
-    H = A.repere(Vector((0.0, -0.290, 1.655)), (0, 0, LACET))
+    a.piece("cou", cou.sculpte(enc.couche), None, poil=False)
+    centre, avant, nuque = enc.cadre(Lc)
+    H = A.cadre(Vector(centre) + Vector((0.0, -0.030, 0.012)), Vector((0.0, -1.0, -0.12)).normalized(), Vector((0, 0, 1)))
     H3 = H.to_3x3()
     tete = A.boule(1.0, 36, 18)
     tete.teinte = np.tile(ROSE, (len(tete.v), 1))
-    a.piece("tete", tete.etire(0.046, 0.070, 0.046), None, mat=H, poil=False)
-    a.tete = H @ Vector((0, -0.090, 0.0))
-    a.piece("bec", A.boule(1.0, 28, 14).etire(0.044, 0.090, 0.024), BEC, mat=H @ A.repere((0, -0.105, -0.010)), poil=False)
-    a.piece("narine", A.boule(1.0, 12, 6).etire(0.010, 0.014, 0.008), CHARBON, mat=H @ A.repere((0, -0.150, 0.010)), poil=False)
+    a.piece("tete", tete.etire(0.054, 0.060, 0.062), None, mat=H, poil=False)
+    a.tete = H @ Vector((0, 0.0, 0.110))
+    bec = A.tour(A.profil([(0, 0), (0.046, 0.008), (0.050, 0.040), (0.044, 0.082), (0.032, 0.112), (0.014, 0.130), (0, 0.138)], 6), 32)
+    K.bandes(bec, [(0.100, tuple(BEC)), (9, tuple(CHARBON))])
+    a.piece("bec", bec.etire(1.0, 0.46, 1.0), None, mat=H @ A.repere((0, 0.004, 0.040)), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.86, -0.30, 0.30))
-        a.rustine("iris_" + nom, "tete", H.to_translation(), regard, 0.30, OEIL, 0.003, 0)
+        regard = H3 @ Vector((c * 0.70, 0.30, 0.50))
+        a.rustine("iris_" + nom, "tete", H.to_translation(), regard, 0.26, OEIL, 0.003, 0)
         p, n = a.surface("tete", H.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0165)
-        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0200)
 
     # ----- les jambes : très longues, épaisses, roses, le genou en arrière ; deux gros orteils ; bien droites sous le corps -----
     for nom, c in (("G", 1), ("D", -1)):

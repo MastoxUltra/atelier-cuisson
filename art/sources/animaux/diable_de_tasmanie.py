@@ -89,9 +89,8 @@ def construire():
     a.tete = T @ Vector((0, 0.0, 0.140))
     for nom, c in (("G", 1), ("D", -1)):
         regard = T3 @ Vector((c * 0.62, 0.50, 0.50))
-        a.rustine("amande_" + nom, "tete", T @ Vector((0, 0.0, 0.020)), regard, 0.26, tuple(CENDRE), 0.003, 0)
         p, n = a.surface("tete", T @ Vector((0, 0.0, 0.020)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0135)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0200)               # de vrais yeux noirs vivants, plus de disque gris
         # l'oreille : ronde, plantée haut sur le côté, le dedans qui rougit
         po, no = a.surface("tete", T @ Vector((0, 0.0, 0.0)), T3 @ Vector((c * 0.66, 0.72, -0.28)))
         face, dresse = T3 @ Vector((c * 0.55, 0.45, 0.70)), no + T3 @ Vector((0, 0.2, -0.9))
