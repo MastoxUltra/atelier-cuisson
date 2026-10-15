@@ -52,14 +52,10 @@ def construire():
     cou = O.tube_r([(0.0, -0.27, 0.58), (0.0, -0.36, 0.69), (0.0, -0.43, 0.79), (0.0, -0.47, 0.89)], [0.136, 0.118, 0.100, 0.090], 22)
     cou.teinte = np.tile(FUMEE, (len(cou.v), 1))
     a.piece("cou", cou, None)
-    fraise = None
-    for k in range(14):
-        ang = math.tau * k / 14
-        d = Vector((math.cos(ang) * 0.9, -0.55 + 0.35 * math.sin(ang), 0.60 * math.sin(ang) - 0.25 * abs(math.cos(ang)))).normalized()
-        f = O.couche(O.teinte(O.pointe(0.075, 0.020, 8), CLAIR * 0.9 + FUMEE * 0.1),
-                     A.cadre(Vector((0.0, -0.395, 0.745)) + Vector((math.cos(ang) * 0.102, math.sin(ang) * 0.095, 0.0)), d, (0, 0, 1)))
-        fraise = f if fraise is None else fraise + f
-    a.piece("fraise", fraise, None, poil=False)
+    # la fraise : un épais col de poils (un boudin moelleux autour du cou, pas des pointes blanches qui font un collier de dents)
+    col = A.tore(0.092, 0.046, 40, 14)
+    col.teinte = np.tile(CLAIR * 0.85 + FUMEE * 0.15, (len(col.v), 1))
+    a.piece("fraise", col.etire(1.0, 1.0, 1.15), None, pos=(0.0, -0.39, 0.745), rot=(33, 0, 0))
 
     H = Vector((0.0, -0.51, 0.99))
     RT = A.repere(H, (-58, 0, 0))                 # la tête renversée : le museau au ciel
@@ -77,10 +73,9 @@ def construire():
     for k, dx in enumerate((-0.026, -0.009, 0.009, 0.026)):
         dent = O.pointe(0.022, 0.0065, 8)
         a.piece("croc_%d" % k, O.couche(O.teinte(dent, np.array(DENT)), RT @ A.cadre(Vector((dx, -0.150, -0.010)), (0.0, 0.20, -1.0), (0, 1, 0))), None, poil=False)
-    # les yeux fermés : deux petits arcs brodés
+    # les yeux : ouverts (ils ne se ferment que dans « dort »), deux petits yeux vifs sous le front
+    O.paire_yeux(a, "tete", H, (0.84, -0.46, 0.30), 0.0150, decolle=0.003, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
-        arc = [RT @ Vector((c * (0.058 + 0.013 * u_), -0.095 + 0.030 * u_, 0.028 + 0.012 * math.sin(math.pi * (u_ + 0.5)))) for u_ in np.linspace(-0.5, 0.5, 7)]
-        a.broderie("oeil_ferme_" + nom, A.courbe([tuple(p) for p in arc], 3), 0.0030, FIL)
         ore = A.tour(A.profil([(0.036, 0), (0.030, 0.034), (0.016, 0.068), (0.005, 0.088), (0, 0.094)], 4), 20).etire(1.0, 0.45, 1.0)
         ore.teinte = np.where((ore.v[:, 2] > 0.060)[:, None], SOMBRE, FUMEE)
         a.piece("oreille_" + nom, O.couche(ore, RT @ A.cadre(Vector((c * 0.050, 0.060, 0.018)), (c * 0.25, 0.85, 0.30), (0, 0, 1))), None)

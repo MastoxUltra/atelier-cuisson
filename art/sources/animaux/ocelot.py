@@ -46,9 +46,10 @@ def chaines(m, graine=0.0, freq=10.0, ventre=None):
     """Peint une pièce encore droite en sable et lui pose des chaînes d'ovales chocolat cernés de sable (un produit de
     sinus dans une bande étroite, étiré dans le sens du flanc) ; le ventre, blanc."""
     v = m.v
-    n = np.sin(freq * v[:, 2] + graine) * np.sin(1.6 * freq * v[:, 1] + 1.9 * graine + 0.5) * np.sin(freq * 0.55 * v[:, 0] + 0.7)
     t = np.tile(np.asarray(SABLE, float), (len(v), 1))
-    t[(n > 0.30) & (n < 0.62)] = CHOCOLAT
+    bande = np.sin(freq * v[:, 2] + graine + 0.9 * np.sin(2.4 * v[:, 1]))             # des bandes ondulées le long du flanc
+    chaine = np.sin(0.55 * freq * v[:, 1] + 0.6 * graine)                              # coupées en chaînons
+    t[(bande > 0.50) & (chaine > -0.35)] = CHOCOLAT
     if ventre is not None:
         t[ventre(v)] = BLANC
     m.teinte = t
@@ -87,14 +88,12 @@ def construire():
         a.broderie("bouche_" + ("G" if c > 0 else "D"),
                    A.courbe(propres(a.trace("museau", T @ Vector((0, -0.096, -0.034)), bouche, 0.004)), 4), 0.0026, CHOCOLAT)
 
-    # ----- les yeux : grands, ronds, d'ambre, sous deux trait de rayure brodés qui tombent vers le nez -----
+    # ----- les yeux : grands, ronds, d'ambre, au regard doux (plus de traits froncés) -----
     for nom, c in (("G", 1), ("D", -1)):
         regard = T3 @ Vector((c * 0.50, -0.82, 0.18))
         a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.36, OEIL, 0.003, 0)
         p, n = a.surface("tete", T.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0215)
-        brow = [T3 @ Vector((c * (0.18 + 0.36 * t), -0.94 + 0.16 * t, 0.26 + 0.10 * t)) for t in np.linspace(0, 1, 5)]
-        a.broderie("sourcil_" + nom, propres(a.trace("tete", T.to_translation(), brow, 0.004)), 0.0030, CHOCOLAT)
         E = A.cadre(T @ Vector((c * 0.080, 0.040, 0.070)), T3 @ Vector((c * 0.30, 0.22, 0.93)), T3 @ Vector((c * 0.4, -0.9, 0.0)))
         po = A.profil([(0, 0), (0.034, 0.008), (0.042, 0.030), (0.034, 0.052), (0.015, 0.066), (0, 0.072)], 5)
         a.piece("oreille_" + nom, A.tour(po, 28).etire(1.0, 0.42, 1.0), CHOCOLAT, mat=E)

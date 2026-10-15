@@ -149,7 +149,7 @@ def nageoire(contour, ep, couleur, casse=0.010):
     return teinte(m, couleur)
 
 
-def paire_yeux(a, piece, centre, direction_g, rayon, fermee=None, couleur_lourde=None, coupe=0.05, haut=(0, 0, 1), decolle=0.002, nom="oeil", vivant=True, R=None):
+def paire_yeux(a, piece, centre, direction_g, rayon, fermee=None, couleur_lourde=None, coupe=0.30, haut=(0, 0, 1), decolle=0.002, nom="oeil", vivant=True, R=None):
     """Deux yeux symétriques (bouton : le style en fait un bouton à croix, un œil de feutrine ou une bille de verre).
     direction_g : où viser, depuis centre, pour l'œil gauche (+X) ; le droit est son miroir sur X.
     couleur_lourde : si donnée, une paupière lourde de cette couleur ; coupe : sa coupe (0 : à moitié fermé)."""

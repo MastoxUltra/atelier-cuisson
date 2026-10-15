@@ -59,7 +59,7 @@ def construire():
     museau = A.boule(1.0, 28, 14).etire(0.058, 0.070, 0.050)
     a.piece("museau", O.teinte(museau, CLAIR), None, pos=tuple(H + Vector((0.0, -0.105, 0.045))))
     a.piece("nez", A.boule(1.0, 16, 8).etire(0.024, 0.018, 0.016), NEZ, pos=tuple(H + Vector((0.0, -0.165, 0.085))), poil=False)
-    O.paire_yeux(a, "tete", H, (0.74, -0.58, 0.20), 0.0240, couleur_lourde=tuple(CARAMEL), coupe=0.04, decolle=0.003, haut=(0, 0.3, 1))
+    O.paire_yeux(a, "tete", H, (0.74, -0.58, 0.20), 0.0240, couleur_lourde=tuple(CARAMEL), coupe=0.30, decolle=0.003, haut=(0, 0.3, 1))
     for nom, c in (("G", 1), ("D", -1)):
         for k, dz in enumerate((0.020, 0.0, -0.020)):
             a.broderie("moustache_%s%d" % (nom, k), [H + Vector((c * 0.020, -0.150, 0.060 + dz * 0.4)), H + Vector((c * 0.090, -0.180, 0.070 + dz)),

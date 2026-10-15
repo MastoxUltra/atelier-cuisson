@@ -20,7 +20,7 @@ import peluche as K
 
 # le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
 AUBERGINE = M.hexa("#7a3a4e")                 # la dominante : brun aubergine
-SOMBRE = M.hexa("#4a2434")                    # le museau, le dessus du cou, les ossicônes
+SOMBRE = M.hexa("#5e3446")                    # le museau, le dessus du cou, les ossicônes
 CREME = M.hexa("#fff2d8")                     # l'accent : les zébrures, le dedans des oreilles
 CORNE = M.hexa("#3a2c2c")                     # les sabots
 CROUPE = Vector((0.0, 0.44, 0.620))           # le bout arrière du corps
@@ -84,6 +84,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.86, 0.34, 0.22)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0185)
+        a.rustine("joue_" + nom, "tete", centre, T3 @ Vector((c * 0.70, -0.30, 0.62)), 0.30, CREME, 0.003, 0)       # la joue claire
         a.piece("lourde_" + nom, K.paupiere(0.021, 0.22), AUBERGINE, mat=A.cadre(pos + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
         po = A.profil([(0, 0), (0.048, 0.016), (0.062, 0.070), (0.056, 0.130), (0.034, 0.180), (0.010, 0.208), (0, 0.216)], 6)
         vers = (T3 @ Vector((c * 0.82, 0.26, 0.54))).normalized()
@@ -145,7 +146,7 @@ OS = [
     ('queue', 'corps', (-0.001, 0.462, 0.694)),
 ]
 
-PORTEURS = [
+PORTEURS = [('joue', 'tete'), 
     ('oeil_reflet', 'tete'), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True),
     ('pavillon', 'oreille', True), ('ossicone', 'corps'), ('sabot_av', 'patte_av', True),
     ('sabot_ar', 'patte_ar', True), ('oreille', 'oreille', True), ('pinceau', 'queue'), ('lourde', 'tete'),

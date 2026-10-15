@@ -78,7 +78,7 @@ def construire():
         pos, n = a.surface("tete", centre, Vector((c * 0.62, -0.78, 0.04)))
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.040)
         haut_oeil = (Vector((0, 0, 1)) - n * n.z).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.040, 0.10), tuple(BRIQUE), mat=A.cadre(pos + n * 0.003, n, haut_oeil), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.040, 0.30), tuple(BRIQUE), mat=A.cadre(pos + n * 0.003, n, haut_oeil), poil=False)
     sourire = [Vector((0.30 * u_ + 0.04, -0.94, -0.30 + 0.10 * u_ * u_)) for u_ in np.linspace(-1, 1, 9)]
     a.broderie("sourire", A.courbe(a.trace("tete", centre, sourire, 0.004), 4), 0.0030, FIL)
     a.tete = centre + Vector((0.0, -0.18, 0.0))

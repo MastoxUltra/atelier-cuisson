@@ -71,7 +71,7 @@ def construire():
     museau = A.tour(A.profil([(0.062, 0), (0.058, 0.024), (0.050, 0.052), (0.036, 0.078), (0.016, 0.094), (0, 0.098)], 5), 28).etire(1.0, 0.86, 1.0)
     a.piece("museau", O.couche(O.teinte(museau, CLAIR), RT @ A.cadre(Vector((0.0, -0.082, -0.024)), (0.0, -1.0, -0.14), (0, 1, 0))), None)
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.016, 0.013, 0.012), NEZ, mat=RT @ A.repere((0.0, -0.182, -0.041)), poil=False)
-    O.paire_yeux(a, "tete", TETE, (0.60, -0.76, 0.14), 0.0165, couleur_lourde=tuple(CHARBON), coupe=0.10, decolle=0.003, R=RT)
+    O.paire_yeux(a, "tete", TETE, (0.60, -0.76, 0.14), 0.0165, couleur_lourde=tuple(CHARBON), coupe=0.30, decolle=0.003, R=RT)
     # le masque creusé autour des yeux : une collerette noire en relief et, au-dessus, un fil crème qui souligne le sourcil
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", TETE, RT.to_3x3() @ Vector((c * 0.60, -0.76, 0.14)))

@@ -133,7 +133,7 @@ def construire():
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.82, 0.42, 0.10)))
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.020)
         haut = (T3 @ Vector((0, 1, 0)) - n * n.dot(T3 @ Vector((0, 1, 0)))).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.020, -0.12), ROSE, mat=A.cadre(pos + n * 0.003, n, haut), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.020, 0.30), ROSE, mat=A.cadre(pos + n * 0.003, n, haut), poil=False)
 
     # ----- les oreilles en banane : longues, dressées, les pointes qui se courbent l'une vers l'autre, le bout chocolat -----
     po = A.profil([(0, 0), (0.024, 0.010), (0.032, 0.040), (0.030, 0.085), (0.020, 0.120), (0.008, 0.140), (0, 0.146)], 6)

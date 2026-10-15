@@ -73,7 +73,7 @@ def construire():
     levre = A.boule(1.0, 28, 14).etire(0.050, 0.040, 0.026)
     a.piece("levre", O.teinte(levre, CHAIR), None, pos=(0.0, -0.250, 0.130), rot=(14, 0, 0))
     centre = Vector((0.0, -0.140, 0.162))
-    O.paire_yeux(a, "corps", centre, (0.88, -0.38, 0.14), 0.0230, couleur_lourde=tuple(ORANGE * 0.9), coupe=-0.15, decolle=0.002)
+    O.paire_yeux(a, "corps", centre, (0.88, -0.38, 0.14), 0.0230, couleur_lourde=tuple(ORANGE * 0.9), coupe=0.30, decolle=0.002)
     O.broder(a, "moue", "corps", centre, [(0.30 * u_, -0.95, -0.44 + 0.14 * u_ * u_) for u_ in np.linspace(-1, 1, 9)], 0.0030, FIL, decolle=0.003)
     a.tete = Vector((0.0, -0.285, 0.162))
 

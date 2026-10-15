@@ -65,7 +65,7 @@ def construire():
     a.piece("bec", bec.etire(1.0, 0.82, 1.0), BEC, mat=A.cadre(H + Vector((0.0, -0.085, -0.010)), (0.0, -1.0, -0.55), (0, 0.5, 1)), poil=False)
 
     # ----- les yeux : petits et perçants, un trait noir au bec ; la queue courte ; les pattes rouges, minuscules -----
-    O.paire_yeux(a, "tete", H, (0.70, -0.62, 0.20), 0.0145, couleur_lourde=tuple(COBALT), coupe=0.12, decolle=0.002)
+    O.paire_yeux(a, "tete", H, (0.70, -0.62, 0.20), 0.0145, couleur_lourde=tuple(COBALT), coupe=0.30, decolle=0.002)
     for nom, c in (("G", 1), ("D", -1)):
         aile = A.boule(1.0, 28, 14).etire(0.020, 0.040, 0.110)
         aile.teinte = np.tile(COBALT * 0.88, (len(aile.v), 1))

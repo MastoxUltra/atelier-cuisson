@@ -66,7 +66,7 @@ def construire():
         pointe = O.pointe(0.060 + 0.012 * (1 - abs(x) / 0.044), 0.0155, 10)
         a.piece("couronne_%d" % k, O.couche(O.teinte(pointe, np.array(ANNEAU)), A.cadre(H + Vector((x, 0.020, hh - 0.034)),
                 (math.sin(math.radians(lean)), 0.18, 1.0), (0, 1, 0))), None, poil=False)
-    O.paire_yeux(a, "tete", H, (0.94, -0.34, 0.22), 0.0200, couleur_lourde=tuple(SAFRAN), coupe=-0.10, decolle=0.003, R=RT)
+    O.paire_yeux(a, "tete", H, (0.94, -0.34, 0.22), 0.0200, couleur_lourde=tuple(SAFRAN), coupe=0.30, decolle=0.003, R=RT)
     a.tete = H + Vector((0.0, -0.17, -0.04))
 
     # ----- les nageoires : le grand éventail du dos, un petit éventail à chaque joue ; l'éventail porte un liseré -----

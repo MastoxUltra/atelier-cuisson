@@ -95,7 +95,7 @@ def construire():
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0155)
         h = (Vector((0.0, 0.0, 1.0)) - n * n.z).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.0155, 0.12), tuple(MAUVE * 0.9), mat=A.cadre(pos + n * 0.002, n, h), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.0155, 0.30), tuple(MAUVE * 0.9), mat=A.cadre(pos + n * 0.002, n, h), poil=False)
         cj, dj = fil.vise(0.915 * L, -0.25, c * 0.95, -0.15)
         pj, nj = a.surface("corps", cj, dj)
         ecaille = A.boule(1.0, 20, 10).etire(0.026, 0.024, 0.0045)
