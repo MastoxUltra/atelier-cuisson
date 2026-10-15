@@ -1,8 +1,8 @@
-"""Le vautour en peluche de velours ras : un brun sombre en grandes plumes lisses, le cou nu et ridé d'un rose gris, la
-collerette de duvet blanc à la base du cou, la petite tête chauve au bec crochu fort, les yeux enfoncés sous un front
-bas, de grandes ailes repliées en cape, des serres. L'attente : perché sur un tronc invisible, le dos voûté, le cou
-rentré dans la collerette puis étiré, la tête de profil tournée vers nous, le bec en crochet, un regard patient de
-croque-mort qui prend son temps.
+"""Le vautour en peluche de velours ras (2e dessin, d'après photos : plus de bloc) : un grand rapace PERCHÉ, voûté, le
+corps en pente qui plonge vers l'avant, un brun sombre en plumes lisses, deux grandes ailes repliées en cape dont les
+longues plumes noires croisent la queue, le COU NU, long et ridé, d'un rose gris qui sort d'une collerette de duvet
+blanc, la petite tête chauve au bec crochu et fort, l'œil enfoncé ; des cuisses en culottes de plumes et de grosses
+pattes à serres. Il attend, de profil, la tête tournée vers nous, un regard patient de croque-mort.
 
     python vautour.py        fabrique la fiche art/apercus/animaux/vautour.png (velours ras, palier 3)
 """
@@ -38,8 +38,9 @@ PEAU = np.array(M.hexa("#e0a8a0"))            # le cou nu, la tête : rose gris
 DUVET = np.array(M.hexa("#fff6e8"))           # la collerette
 BEC = M.hexa("#c8b898")
 OEIL = M.hexa("#c8903a")
-CHARBON = M.hexa("#3a3230")
-PAS = 0.008
+CHARBON = np.array(M.hexa("#3a3230"))         # le bout des ailes, les serres
+PAS = 0.006
+LACET = 28.0
 
 
 def lisser(r, n=5):
@@ -58,157 +59,64 @@ def construire():
     a = K.Animal("vautour")
     a.taille = 1.10
 
-    # ----- le corps : un œuf lourd, voûté, penché en avant ; les ailes en cape, de grandes plumes rangées -----
-    fil = K.Fil([(0.0, y, z) for y, z in ((0.240, 0.250), (0.150, 0.420), (0.040, 0.570), (-0.060, 0.690))], (1, 0, 0))
+    # ----- le corps : un tronc voûté en pente, la queue basse derrière, la poitrine bombée devant ; le dos plus sombre -----
+    fil = K.Fil([(0.0, y, z) for y, z in ((0.240, 0.250), (0.130, 0.360), (0.000, 0.470), (-0.080, 0.560))], (1, 0, 0))
     L = fil.long
-    corps = fuseau([(0.0, 0.0), (0.05, 0.150), (0.20, 0.230), (0.55, 0.240), (0.85, 0.180), (1.0, 0.0)], L, 64, 0.009)
-    corps.teinte = np.where((np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1])) > 2.5)[:, None], PLUME, BRUN)
+    corps = fuseau([(0.0, 0.0), (0.05, 0.105), (0.25, 0.180), (0.55, 0.185), (0.84, 0.140), (1.0, 0.0)], L, 56)
+    th = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
+    corps.teinte = np.where((th > 2.3)[:, None], tuple(PLUME), tuple(BRUN))
     a.piece("corps", corps.sculpte(fil.couche), None)
+
+    # ----- les ailes : deux capes repliées sur les flancs, les couvertures claires en haut, les longues plumes noires qui
+    #       descendent et croisent la queue -----
     for nom, c in (("G", 1), ("D", -1)):
-        aile = A.boule(1.0, 36, 18)
-        aile.teinte = np.where((np.sin(16 * aile.v[:, 2]) > 0.7)[:, None], PLUME, BRUN)
+        cape = A.boule(1.0, 36, 18)
+        cape.teinte = np.where((cape.v[:, 2] > 0.35)[:, None], tuple(PLUME), tuple(BRUN))
+        a.piece("aile_" + nom, cape.etire(0.050, 0.200, 0.270), None, pos=(c * 0.170, 0.070, 0.390), rot=(-16, 0, c * 7))
+        a.piece("plumes_" + nom, A.boule(1.0, 24, 12).etire(0.030, 0.210, 0.034), tuple(CHARBON), pos=(c * 0.115, 0.290, 0.210), rot=(-34, 0, c * -8))
+    a.piece("queue", A.boule(1.0, 24, 12).etire(0.070, 0.030, 0.150), tuple(BRUN), pos=(0.0, 0.290, 0.150), rot=(38, 0, 0))
 
-        def galet(v):
-            s = K.emousse(v, 0.88)
-            s[:, 1] *= 1 - 0.42 * K.lisse((v[:, 2] + 0.2) / 1.2)
-            return s
-        a.piece("aile_" + nom, aile.sculpte(galet).etire(0.060, 0.120, 0.380), None, pos=(c * 0.205, 0.140, 0.430), rot=(-22, 0, c * 8))
-
-    # ----- la collerette de duvet blanc ; le cou nu et ridé qui s'étire ; la petite tête chauve au bec crochu -----
-    a.piece("collerette", A.boule(1.0, 36, 18).etire(0.150, 0.110, 0.090), tuple(DUVET), pos=(0.0, -0.040, 0.700))
-    cou = K.tube_peint(A.courbe([(0.0, -0.020, 0.720), (0.0, -0.100, 0.800), (0.0, -0.160, 0.870)], 5), lambda t: 0.062 - 0.016 * t,
-                       [(1, tuple(PEAU))], 18)
-    a.piece("cou", cou, None)
-    H = A.cadre(Vector((0.0, -0.200, 0.900)), Vector((0.62, -1.0, -0.12)).normalized(), Vector((0, 0, 1)))
+    # ----- le cou nu et ridé, qui s'étire hors de la collerette ; la tête chauve ; le bec crochu -----
+    chemin = [(0.0, -0.090, 0.540), (0.0, -0.170, 0.640), (0.0, -0.160, 0.740), (0.0, -0.230, 0.820)]
+    cou = A.tube(A.courbe(propres(chemin), 6), lambda t: 0.052 - 0.020 * t, 20)
+    cou.teinte = np.tile(PEAU, (len(cou.v), 1))
+    a.piece("cou", cou, None, poil=False)
+    a.piece("collerette", A.boule(1.0, 36, 18).etire(0.115, 0.095, 0.060), tuple(DUVET), pos=(0.0, -0.090, 0.560), rot=(-22, 0, 0))
+    H = A.repere(Vector((0.0, -0.250, 0.850)), (0, 0, LACET))
     H3 = H.to_3x3()
-    a.piece("tete", A.boule(1.0, 36, 18).etire(0.056, 0.070, 0.058), tuple(PEAU), mat=H)
-    bec = A.tour(A.profil([(0, 0), (0.040, 0.008), (0.040, 0.044), (0.030, 0.080), (0.016, 0.110), (0.004, 0.126), (0, 0.130)], 6), 28)
-    bec.sculpte(lambda v: v + np.stack([np.zeros(len(v)), -0.030 * np.clip((v[:, 2] - 0.06) / 0.07, 0, 1) ** 1.6, np.zeros(len(v))], axis=1))
-    a.piece("bec", bec, BEC, mat=A.cadre(H @ Vector((0, 0.0, 0.0)) + H3 @ Vector((0, -0.064, -0.006)), H3 @ Vector((0, -1.0, -0.10)), (0, 0, 1)), poil=False)
-    a.tete = H @ Vector((0, -0.100, -0.010))
-    for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.84, -0.30, 0.30))
-        a.rustine("iris_" + nom, "tete", H.to_translation(), regard, 0.20, OEIL, 0.003, 0)
-        p, n = a.surface("tete", H.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0120)
-        a.piece("lourde_" + nom, K.paupiere(0.0150, 0.18), tuple(PEAU), mat=A.cadre(p + n * 0.005, n, H3 @ Vector((0, 0, 1))), poil=False)
+    tete = A.boule(1.0, 40, 20)
+    tete.teinte = np.tile(PEAU, (len(tete.v), 1))
+    a.piece("tete", tete.etire(0.046, 0.062, 0.048), None, mat=H, poil=False)
+    a.tete = H @ Vector((0, -0.090, -0.010))
+    haut = A.tour(A.profil([(0, 0), (0.034, 0.006), (0.030, 0.034), (0.018, 0.064), (0.006, 0.084), (0, 0.092)], 5), 28)
 
-    # ----- la queue : un court éventail ; les serres : deux gros pieds gris à griffes noires, plantés sur le perchoir -----
-    a.piece("queue", A.boule(1.0, 24, 12).etire(0.080, 0.180, 0.030), tuple(BRUN), pos=(0.0, 0.340, 0.180), rot=(-30, 0, 0))
+    def crochu(v):
+        s = v.copy()
+        s[:, 1] *= 1.10
+        s[:, 1] -= 0.040 * np.clip(v[:, 2] / 0.092, 0, 1) ** 2.2
+        return s
+    a.piece("bec", haut.sculpte(crochu), BEC, mat=A.cadre(H @ Vector((0, -0.050, -0.010)), H3 @ Vector((0, -1.0, -0.24)), Vector((0, 0, 1))), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        a.piece("jambe_" + nom, A.tube(A.courbe([(c * 0.080, 0.100, 0.300), (c * 0.086, 0.080, 0.160), (c * 0.088, 0.060, 0.050)], 5), 0.036, 12), tuple(PEAU), poil=False)
-        doigts = None
-        for ang in (-30, 0, 30):
-            d = A.boule(1.0, 14, 8).etire(0.016, 0.076, 0.014).pose((0, -0.060, 0.0)).pose((0, 0, 0), (0, 0, ang))
-            doigts = d if doigts is None else doigts + d
-        a.piece("serres_" + nom, doigts, M.hexa("#8a7a74"), pos=(c * 0.088, 0.040, 0.018), poil=False)
+        regard = H3 @ Vector((c * 0.70, -0.55, 0.30))
+        p, n = a.surface("tete", H.to_translation(), regard)
+        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0135)
+        a.piece("arcade_" + nom, K.paupiere(0.020, 0.30), tuple(PEAU * 0.82), mat=A.cadre(p + n * 0.004, n, H3 @ Vector((0, 0, 1))), poil=False)
+
+    # ----- les pattes : des culottes de plumes, de grosses pattes grises, trois serres devant et une derrière -----
+    for nom, c in (("G", 1), ("D", -1)):
+        a.piece("culotte_" + nom, A.boule(1.0, 28, 14).etire(0.070, 0.095, 0.115), tuple(BRUN), pos=(c * 0.085, 0.020, 0.230))
+        ch = [(c * 0.080, 0.000, 0.170), (c * 0.082, -0.010, 0.090), (c * 0.082, -0.020, 0.018)]
+        m = A.tube(A.courbe(propres(ch), 5), 0.026, 12)
+        m.teinte = np.tile(PEAU * 0.85, (len(m.v), 1))
+        a.piece("patte_" + nom, m, None, poil=False)
+        serres = None
+        for ang in (-28, 0, 28, 180):
+            d = A.boule(1.0, 12, 6).etire(0.010, 0.046, 0.010).pose((0.7 * 0.046 * math.sin(math.radians(ang)), -0.7 * 0.046 * math.cos(math.radians(ang)), 0), (0, 0, ang))
+            serres = d if serres is None else serres + d
+        a.piece("serres_" + nom, serres, tuple(CHARBON), pos=(c * 0.082, -0.020, 0.012), poil=False)
     return a
 
 
 if __name__ == "__main__":
     import styles
     K.planche(lambda: styles.construire("vautour", styles.style_de("vautour"), sys.modules[__name__]), "Vautour")
-
-
-# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
-# (voir usine.py : python usine.py vautour). Généré d'après la géométrie du modèle (pivots : haut des pattes, base des
-# oreilles, nuque, racine de la queue) ; les gestes sont réglés sur la longueur de ses pattes. Mesures avant a.taille.
-
-from poses import Pose, borne, cloche, onde
-
-JAMBE = 0.168                                        # de l'épaule (ou de la hanche) au sol
-
-OS = [
-    ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.254, 0.504)),
-    ('cou', 'corps', (0.000, -0.011, 0.735)),
-    ('tete', 'cou', (-0.004, -0.161, 0.853)),
-    ('patte_ar_G', 'corps', (0.088, 0.086, 0.305)),
-    ('patte_av_G', 'corps', (0.069, -0.013, 0.031)),
-    ('aile_G', 'corps', (0.187, 0.273, 0.778)),
-    ('queue', 'corps', (-0.000, 0.215, 0.267)),
-]
-
-PORTEURS = [
-    ('oeil_reflet', 'tete'), ('collerette', 'corps'), ('lourde', 'tete'), ('serres', 'patte_av', True),
-    ('corps', 'corps'), ('jambe', 'patte_ar', True), ('queue', 'queue'), ('aile', 'aile', True), ('tete', 'tete'),
-    ('iris', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'),
-    ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
-]
-
-def repos(t):
-    """Il respire, tourne la tête d'un côté puis de l'autre, une oreille bouge, un clignement."""
-    p = Pose()
-    r = onde(t, 2)
-    g, d = cloche(t, 0.28, 0.16), cloche(t, 0.72, 0.13)
-    p.add('corps', ech=(1 + 0.010 * r, 1, 1 + 0.018 * r))
-    p.add('cou', rot=(2 * r, 0, 8 * g - 6 * d))
-    p.add('tete', rot=(3 * g - 2 * d, -4 * g + 3 * d, 16 * g - 12 * d))
-    p.add('queue', rot=(0, 0, 10 * onde(t, 1)))
-    p.paire('aile', rot=(0, -3 * cloche(t, 0.55, 0.06), 0))
-    p.ouvert = borne(1 - 0.3 * g - cloche(t, 0.08, 0.02) - cloche(t, 0.62, 0.02))
-    return p
-
-
-def avance(t):
-    """Sa marche : les pattes alternent, le corps oscille, la tête dodeline."""
-    p = Pose()
-    c, s = math.cos(math.tau * t), math.sin(math.tau * t)
-    pas = 26.0
-    creux = JAMBE * (1 - math.cos(math.radians(pas * s))) * 0.5
-    p.add('corps', pos=(0, 0, -creux), rot=(1.0 * onde(t, 2, 0.1), 3 * c, 2.5 * s))
-    for nom, sens in [('patte_av_G', 1), ('patte_ar_D', 1), ('patte_av_D', -1), ('patte_ar_G', -1)]:
-        p.add(nom, rot=(pas * sens * s, 0, 0), pos=(0, 0, 0.03 * max(0.0, -sens * c)))
-    p.add('cou', rot=(-3 + 2 * onde(t, 2, -0.1), 0, -2 * s))
-    p.add('tete', rot=(3 - 2 * onde(t, 2, -0.2), -2 * c, -2 * s))
-    p.add('queue', rot=(-6, 0, -10 * s))
-    p.paire('aile', rot=(0, -2 + 2 * onde(t, 2), 0))
-    return p
-
-
-def mange(t):
-    """Il baisse la tête vers le sol, quelques bouchées, puis la relève et mâche."""
-    p = Pose()
-    leve = cloche(t, 0.84, 0.15)
-    bas = 1 - leve
-    coups = max(0.0, onde(t, 4)) ** 2 * bas
-    p.add('corps', rot=(5 * bas, 0, 0))
-    p.add('cou', rot=(34 * bas + 4 * coups, 0, 5 * leve))
-    p.add('tete', rot=(18 * bas + 6 * coups + 3 * leve * onde(t, 12), -3 * leve, 12 * leve))
-    p.add('queue', rot=(0, 0, -7 * onde(t, 2)))
-    p.ouvert = borne(1 - cloche(t, 0.70, 0.03))
-    return p
-
-
-def joie(t):
-    """Il se tasse, bondit, retombe, et fête ça : les oreilles, la queue, les ailes."""
-    p = Pose()
-    tasse = cloche(t, 0.12, 0.12, False)
-    vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
-    salut = cloche(t, 0.72, 0.16, False)
-    fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.050 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
-    p.paire('patte_av', rot=(-22 * vol, 0, 0))
-    p.paire('patte_ar', rot=(18 * vol, 0, 0))
-    p.add('cou', rot=(-8 * vol + 8 * tasse, 0, 0))
-    p.add('queue', rot=(-16 * vol, 0, -22 * fouet))
-    p.paire('aile', rot=(0, -48 * vol, 0))
-    return p
-
-
-def dort(t):
-    """Il s'affaisse, la tête repose de côté, les yeux fermés, une respiration lente."""
-    p = Pose()
-    r = onde(t, 1)
-    p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.092), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
-    p.paire('patte_av', rot=(-68, 0, 14))
-    p.paire('patte_ar', rot=(66, 0, 10))
-    p.add('cou', rot=(30, 0, 44))
-    p.add('tete', rot=(14, 4, 28))
-    p.add('queue', rot=(6, 0, 40))
-    return p
-
-
-ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
-              "joie": (48, joie, False), "dort": (120, dort, True)}
