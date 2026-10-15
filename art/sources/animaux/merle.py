@@ -30,7 +30,7 @@ ORANGE = M.hexa("#ff8a1a")                    # l'accent : le bec et le cerne de
 PATTE = M.hexa("#4b3a30")                     # les pattes, en feutrine brun sombre
 CORPS = Vector((0.0, 0.020, 0.128))
 TETE = Vector((0.004, -0.096, 0.158))
-RAYON = 0.038                                  # une petite tête : la grosse tête faisait poussin
+RAYON = 0.034                                  # une petite tête : la grosse tête faisait poussin
 PENCHE = A.repere(CORPS, (5, 0, 0))          # le corps : le poitrail vers le sol, le croupion en l'air
 ECOUTE = A.repere(TETE, (2, 30, -14))        # la tête : le bec vers la terre, couchée sur le côté pour tendre l'œil gauche
 
@@ -43,14 +43,14 @@ def vers(x, y, z):
 def construire():
     a = K.Animal("merle")
     a.taille = 0.31
-    a.tete = ECOUTE @ Vector((0.010, -0.036, -0.004))
+    a.tete = ECOUTE @ Vector((0.010, -0.032, -0.004))
 
     # ----- le corps : un long fuseau, le poitrail plein, des épaules, et qui s'effile vers la queue -----
     def coque(v):
         v = K.bosse(v, (0, -0.70, -0.45), 0.12, 0.30)       # le poitrail
         v = K.bosse(v, (0, -0.30, 0.90), 0.05, 0.30)        # les épaules
         arriere = K.lisse(v[:, 1])
-        s = v * [0.056, 0.100, 0.060]                # un fuseau, pas une boule
+        s = v * [0.054, 0.108, 0.058]                # un fuseau, pas une boule
         s[:, 0] *= 1 - 0.50 * arriere
         s[:, 2] *= 1 - 0.45 * arriere
         return s
@@ -73,7 +73,7 @@ def construire():
 
     # ----- le bec : un cône rond et fin de feutrine orange vif, pointé vers la terre -----
     bec = A.tour(A.profil([(0, 0), (0.0095, 0.004), (0.0085, 0.012), (0.0040, 0.027), (0, 0.035)], 5), 28)
-    a.piece("bec", bec, ORANGE, pos=ECOUTE @ Vector((0, -0.034, -0.005)), rot=A.viser(vers(0, -1, -0.10)), poil=False)
+    a.piece("bec", bec, ORANGE, pos=ECOUTE @ Vector((0, -0.030, -0.005)), rot=A.viser(vers(0, -1, -0.10)), poil=False)
 
     # ----- les ailes : deux longs galets serrés au corps, la pointe qui croise sur la queue -----
     def galet(v):

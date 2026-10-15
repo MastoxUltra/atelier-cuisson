@@ -44,7 +44,16 @@ ARRET = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".pas_de_calcul
 # (Godot) ne sont jamais concernés. Posé le 14/10/2026 après un arrêt net de la machine à 86 °C.
 
 
+JOUE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".arthur_joue")
+# LA PAUSE D'ARTHUR (Principal, 15/10) : tant que ce fichier existe, RIEN ne tourne sur ce PC, pas même les essais du jeu ;
+# tout part en ligne (Kaggle, GitHub, Codespaces). Principal l'efface quand l'auteur a fini de jouer.
+
+
 def _interdit(nom):
+    if not DISTANT and os.path.exists(JOUE):
+        print("[machine] REFUSÉ : « %s ». l'auteur joue sur ce PC, rien ne tourne ici (même les essais). Travaille en ligne "
+              "(art/distant/LISEZMOI.md) ou attends que Principal efface art/sources/.arthur_joue" % nom, flush=True)
+        raise SystemExit(3)
     if DISTANT or "essai du jeu" in nom or not os.path.exists(ARRET):
         return
     print("[machine] REFUSÉ : « %s » ne tourne plus sur ce PC (%s). Dépose-le dans la file Kaggle : art/distant/LISEZMOI.md"
