@@ -15,7 +15,7 @@ A la fin du fichier de la bête :
 
     from rig_auto import rig
     if __name__ != "__main__":
-        OS, PORTEURS, ANIMATIONS = rig(sys.modules[__name__], "quad")
+        OS, PORTEURS, ANIMATIONS = rig(sys.modules.get(__name__) or construire, "quad")
 
 `rig` appelle `construire()` une fois (au chargement du module, pas quand on lance la fiche). Les os dont le nom finit
 par « _g » ou « _d » (minuscules) ne sont PAS recopiés en miroir : chaque côté a son propre os, à sa vraie place.
@@ -42,7 +42,7 @@ PAUPIERES = [("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0
 
 class Mesures:
     def __init__(self, module):
-        self.a = module.construire()
+        self.a = module.construire() if hasattr(module, "construire") else module()      # le module, ou sa fonction construire
         self.pieces = {}
         for p in self.a._toutes():
             v = np.asarray(p["monde"], float)
