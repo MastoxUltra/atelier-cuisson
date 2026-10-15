@@ -2,9 +2,13 @@
 le miroir crème sous la queue, le bas des jambes chocolat cerclé d'un bracelet crème au-dessus de gros sabots fendus.
 Sur la tête, ses bois immenses, en velours ivoire : deux grandes crosses qui partent en arrière puis reviennent en
 avant, et d'un seul côté la pelle qui avance au-dessus du nez. Un marcheur têtu qui fend le vent : tête basse, le nez
-en avant, l'antérieur gauche levé pour le pas suivant, le sourcil froncé.
+en avant, l'antérieur gauche levé pour le pas suivant.
 
     python renne.py        fabrique la fiche art/apercus/animaux/renne.png (velours ras, palier 3)
+
+Les 5 traits de l'espèce (photos de Commons, 15/10) : 1. un cervidé trapu, l'encolure épaisse et l'épais cou crème avec une
+collerette de poils ; 2. les bois immenses, ramifiés, des deux sexes, avec une pelle au-dessus du nez ; 3. un museau large
+et velu au nez sombre ; 4. de grands sabots larges et fendus ; 5. le pelage fauve taupe, le ventre, la croupe et la queue crème.
 """
 import math
 import os
@@ -18,6 +22,9 @@ from mathutils import Matrix, Vector
 import atelier as A
 import matieres as M
 import peluche as K
+
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
+DEGONFLE = 0.86       # ... qui élargit les volumes d'environ 30 % : on part plus mince
 
 
 def propres(points, eps=2e-4):
@@ -131,15 +138,15 @@ def construire():
         s[:, 0] *= 0.96 * (1 + 0.12 * np.exp(-((v[:, 2] - 0.48) / 0.08) ** 2))                # les épaules
         s[:, 1] *= np.where(v[:, 1] > 0, 1 + 0.10 * np.exp(-((v[:, 2] - 0.44) / 0.07) ** 2), 0.94)  # le garrot, le ventre
         return s
-    corps = A.tour(A.profil([(0, 0), (0.118, 0.010), (0.168, 0.060), (0.182, 0.140), (0.176, 0.250), (0.166, 0.340),
-                             (0.178, 0.430), (0.172, 0.500), (0.132, 0.555), (0, 0.598)], 6), 56)
+    corps = A.tour(A.profil([(r * DEGONFLE, z) for r, z in ((0, 0), (0.118, 0.010), (0.168, 0.060), (0.182, 0.140), (0.176, 0.250),
+                             (0.166, 0.340), (0.178, 0.430), (0.172, 0.500), (0.132, 0.555), (0, 0.598))], 6), 56)
     K.bandes(corps, [(0.070, CREME), (9, TAUPE)])
     a.piece("corps", corps.sculpte(galbe), None, pos=CROUPE, rot=(87, 0, 0))
 
     # ----- l'encolure : crème, couchée presque à plat le long de son arc -----
     enc = K.Fil([tuple(BASE + AVANT * u + Vector((0, 0, z))) for u, z in ARC], FLANC)
     L = enc.long
-    parts, rayons = [0.03, 0.20, 0.45, 0.70, 0.90, 0.985], [0.178, 0.168, 0.142, 0.116, 0.098, 0.086]
+    parts, rayons = [0.03, 0.20, 0.45, 0.70, 0.90, 0.985], [r * 0.90 for r in (0.178, 0.168, 0.142, 0.116, 0.098, 0.086)]
     pc = A.profil([(0, 0)] + [(r, f * L) for r, f in zip(rayons, parts)] + [(0, 1.01 * L)], 6)
     a.piece("cou", A.tour(pc, 40).etire(0.86, 1.0, 1.0).sculpte(enc.couche), CREME)
 
@@ -185,8 +192,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.66, 0.60, 0.20)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.017)
-    fronce = [T3 @ Vector((0.42 + 0.10 * u, 0.90 - 0.14 * u * u, 0.02 + 0.30 * u)) for u in np.linspace(0, 1, 7)]
-    a.broderie("sourcil_g", A.courbe(propres(a.trace("tete", centre, fronce, 0.004)), 4), 0.0040, CREME)
+    # (plus de sourcil froncé : l'auteur y lit de la colère ; l'air têtu vient de la tête basse et du nez en avant)
 
     # ----- les oreilles : courtes et rondes, basses sur les côtés, couchées en arrière contre le vent -----
     po = A.profil([(0, 0), (0.024, 0.010), (0.030, 0.034), (0.024, 0.060), (0.010, 0.078), (0, 0.083)], 6)
@@ -206,8 +212,8 @@ def construire():
     a.piece("queue", A.boule(1.0, 24, 12).etire(0.034, 0.040, 0.058), CREME, pos=(0, 0.292, 0.585), rot=(-30, 0, 0))
 
     # ----- les jambes : trois plantées, l'antérieur gauche levé pour le pas suivant ; au bout, les gros sabots fendus -----
-    hanche = [0.088, 0.118, 0.092, 0.058, 0.040, 0.046, 0.042]
-    epaule = [0.088, 0.104, 0.078, 0.058, 0.040, 0.046, 0.042]
+    hanche = [r * 0.82 for r in (0.088, 0.118, 0.092, 0.058, 0.040, 0.046, 0.042)]
+    epaule = [r * 0.82 for r in (0.088, 0.104, 0.078, 0.058, 0.040, 0.046, 0.042)]
     plantees = (("avant_D", [(-0.048, -0.220, 0.580), (-0.074, -0.214, 0.480), (-0.084, -0.236, 0.380), (-0.088, -0.226, 0.240),
                              (-0.088, -0.210, 0.150), (-0.088, -0.212, 0.080), (-0.088, -0.222, 0.050)], epaule),
                 ("arriere_G", [(0.080, 0.205, 0.570), (0.102, 0.170, 0.470), (0.106, 0.140, 0.370), (0.106, 0.270, 0.245),
