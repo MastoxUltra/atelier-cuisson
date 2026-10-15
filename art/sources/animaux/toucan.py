@@ -4,6 +4,10 @@ base, orange puis rouge, la pointe noire. Un snob qui porte son bec comme une œ
 i, le bec pointé vers nous en biais, l'œil mi-clos de quelqu'un qui n'a pas besoin d'expliquer.
 
     python toucan.py        fabrique la fiche art/apercus/animaux/toucan.png (velours ras, palier 3)
+
+Les 5 traits de l'espèce (photos de Commons, 15/10) : 1. un bec énorme, aussi long que le corps, jaune à la base, orange puis
+rouge, la pointe sombre ; 2. le corps noir, la gorge et la poitrine blanches ; 3. un cercle de peau bleu clair autour de l'œil ;
+4. le dessous de la queue rouge ; 5. des pattes courtes grises à deux doigts devant, deux derrière.
 """
 import math
 import os
@@ -28,7 +32,7 @@ ROUGE = M.hexa("#f02a22")                     # le bout du bec, le dessous de la
 CIEL = M.hexa("#6fd0f2")                      # le cercle de l'œil
 CORPS = Vector((0.0, 0.040, 0.290))
 TETE = Vector((0.0, -0.045, 0.515))
-LACET = 30.0                                  # la tête tournée vers nous
+LACET = 62.0                                  # la tête de trois quarts : le bec se voit dans toute sa longueur
 
 
 def construire():

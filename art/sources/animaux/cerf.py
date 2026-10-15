@@ -210,12 +210,12 @@ def construire():
         monde = lambda q: tuple(T @ (Vector((c * q[0], q[1], q[2])) * RAMURE + Vector((0, 0.008, 0.006))))
         # le merrain épais, brun noisette, perlé à la base (la meule), qui blanchit vers le haut ; des andouillers forts
         bois = K.tube_peint(A.courbe([monde(q) for q in MERRAIN], 8), lambda t: 0.060 - 0.030 * t + 0.014 * gauss(t / 0.05),
-                            [(0.80, MERRAIN_BRUN), (9, IVOIRE)], 18)          # brun d'un bout à l'autre, ivoire au sommet : sans bagues
+                            [(9, MERRAIN_BRUN)], 18)          # brun d'un bout à l'autre (son bout ivoire faisait une bague sous la couronne)
         for chemin, r0 in ANDOUILLERS:
             q0 = np.array(chemin[0])
-            chemin = [tuple(q0 + (np.array(q) - q0) * ALLONGE) for q in chemin]
+            chemin = [tuple(q0 + (np.array(q) - q0) * ALLONGE * np.array([1.0, 1.45, 0.70])) for q in chemin]   # plus vers le ciel que vers nous : de face, ils faisaient des cônes
             bois = bois + K.tube_peint(A.courbe([monde(q) for q in chemin], 8), lambda t, r0=r0: 2.4 * r0 * (1 - 0.82 * t),
-                                       [(0.70, MERRAIN_BRUN), (9, IVOIRE)], 14)    # pointus, la pointe ivoire
+                                       [(0.78, MERRAIN_BRUN), (9, IVOIRE)], 14)    # pointus, la pointe ivoire
         a.piece("bois_" + nom, bois, None, poil=False)
 
     # ----- la queue : courte, brun noir, plaquée sur le miroir crème -----

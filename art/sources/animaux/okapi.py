@@ -61,7 +61,8 @@ def construire():
         s[:, 1] *= np.where(v[:, 1] > 0, 1 + 0.22 * K.lisse((v[:, 2] - 0.30) / 0.5), 1.02)    # le garrot, le ventre plein
         s[:, 0] *= 1 + 0.12 * np.exp(-((v[:, 2] - 0.06) / 0.10) ** 2)                          # la croupe ronde
         return s
-    corps = A.tour(A.profil([(r * 1.20, z * 1.25) for r, z in [(0, 0), (0.115, 0.012), (0.170, 0.070), (0.190, 0.170), (0.180, 0.300),
+    DEGONFLE = 0.80      # le gonflage de la base (fusion.py) élargit corps et membres d'environ 30 % : on part plus mince
+    corps = A.tour(A.profil([(r * 1.20 * DEGONFLE, z * 1.25) for r, z in [(0, 0), (0.115, 0.012), (0.170, 0.070), (0.190, 0.170), (0.180, 0.300),
                              (0.175, 0.420), (0.185, 0.540), (0.165, 0.620), (0.115, 0.670), (0, 0.700)]], 6), 56)
     zebrer(corps, [0.050, 0.120, 0.190, 0.260], 0.040)                              # des bandes de crème sur la croupe
     a.piece("corps", corps.sculpte(galbe), None, pos=CROUPE, rot=(90 - 6, 0, 0))
@@ -69,7 +70,7 @@ def construire():
     # ----- le cou : long, étroit, d'une seule pièce couchée sur son arc ; le dessus plus sombre -----
     enc = K.Fil([tuple(BASE + AVANT * u + Vector((0, 0, z))) for u, z in ARC], FLANC)
     L = enc.long
-    parts, rayons = [0.04, 0.25, 0.55, 0.80, 0.97], [0.185, 0.150, 0.118, 0.098, 0.086]
+    parts, rayons = [0.04, 0.25, 0.55, 0.80, 0.97], [r * 0.84 for r in (0.185, 0.150, 0.118, 0.098, 0.086)]
     pc = A.profil([(0, 0)] + [(r, p * L) for r, p in zip(rayons, parts)] + [(0, 1.01 * L)], 6)
     a.piece("cou", A.tour(pc, 40).etire(0.82, 1.0, 1.0).sculpte(enc.couche), AUBERGINE)
 
@@ -91,7 +92,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.86, 0.34, 0.22)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0185)
-        a.rustine("joue_" + nom, "tete", centre, T3 @ Vector((c * 0.70, -0.30, 0.62)), 0.44, CREME, 0.003, 0)       # la joue claire, bien visible
+        a.rustine("joue_" + nom, "tete", centre, T3 @ Vector((c * 0.62, -0.46, 0.70)), 0.30, CREME, 0.003, 0)       # la joue claire, bas sur le museau : loin de l'œil
         a.piece("lourde_" + nom, K.paupiere(0.021, 0.58), AUBERGINE, mat=A.cadre(pos + n * 0.005, n, T3 @ Vector((0, 1, 0))), poil=False)
         po = A.profil([(0, 0), (0.048, 0.016), (0.062, 0.070), (0.056, 0.130), (0.034, 0.180), (0.010, 0.208), (0, 0.216)], 6)
         vers = (T3 @ Vector((c * 0.82, 0.26, 0.54))).normalized()
@@ -116,10 +117,10 @@ def construire():
                 ("ar_G", [(0.090, 0.400, 0.620), (0.116, 0.350, 0.470), (0.118, 0.330, 0.330), (0.112, 0.470, 0.210), (0.108, 0.430, 0.050)]),
                 ("ar_D", [(-0.090, 0.400, 0.620), (-0.116, 0.350, 0.470), (-0.118, 0.330, 0.330), (-0.112, 0.470, 0.210), (-0.108, 0.430, 0.050)]))
     for nom, pts in plantees:
-        a.piece("patte_" + nom, zebre_jambe(pts, 0.066), None)
+        a.piece("patte_" + nom, zebre_jambe(pts, 0.052), None)
         a.piece("sabot_" + nom, A.boule(1.0, 24, 12).etire(0.044, 0.058, 0.032), CORNE, pos=(pts[-1][0], pts[-1][1] - 0.010, 0.026), poil=False)
     levee = [(0.080, -0.210, 0.600), (0.092, -0.230, 0.440), (0.092, -0.320, 0.360), (0.092, -0.340, 0.220)]
-    a.piece("patte_av_G", zebre_jambe(levee, 0.066), None)
+    a.piece("patte_av_G", zebre_jambe(levee, 0.052), None)
     a.piece("sabot_av_G", A.boule(1.0, 24, 12).etire(0.044, 0.058, 0.032), CORNE, pos=(0.092, -0.352, 0.200), rot=(-70, 0, 0), poil=False)
 
     # ----- la queue : fine, avec un pinceau sombre au bout -----

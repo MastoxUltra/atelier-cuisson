@@ -333,11 +333,43 @@ class _Morceau:
         self.p, self.cle, self.vidx = piece, cle, vidx
         self.v = piece["monde"][vidx]
         self.f = faces
-        self.tris = _triangles(faces)
+        self.vidx0, self.f0 = vidx, faces                            # tels quels (pour une pièce laissée à part : _extraire)
+        self.trous = self._boucher()
+        self.tris = _triangles(self.f)
         self.aire, self.volume = _mesures(self.v, self.tris)
         self.epais = 4.0 * self.volume / max(self.aire, 1e-12)
         self.bas, self.haut = self.v.min(axis=0), self.v.max(axis=0)
         self.arbre = None
+
+    def _boucher(self):
+        """Un morceau ouvert (une pièce tournée dont le profil ne part pas d'un rayon nul : un museau, une oreille du raton)
+        est fermé : chaque trou reçoit un éventail vers son centre. Sans cela, ni les voxels ni les distances signées ne
+        savent où est son dedans, et la fusion le mangeait (essai du 15/10 : le museau du raton coupé net, ses oreilles
+        fondues, la truffe et les ourlets restés en l'air). Rend le nombre de trous bouchés."""
+        if not self.f:
+            return 0
+        d = np.array([(f[k], f[(k + 1) % len(f)]) for f in self.f for k in range(len(f))], np.int64)
+        cle_ = np.sort(d, axis=1)
+        _u, inv, nb = np.unique(cle_, axis=0, return_inverse=True, return_counts=True)
+        bord = d[nb[inv.ravel()] == 1]                               # les arêtes qui n'ont qu'une face : le bord d'un trou
+        if not len(bord):
+            return 0
+        n = len(self.v)
+        lab = _etiquettes(n, bord)
+        sommets = np.unique(bord)
+        nouveaux, faces, vidx = [], list(self.f), list(self.vidx)
+        for l_ in np.unique(lab[sommets]):
+            vs = sommets[lab[sommets] == l_]
+            c = self.v[vs].mean(axis=0)
+            ic = n + len(nouveaux)
+            nouveaux.append(c)
+            vidx.append(int(self.vidx[vs[int(np.argmin(np.linalg.norm(self.v[vs] - c, axis=1)))]]))
+            for a_, b_ in bord[np.isin(bord[:, 0], vs)].tolist():
+                faces.append((b_, a_, ic))                           # le sens inverse du bord : la normale vers dehors
+        self.v = np.vstack([self.v, np.array(nouveaux)])
+        self.f = faces
+        self.vidx = np.array(vidx, np.int64)
+        return len(nouveaux)
 
     def ecorce(self):
         if self.arbre is None:
@@ -362,13 +394,13 @@ def _morceaux(p, cle):
 
 
 def _extraire(p, morceaux):
-    """Une copie de la pièce réduite à quelques-uns de ses morceaux (ceux qui restent à part)."""
-    vidx = np.unique(np.concatenate([m.vidx for m in morceaux]))
+    """Une copie de la pièce réduite à quelques-uns de ses morceaux (ceux qui restent à part), tels quels (sans bouchon)."""
+    vidx = np.unique(np.concatenate([m.vidx0 for m in morceaux]))
     loc = np.full(len(p["monde"]), -1, np.int64)
     loc[vidx] = np.arange(len(vidx))
     q = dict(p)
     q["monde"], q["loc"], q["teinte"] = p["monde"][vidx], p["loc"][vidx], np.asarray(p["teinte"])[vidx]
-    q["faces"] = [tuple(int(loc[m.vidx[i]]) for i in f) for m in morceaux for f in m.f]
+    q["faces"] = [tuple(int(loc[m.vidx0[i]]) for i in f) for m in morceaux for f in m.f0]
     if p.get("poids"):
         q["poids"] = {o: np.asarray(w)[vidx] for o, w in p["poids"].items()}
     return q
@@ -577,6 +609,9 @@ def fusionner(a, gonfle=None):
     _dire("%d pièces, %d morceaux à fondre (%d triangles) ; voxel %.1f mm ; à part : %s" % (
         len({id(m.p) for m in M}), len(M), tris_avant, 1000 * h,
         ", ".join("%s (%s)" % kv for kv in sorted(apart.items())) or "rien"))
+    bouches = ["%s (%d)" % (m.p["nom"], m.trous) for m in M if m.trous]
+    if bouches:
+        _dire("morceaux ouverts, bouchés : " + ", ".join(bouches))
 
     # l'union en voxels
     V, F, d = [], [], 0
@@ -861,6 +896,8 @@ def _recoller(a, peau, ancienne):
             if sur.any():
                 de = np.zeros(len(X))
                 de[sur] = ecart(q[sur], n[sur], portee, bosse_max)
+                med = float(np.median(de[sur]))
+                de[sur] = np.clip(de[sur], med - 2 * h, med + 2 * h)     # la pièce suit la peau sans se déchirer (15/10)
                 p["monde"] = X + n * de[:, None]
                 posees.append("%s %+.1f..%+.1f mm" % (p["nom"], 1000 * de.min(), 1000 * de.max()))
             deja.add(id(p))

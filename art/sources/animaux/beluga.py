@@ -4,6 +4,10 @@ la joue. Un gros chanteur bonne pâte, couché sur le ventre comme échoué sur 
 cambrée en l'air, les petites nageoires à plat de chaque côté.
 
     python beluga.py        fabrique la fiche art/apercus/animaux/beluga.png (peluche de magasin, palier 4)
+
+Les 5 traits de l'espèce (photos de Commons, 15/10) : 1. tout blanc, un corps rond et dodu sans nageoire dorsale ; 2. un melon
+bombé sur le front, au-dessus d'un museau court sans bec ; 3. la bouche aux coins relevés, un sourire fixe ; 4. de petites
+nageoires rondes en pagaies ; 5. une queue à deux lobes larges, un pli au cou.
 """
 import math
 import os
@@ -17,6 +21,8 @@ from mathutils import Vector
 import atelier as A
 import matieres as M
 import peluche as K
+
+GONFLAGE = True       # la base aux volumes gonflés de l'Artiste (fusion.py) : jointures fondues, bouts arrondis
 
 
 def propres(points, eps=2e-4):
@@ -49,7 +55,8 @@ def construire():
     # ----- le corps : une seule pièce longue couchée le long de l'échine en banane ; un pli au cou, des joues pleines -----
     fil = K.Fil([(0.0, y, z) for y, z in ECHINE], (1, 0, 0))
     L = fil.long
-    corps = A.tour(A.profil([(r, f * L) for f, r in GALBE], 8), 64)
+    DEGONFLE = 0.88      # le gonflage de la base élargit les volumes d'environ 30 % : on part plus mince
+    corps = A.tour(A.profil([(r * DEGONFLE, f * L) for f, r in GALBE], 8), 64)
 
     def douce(v):
         s = v.copy()
