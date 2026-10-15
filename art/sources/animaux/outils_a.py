@@ -92,7 +92,7 @@ def griffe(long, base):
     return m.sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.45 * long * (v[:, 2] / long) ** 2, v[:, 2]], axis=1))
 
 
-def fil_corps(a, nom, chemin, rayon_f, teinte_f=None, couleur=None, cotes=40, pas=10, flanc=(-1.0, 0.0, 0.0), deforme=None):
+def fil_corps(a, nom, chemin, rayon_f, teinte_f=None, couleur=None, cotes=40, pas=10, flanc=(-1.0, 0.0, 0.0), deforme=None, poil=True):
     """Un corps long (poisson, serpent, cou) : un fuseau tourné dont le rayon est rayon_f(fraction), peint par teinte_f(maille, L),
     couché le long d'un fil. Rend (fil, longueur). Le dos est en haut quand le chemin va vers +Y avec flanc = (-1, 0, 0),
     ou vers -Y avec flanc = (1, 0, 0)."""
@@ -105,7 +105,7 @@ def fil_corps(a, nom, chemin, rayon_f, teinte_f=None, couleur=None, cotes=40, pa
         m.teinte = teinte_f(m, L)
     if deforme is not None:
         m = m.sculpte(deforme(L))
-    a.piece(nom, m.sculpte(fil.couche), couleur)
+    a.piece(nom, m.sculpte(fil.couche), couleur, poil=poil)
     return fil, L
 
 

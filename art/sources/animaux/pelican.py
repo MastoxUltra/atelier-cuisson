@@ -60,7 +60,7 @@ def construire():
     # la poche : une besace qui pend, large en haut contre le bec, ronde et lourde en bas (plus un bloc plat)
     poche = A.tour(A.profil([(0, 0), (0.030, 0.012), (0.062, 0.070), (0.082, 0.140), (0.074, 0.215), (0.044, 0.272), (0, 0.300)], 5), 32).etire(1.0, 0.80, 1.0)
     poche.teinte = np.tile(np.asarray(POCHE, float), (len(poche.v), 1))
-    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.140, -0.052)), (0.0, -0.55, -1.0), (0, 1.0, 0)))
+    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.215, -0.085)), (0.0, -0.10, -1.0), (0, 1.0, 0)))       # pendue SOUS le bec
     O.paire_yeux(a, "tete", H, (0.88, -0.30, 0.30), 0.0175, decolle=0.002)
 
     # ----- les ailes repliées en toit, le bout sombre ; la queue courte ; les pattes courtes, orange -----

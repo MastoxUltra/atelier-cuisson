@@ -60,7 +60,7 @@ def construire():
             s[:, 0] *= 1.0 + 0.30 * np.clip((fr - 0.92) / 0.06, 0.0, 1.0)                                         # et large au bout
             return s
         return g
-    fil, L = O.fil_corps(a, "corps", CHEMIN, rayon, peint, None, cotes=36, flanc=(1.0, 0.0, 0.0), deforme=spatule)
+    fil, L = O.fil_corps(a, "corps", CHEMIN, rayon, peint, None, cotes=36, flanc=(1.0, 0.0, 0.0), deforme=spatule, poil=False)      # lisse, sans fourrure
 
     # ----- le visage : deux points rosés sous la peau, une bouche fine, deux narines -----
     for nom, c in (("G", 1), ("D", -1)):
