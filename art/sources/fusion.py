@@ -966,6 +966,81 @@ def _arrondir(X0, T, E, deg, n0, rayon, t, dedans, dehors, sol):
     return X, passes
 
 
+def _pointes(X0, T, E, rayon, zmin):
+    """Les pointes : un bout plus pointu qu'une demi-boule de ce rayon (le bout d'une queue en cône) est coupé là où le tube
+    atteint ce rayon et fermé d'une demi-boule, comme le bout cousu d'une queue de peluche. Un bout déjà rond (un doigt, une
+    patte, un museau mousse), une pièce plate (une oreille) ou plus fine que le rayon sur toute sa longueur ne change pas.
+    Rend les points et la liste des pointes arrondies (« raccourcie de x mm, bout de r mm »)."""
+    from collections import deque
+    from mathutils.kdtree import KDTree
+    n = len(X0)
+    X = X0.copy()
+    A_, B_, C_ = X[T[:, 0]], X[T[:, 1]], X[T[:, 2]]
+
+    def angle(u, v):
+        c = np.einsum("ij,ij->i", u, v) / np.maximum(np.linalg.norm(u, axis=1) * np.linalg.norm(v, axis=1), 1e-18)
+        return np.arccos(np.clip(c, -1.0, 1.0))
+    defaut = 2.0 * math.pi - (np.bincount(T[:, 0], weights=angle(B_ - A_, C_ - A_), minlength=n) +
+                              np.bincount(T[:, 1], weights=angle(C_ - B_, A_ - B_), minlength=n) +
+                              np.bincount(T[:, 2], weights=angle(A_ - C_, B_ - C_), minlength=n))
+    arbre = KDTree(n)
+    for i, x in enumerate(X.tolist()):
+        arbre.insert(x, i)
+    arbre.balance()
+    # la courbure totale (le défaut d'angle) à moins de « rayon » de chaque point : une demi-boule de ce rayon en a pi
+    total = np.array([sum(defaut[j] for _c, j, _d in arbre.find_range(x, rayon)) for x in X.tolist()])
+    tous = np.concatenate([E[:, 0], E[:, 1]])
+    ordre = np.argsort(tous, kind="stable")
+    voisins = np.concatenate([E[:, 1], E[:, 0]])[ordre]
+    debut = np.searchsorted(tous[ordre], np.arange(n + 1))
+    nrm = _normales(X, T)
+    fait = np.zeros(n, bool)
+    faites = []
+    for i in np.argsort(-total).tolist():
+        if total[i] < math.pi:
+            break
+        if fait[i]:
+            continue
+        apex = X[i].copy()
+        proche = np.array([j for _c, j, _d in arbre.find_range(apex.tolist(), rayon)], np.int64)
+        axe = nrm[proche].sum(axis=0)
+        axe /= max(np.linalg.norm(axe), 1e-12)
+        vu, file_ = {i}, deque([i])                                  # la région : de proche en proche, à moins de 6 rayons
+        while file_:
+            j = file_.popleft()
+            for k in voisins[debut[j]:debut[j + 1]].tolist():
+                if k not in vu and np.linalg.norm(X[k] - apex) < 6.0 * rayon:
+                    vu.add(k)
+                    file_.append(k)
+        R = np.array(sorted(vu), np.int64)
+        V = X[R] - apex
+        s = -(V @ axe)                                               # la profondeur depuis la pointe, le long de l'axe
+        rad = np.linalg.norm(V + s[:, None] * axe, axis=1)           # l'écart à l'axe
+        fait[R[np.linalg.norm(V, axis=1) < 2.0 * rayon]] = True
+        pas = 0.25 * rayon
+        s_c = None
+        for k in range(1, int(6.0 * rayon / pas)):
+            tranche = np.abs(s - k * pas) < 0.5 * pas
+            if tranche.sum() >= 6 and float(np.median(rad[tranche])) >= rayon:
+                s_c = k * pas
+                break
+        if s_c is None or s_c < 1.3 * rayon:                         # plus fine que le rayon partout, ou déjà ronde
+            continue
+        anneau = R[np.abs(s - s_c) < 0.5 * pas]
+        rr = rad[np.abs(s - s_c) < 0.5 * pas]
+        if rr.min() < 0.55 * rr.max():                               # une section plate (une oreille) : pas de boule au bout
+            continue
+        c = X[anneau].mean(axis=0)
+        rho = float(np.median(np.linalg.norm(X[anneau] - c, axis=1)))
+        bout = R[(s < s_c) & (rad < 1.5 * rho)]
+        d = X[bout] - c
+        X[bout] = c + rho * d / np.maximum(np.linalg.norm(d, axis=1, keepdims=True), 1e-12)
+        fait[R[s < s_c + rayon]] = True
+        faites.append("raccourcie de %.0f mm, bout de %.0f mm" % (1000 * (s_c - rho), 1000 * rho))
+    X[:, 2] = np.maximum(X[:, 2], zmin)
+    return X, faites
+
+
 def _ressorts(X1, T, E, deg, g, L, iterations, X0, n0, dedans, dehors, sol, zmin):
     """La pression, en numpy : chaque arête est un ressort à sa longueur de départ, chaque point est poussé le long de sa
     normale ; à l'équilibre, une boule de rayon r s'étire d'environ g r / L (un tube deux à trois fois plus), un fond plat
@@ -1074,14 +1149,23 @@ def gonfler(P, F, L, h, reglages=None):
     n = len(P)
     E = _aretes(T)
     deg = np.maximum(np.bincount(E[:, 0], minlength=n) + np.bincount(E[:, 1], minlength=n), 1).astype(float)
+    zmin = float(P[:, 2].min())
+    sol = np.nonzero(P[:, 2] <= zmin + 0.004 * L)[0]                  # posés au sol : ils y restent
+    P0, faites = P, []
+    if r["pointes"] > 0:                                             # d'abord les bouts pointus : coupés et fermés en boule
+        try:
+            P, faites = _pointes(P0, T, E, r["pointes"] * L, zmin)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            _dire("pointes : RATÉ, je passe (voir l'erreur au-dessus)")
+            P = P0
     n0 = _normales(P, T)
     t = np.maximum(_epaisseur(P, T, n0, L), TROP_FIN * h)             # rien de plus fin n'a été fondu
     for _ in range(3):
         t = 0.5 * t + 0.5 * _voisins(t, E, deg)
     dedans = r["dedans"] * t
     dehors = np.minimum(r["dehors"] * t, r["plafond"] * L)
-    zmin = float(P[:, 2].min())
-    sol = np.nonzero(P[:, 2] <= zmin + 0.004 * L)[0]                  # posés au sol : ils y restent
     X, passes, pas_faits = P, 0, 0
     if r["arrondi"] > 0:
         X, passes = _arrondir(P, T, E, deg, n0, r["arrondi"] * L, t, dedans, dehors, sol)
