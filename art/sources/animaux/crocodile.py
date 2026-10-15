@@ -80,6 +80,10 @@ def construire():
     t = np.tile(OCRE, (len(z), 1))
     t[(f > 0.52) & (((f - 0.52) / 0.045) % 1.0 < 0.34) & (th < 2.0)] = BOUE            # les bandes du dos et de la queue
     t[th > 2.35] = VENTRE
+    # le dos en plaques : un damier d'écailles plus sombres, pour que le dessus ne soit pas une planche beige lisse
+    sg = np.arctan2(x, corps.v[:, 1])
+    carre = ((np.floor(z / 0.055) + np.floor(sg * 3.2)) % 2 == 0) & (th < 2.0) & (f > 0.08)
+    t[carre] = t[carre] * 0.55 + np.asarray(BOUE, float) * 0.45
     corps.teinte = t
     a.piece("corps", corps.sculpte(fil.couche), None)
     a.tete = Vector(fil.cadre(0.16 * L)[0])

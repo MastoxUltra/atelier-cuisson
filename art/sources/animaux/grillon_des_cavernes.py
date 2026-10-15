@@ -47,7 +47,7 @@ def construire():
         cerque = O.tube_r([(c * 0.014, 0.300, 0.115), (c * 0.034, 0.350, 0.108), (c * 0.050, 0.395, 0.100)], [0.0085, 0.0065, 0.0040], 8)
         a.piece("cerque_%d" % c, O.teinte(cerque, SOMBRE), None, poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        a.oeil("oeil_" + nom, Vector((c * 0.030, -0.212, 0.176)), Vector((c * 0.55, -0.80, 0.30)).normalized(), 0.0175)
+        a.oeil("oeil_" + nom, Vector((c * 0.030, -0.212, 0.176)), Vector((c * 0.55, -0.80, 0.30)).normalized(), 0.0270)
         # les antennes : plus longues que le corps, balayant en arc vers le haut et le dehors
         ant = O.tube_r([(c * 0.014, -0.208, 0.168), (c * 0.110, -0.360, 0.300), (c * 0.300, -0.450, 0.440), (c * 0.520, -0.420, 0.470),
                         (c * 0.690, -0.320, 0.400)], [0.0070, 0.0058, 0.0046, 0.0036, 0.0026], 8)

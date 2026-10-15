@@ -112,7 +112,8 @@ def construire():
     # ----- les yeux : deux yeux vivants, grands ouverts, sur l'avant de la tête (visibles de face) -----
     for nom, c in (("G", 1), ("D", -1)):
         pos, vers = a.surface("tete", T @ Vector((0, 0, 0.080)), T3 @ Vector((c * 0.64, 0.58, 0.40)))
-        a.oeil("oeil_" + nom, pos + vers * 0.010, vers, 0.030)
+        if c == 1:
+            a.oeil("oeil", pos + vers * 0.010, vers, 0.030, paire=True)      # une paire : le reflet du même côté pour les deux (plus un terne, un brillant)
 
     # ----- les petites cornes crème, les oreilles charbon doublées de rose, et le toupet qui retombe sur le front -----
     def feuille(v):                                       # une oreille : ronde à l'attache, plus étroite au bout
