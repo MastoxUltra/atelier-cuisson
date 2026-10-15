@@ -1,0 +1,49 @@
+name: cuire
+# Lancé à la main seulement (gh workflow run). Un lot = un job : carnet.py fait ses travaux un par un, sur processeur.
+on:
+  workflow_dispatch:
+    inputs:
+      lots:
+        description: 'JSON : [{"lot": "20261015-...", "travaux": ["usine.py souris"]}]'
+        required: true
+      paralleles:
+        description: "jobs à la fois (8 au plus)"
+        required: false
+        default: "6"
+permissions:
+  contents: read
+jobs:
+  cuire:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(inputs.paralleles) }}
+      matrix:
+        lot: ${{ fromJSON(inputs.lots) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: travaux.json
+        env:
+          LOT: ${{ toJSON(matrix.lot) }}
+        run: |
+          python - <<'EOF'
+          import json, os, shlex
+          l = json.loads(os.environ["LOT"])
+          lot = {"lot": l["lot"], "par": "Puissance", "travaux": [shlex.split(t) for t in l["travaux"]], "entrees": [],
+                 "apercus": "CYCLES", "gpu": "NONE", "limite_travail": 5 * 3600, "limite_totale": 5.4 * 3600}
+          json.dump(lot, open("travaux.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+          print(lot["lot"], len(lot["travaux"]), "travaux")
+          EOF
+      - name: carnet
+        run: python carnet.py --entree . --sortie "$RUNNER_TEMP/sortie"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.lot.lot }}
+          path: ${{ runner.temp }}/sortie
+          retention-days: 1
+          if-no-files-found: warn
