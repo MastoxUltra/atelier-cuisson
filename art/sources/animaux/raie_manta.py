@@ -65,14 +65,13 @@ def construire():
     a.piece("corps", corps, None, mat=RM)
     R3 = RM.to_3x3()
 
-    # ----- les cornes céphaliques : deux palettes DÉROULÉES, minces, qui avancent devant les lobes ; la bouche large entre elles -----
+    # ----- les cornes céphaliques : deux lobes charnus qui avancent devant la tête (des cuillères rondes, épaisses à la base
+    #       et qui s'arrondissent au bout, du même poil que le corps : plus de planches grises) -----
     for nom, c in (("G", 1), ("D", -1)):
-        contour = [(0.0, -0.022), (0.040, -0.027), (0.100, -0.022), (0.145, -0.010), (0.165, 0.0), (0.145, 0.010), (0.100, 0.022), (0.040, 0.027), (0.0, 0.022)]
-        pal = O.nageoire(contour, 0.012, NOIR * 0.92, 0.0045)
+        lobe = A.tour(A.profil([(0.030, 0), (0.040, 0.030), (0.043, 0.085), (0.034, 0.135), (0.018, 0.168), (0, 0.185)], 5), 28).etire(1.0, 0.62, 1.0)
+        lobe.teinte = np.tile(NOIR * 0.95, (len(lobe.v), 1))
         base = RM @ Vector((c * 0.078, -0.180, 0.022))
-        ex = R3 @ Vector((c * 0.22, -1.0, 0.10))
-        ey = R3 @ Vector((c * 1.0, 0.22, 0.0))
-        a.piece("corne_" + nom, O.couche(pal, O.plan(base, ex, ey)), None, poil=False)
+        a.piece("corne_" + nom, lobe, None, mat=A.cadre(base, R3 @ Vector((c * 0.22, -1.0, 0.06)), (0, 0, 1)))
     # la bouche : une grande fente sur toute la largeur du museau, dessous ; on l'écrit sur le bord avant, côté blanc
     bouche = [RM @ Vector((0.20 * (k - 5) / 5 * 1.0, -0.196 + 0.020 * (1 - ((k - 5) / 5) ** 2) * 0 - 0.020 * abs((k - 5) / 5) ** 2, -0.016)) for k in range(11)]
     a.broderie("bouche", A.courbe([tuple(p) for p in bouche], 3), 0.0044, FIL)

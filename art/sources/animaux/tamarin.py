@@ -93,7 +93,7 @@ def construire():
             continue                                                                 # rien devant : la face reste dégagée
         base = np.array(TETE) + np.array([0.060 * math.cos(ang), 0.050 * math.sin(ang) + 0.004, -0.030])
         l = 0.060 + 0.030 * rng.random()
-        m = A.boule(1.0, 8, 6).etire(0.018, 0.014, l).pose(tuple(base + np.array([0.0, 0.0, -l * 0.7])), (10 * math.sin(ang), -12 * math.cos(ang), 0))
+        m = A.boule(1.0, 10, 8).etire(0.024, 0.024, l).pose(tuple(base + np.array([0.0, 0.0, -l * 0.7])), (10 * math.sin(ang), -12 * math.cos(ang), 0))   # des mèches rondes, plus de rabats plats
         poils = m if poils is None else poils + m
     a.piece("collerette", poils, tuple(CLAIR))
 
@@ -102,8 +102,15 @@ def construire():
         ch = [(c * 0.070, -0.010, 0.290), (c * 0.092, -0.050, 0.210), (c * 0.040, -0.098, 0.190)]
         a.piece("bras_" + nom, A.tube(A.courbe(propres(ch), 5), lambda t: 0.019 - 0.005 * t, 12), tuple(OR))
         a.piece("main_" + nom, A.boule(1.0, 16, 8).etire(0.018, 0.022, 0.014), tuple(FACE), pos=ch[-1], poil=False)
-        a.piece("cuisse_" + nom, A.boule(1.0, 24, 12).etire(0.036, 0.074, 0.040), tuple(OR), pos=(c * 0.078, 0.010, 0.060))
-        a.piece("pied_" + nom, A.boule(1.0, 20, 10).etire(0.026, 0.060, 0.014), tuple(FACE), pos=(c * 0.084, -0.060, 0.016), rot=(0, 0, c * 6), poil=False)
+        # la jambe : un membre d'une pièce, qui descend de la hanche et finit par un pied à trois doigts (plus de boules)
+        a.piece("cuisse_" + nom, A.tube(A.courbe(propres([(c * 0.070, 0.050, 0.150), (c * 0.092, 0.036, 0.085), (c * 0.084, -0.030, 0.034)]), 5),
+                                         lambda t_: 0.034 - 0.012 * t_, 14), tuple(OR))
+        doigts = None
+        for dg in (-24, 0, 24):
+            r_ = math.radians(dg)
+            d_ = A.boule(1.0, 12, 6).etire(0.0105, 0.034, 0.009).pose((0.026 * math.sin(r_), -0.026 * math.cos(r_), 0.0), (0, 0, dg))
+            doigts = d_ if doigts is None else doigts + d_
+        a.piece("pied_" + nom, doigts, tuple(FACE), pos=(c * 0.084, -0.050, 0.012), poil=False)
     qf = K.Fil([(0.0, 0.130, 0.100), (0.0, 0.230, 0.060), (0.060, 0.320, 0.100), (0.100, 0.310, 0.230), (0.060, 0.230, 0.300),
                 (0.0, 0.200, 0.250)], (1, 0, 0))
     queue = fuseau([(0.0, 0.022), (0.50, 0.024), (0.94, 0.018), (1.0, 0.0)], qf.long, 20, 0.006)

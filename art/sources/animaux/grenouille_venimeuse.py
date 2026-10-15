@@ -84,7 +84,7 @@ def construire():
     a.piece("corps", corps.sculpte(fil.couche), None)
 
     # ----- la tête : un coin pointu, bas ; de PETITS yeux noirs, à fleur de tête, sur les côtés du crâne -----
-    T = A.cadre(Vector((0.0, -0.105, 0.134)), Vector((0.30, -1.0, 0.16)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(Vector((0.0, -0.105, 0.134)), Vector((0.0, -1.0, 0.16)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.10, 0.042), (0.36, 0.052), (0.64, 0.044), (0.88, 0.030), (0.98, 0.016), (1.0, 0.0)], 0.110, 40, 0.003)
     tete.v[:, 1] *= 0.80
@@ -92,9 +92,9 @@ def construire():
     a.piece("tete", tete, None, mat=T @ A.repere((0, 0, -0.040)))
     a.tete = T @ Vector((0, 0.0, 0.060))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = T3 @ Vector((c * 0.74, 0.55, 0.20))
+        regard = T3 @ Vector((c * 0.58, 0.55, 0.55))                      # sur l'avant de la tête : les deux yeux de face
         p, n = a.surface("tete", T @ Vector((0, 0.0, 0.020)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.002, n, 0.0105)
+        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0165)
 
     # ----- les pattes avant : fines et droites, quatre longs doigts à ventouse ; les arrière : longues, repliées en Z,
     #       le pied à plat, les doigts écartés, chacun sa ventouse -----
