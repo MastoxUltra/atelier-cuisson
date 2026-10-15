@@ -20,8 +20,8 @@ import matieres as M
 import peluche as K
 import outils_a as O                          # (garde-fous : aucun tube à segment nul)
 
-CENDRE = np.array(M.hexa("#5a4d44"))          # la dominante (registre : brun cendré noirâtre), un cran plus clair (style C)
-VENTRE = np.array(M.hexa("#7a6a5e"))          # le ventre, le bas du cou emplumé
+CENDRE = np.array(M.hexa("#4a3d37"))          # la dominante (registre : brun cendré noirâtre), un cran plus clair (style C)
+VENTRE = np.array(M.hexa("#5e4e46"))          # le ventre, le bas du cou emplumé
 NOIR = np.array(M.hexa("#2c2623"))            # la queue, le bout des ailes
 ROUGE = np.array(M.hexa("#e0552a"))           # l'accent : la tête et le cou nus, rouge orangé
 JAUNE = np.array(M.hexa("#eac844"))           # la caroncule
@@ -34,7 +34,7 @@ def construire():
     a.taille = 0.62
 
     r = O.oiseau(a, dos=CENDRE, ventre=VENTRE, tete=ROUGE, aile=CENDRE * 0.96, queue=NOIR, bec=BEC, patte=PATTE, long=0.40, ray=0.140,
-                 incline=26.0, z0=0.185, tete_r=(0.070, 0.078, 0.068), tete_pos=(0.0, -0.108, 0.088), bec_long=0.050, bec_ray=0.016,
+                 incline=26.0, z0=0.185, tete_r=(0.070, 0.078, 0.068), tete_pos=(0.0, -0.100, 0.070), bec_long=0.050, bec_ray=0.016,
                  aile_dim=(0.030, 0.118, 0.215), aile_pos=(0.0, 0.020, 0.0), queue_dim=(0.016, 0.130, 0.150), queue_haut=14.0,
                  patte_long=0.140, patte_ray=0.024, oeil_r=0.0140, oeil_dir=(0.78, -0.50, 0.20), bout_aile=NOIR)
     H, T, haut = r["H"], r["T"], r["haut"]
@@ -43,10 +43,20 @@ def construire():
     cou = O.tube_r([tuple(haut + Vector((0.0, -0.020, -0.025))), tuple(haut + Vector((0.0, -0.075, 0.040))), tuple(H + Vector((0.0, 0.010, -0.040)))],
                    [0.080, 0.066, 0.060], 18)
     a.piece("cou", O.teinte(cou, ROUGE), None)
-    caro = A.boule(1.0, 24, 12).etire(0.050, 0.046, 0.058)
-    a.piece("caroncule", O.teinte(caro, JAUNE), None, pos=tuple(haut + Vector((0.0, -0.060, 0.000))), poil=False)
+    caro = A.boule(1.0, 28, 14).etire(0.062, 0.052, 0.080)
+    a.piece("caroncule", O.teinte(caro, JAUNE), None, pos=tuple(haut + Vector((0.0, -0.075, -0.020))), poil=False)
     col = A.tore(0.062, 0.020, 28, 8)
     a.piece("collerette", O.teinte(col, VENTRE), None, pos=tuple(haut + Vector((0.0, -0.018, -0.030))), rot=(70, 0, 0))
+
+    # ----- l'éventail de la queue : une grande lame verticale à sept lobes, dressée derrière le dos -----
+    pts = [(0.0, 0.0)]
+    for k in range(15):
+        th = math.radians(-78 + 156 * k / 14)
+        r = 0.250 if k % 2 == 0 else 0.208
+        pts.append((r * math.sin(th), r * math.cos(th)))
+    eventail = A.decoupe(pts, 0.014, 0.005)
+    eventail.teinte = np.tile(NOIR * 1.15, (len(eventail.v), 1))
+    a.piece("eventail", O.couche(eventail, O.plan(Vector((0.0, 0.250, 0.215)), Vector((1.0, 0.0, 0.0)), Vector((0.0, 0.22, 1.0)))), None, poil=False)
 
     # ----- les pieds énormes : trois grands doigts devant, un petit derrière, de grosses griffes ; le pied droit gratte -----
     for nom, c in (("G", 1), ("D", -1)):

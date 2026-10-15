@@ -90,13 +90,13 @@ def construire():
     for sgn, nom in ((1, "G"), (-1, "D")):
         O.jambe(a, "avant_" + nom, (sgn * 0.098, -0.250, 0.500), (sgn * 0.086, -0.292, 0.056), 0.070, FUMEE, bas=SOMBRE, sorte="av", plie=0.045,
                 pied_dim=(0.044, 0.082, 0.024), griffes=3)
-        O.jambe(a, "arriere_" + nom, (sgn * 0.102, 0.560, 0.520), (sgn * 0.094, 0.600, 0.056), 0.086, FUMEE, bas=SOMBRE, sorte="ar", plie=0.12,
+        O.jambe(a, "arriere_" + nom, (sgn * 0.102, 0.330, 0.520), (sgn * 0.094, 0.375, 0.056), 0.086, FUMEE, bas=SOMBRE, sorte="ar", plie=0.12,
                 pied_dim=(0.046, 0.088, 0.024), griffes=3)
-    queue = K.tube_peint(A.courbe([(0.0, 0.790, 0.540), (0.0, 0.910, 0.470), (0.0, 0.975, 0.340), (0.0, 0.990, 0.200)], 6),
+    queue = K.tube_peint(A.courbe([(0.0, 0.440, 0.540), (0.0, 0.560, 0.470), (0.0, 0.625, 0.340), (0.0, 0.640, 0.200)], 6),
                          lambda t: 0.054 + 0.028 * math.sin(math.pi * min(t * 1.15, 1.0)) ** 0.8, [(0.80, FUMEE), (1.0, SOMBRE)], 18)
     a.piece("queue", queue, None)
     bout = A.boule(1.0, 18, 9).etire(0.034, 0.034, 0.038)
-    a.piece("queue_bout", O.teinte(bout, SOMBRE), None, pos=(0.0, 0.990, 0.190))
+    a.piece("queue_bout", O.teinte(bout, SOMBRE), None, pos=(0.0, 0.640, 0.190))
     return a
 
 

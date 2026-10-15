@@ -70,12 +70,12 @@ def construire():
             g = O.couche(O.teinte(O.griffe(0.044, 0.0100), GRIFFE),
                          A.cadre(Vector((c * 0.178 + dx * 0.95, -0.428, 0.206)), Vector((dx * c * 0.9, -1.0, 0.0)), (0, 0, 1)))
             a.piece("griffe_%s%d" % (nom, k), g, None, poil=False)
-        cuisse = O.tube_r([(c * 0.120, 0.470, 0.170), (c * 0.140, 0.500, 0.100), (c * 0.135, 0.470, 0.040)], [0.085, 0.062, 0.042], 16)
+        cuisse = O.tube_r([(c * 0.120, 0.320, 0.170), (c * 0.140, 0.350, 0.100), (c * 0.135, 0.320, 0.040)], [0.085, 0.062, 0.042], 16)
         a.piece("cuisse_" + nom, O.teinte(cuisse, VELOURS), None)
         pied = A.boule(1.0, 24, 12).sculpte(lambda v: K.emousse(v, 0.8)).etire(0.040, 0.066, 0.016)
-        a.piece("pied_" + nom, O.teinte(pied, ROSE), None, pos=(c * 0.135, 0.430, 0.017), rot=(0, 0, c * -10), poil=False)
+        a.piece("pied_" + nom, O.teinte(pied, ROSE), None, pos=(c * 0.135, 0.280, 0.017), rot=(0, 0, c * -10), poil=False)
     # ----- la queue : courte et grasse, rose, épaisse en son milieu -----
-    queue = K.tube_peint(A.courbe([(0.0, 0.690, 0.150), (0.0, 0.780, 0.130), (0.020, 0.840, 0.100)], 5),
+    queue = K.tube_peint(A.courbe([(0.0, 0.360, 0.150), (0.0, 0.450, 0.130), (0.020, 0.510, 0.100)], 5),
                          lambda t_: 0.034 + 0.014 * math.sin(math.pi * min(t_ * 1.1, 1.0)), [(1.0, tuple(ROSE * 0.96))], 14)
     a.piece("queue", queue, None)
     a.tete = H + Vector((0.0, -0.20, 0.0))

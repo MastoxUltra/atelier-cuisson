@@ -70,7 +70,7 @@ def construire():
     for sgn, nom in ((1, "G"), (-1, "D")):
         O.jambe(a, "avant_" + nom, (sgn * 0.120, -0.230, 0.320), (sgn * 0.124, -0.265, 0.044), 0.088, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
                 sorte="av", plie=0.020, pied_dim=(0.054, 0.082, 0.026), griffes=0)
-        O.jambe(a, "arriere_" + nom, (sgn * 0.112, 0.560, 0.300), (sgn * 0.118, 0.590, 0.044), 0.094, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
+        O.jambe(a, "arriere_" + nom, (sgn * 0.112, 0.300, 0.300), (sgn * 0.118, 0.340, 0.044), 0.094, SABLE, bas=SABLE * 0.90, bas_frac=0.60,
                 sorte="ar", plie=0.045, pied_dim=(0.056, 0.086, 0.026), griffes=0)
     return a
 

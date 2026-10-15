@@ -76,11 +76,11 @@ def construire():
     for sgn, nom in ((1, "G"), (-1, "D")):
         O.jambe(a, "avant_" + nom, (sgn * 0.100, -0.120, 0.340), (sgn * 0.115, -0.215 if sgn < 0 else -0.280, 0.052), 0.092, SUIE, bas=NOIRC, bas_frac=0.50,
                 sorte="av", plie=0.030, pied_dim=(0.060, 0.095, 0.030), griffes=4)
-        O.jambe(a, "arriere_" + nom, (sgn * 0.100, 0.440, 0.360), (sgn * 0.118, 0.500, 0.052), 0.100, SUIE, bas=NOIRC, bas_frac=0.50,
+        O.jambe(a, "arriere_" + nom, (sgn * 0.100, 0.130, 0.360), (sgn * 0.118, 0.200, 0.052), 0.100, SUIE, bas=NOIRC, bas_frac=0.50,
                 sorte="ar", plie=0.06, pied_dim=(0.062, 0.100, 0.030), griffes=4)
 
     # ----- la queue : touffue, traînante, plus claire sur le dessus, le bout noir -----
-    queue = K.tube_peint(A.courbe([(0.0, 0.680, 0.370), (0.0, 0.800, 0.290), (0.040, 0.880, 0.160), (0.040, 0.870, 0.060)], 6),
+    queue = K.tube_peint(A.courbe([(0.0, 0.250, 0.370), (0.0, 0.370, 0.290), (0.040, 0.450, 0.160), (0.040, 0.440, 0.060)], 6),
                          lambda t_: 0.062 + 0.040 * math.sin(math.pi * min(t_ * 1.15, 1.0)) ** 0.8, [(0.80, SUIE), (1.0, NOIRC)], 18)
     a.piece("queue", queue, None)
     return a

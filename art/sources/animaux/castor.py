@@ -82,11 +82,12 @@ def construire():
     a.piece("nez", A.boule(1.0, 16, 8).etire(0.032, 0.022, 0.020), NEZ, mat=RT @ A.repere((0.0, -0.172, -0.020)), poil=False)
     menton = A.boule(1.0, 24, 12).etire(0.046, 0.046, 0.030)
     a.piece("menton", O.teinte(menton, CLAIR * 0.92), None, mat=RT @ A.repere((0.0, -0.100, -0.108)))
-    dents = None
-    for c in (1, -1):
-        d = A.boule(1.0, 16, 8).sculpte(lambda v: K.emousse(v, 0.75)).etire(0.0185, 0.0125, 0.056).pose((c * 0.0135, -0.158, -0.105))
-        dents = d if dents is None else dents + d
-    a.piece("incisives", dents, ORANGE, mat=RT, poil=False)
+    # les incisives : petites, d'un ivoire chaud, cousues DANS la bouche, là où les lèvres se rejoignent (comme la marmotte gardée)
+    p0 = a.trace("museau", RT @ Vector((0.0, -0.100, -0.045)), [R3 @ Vector((0.0, -0.85, -0.52))], 0.0)[0]
+    loc = RT.inverted() @ p0
+    for nom_d, c in (("G", 1), ("D", -1)):
+        dent = A.boule(1.0, 16, 8).sculpte(lambda v: K.emousse(v, 0.70)).etire(0.0072, 0.0045, 0.0135)
+        a.piece("dent_" + nom_d, dent, M.hexa("#efdcb0"), mat=RT @ A.repere((loc.x + c * 0.0075, loc.y + 0.0015, loc.z - 0.0062), (-6, 0, c * -3)), poil=False)
 
     # les yeux : petits, vivants, sous un sourcil lourd ; les petites oreilles rondes, sombres
     O.paire_yeux(a, "tete", TETE, (0.52, -0.80, 0.20), 0.0165, couleur_lourde=tuple(MARRON), coupe=0.14, decolle=0.003)

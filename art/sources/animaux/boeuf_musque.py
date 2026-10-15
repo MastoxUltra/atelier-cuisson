@@ -108,11 +108,10 @@ def construire():
     a.piece("nez", A.boule(1.0, 24, 12).etire(0.040, 0.026, 0.030), CORNE, mat=H @ A.repere((0, -0.245, -0.050)), poil=False)
     a.tete = H @ Vector((0, -0.200, -0.040))
 
-    # ----- les yeux : de petites billes sous la corne, sous une paupière lourde : il vous toise par en dessous -----
+    # ----- les yeux : ronds et vivants, au regard calme, sous la corne (plus de paupière lourde) -----
     for nom, c in (("G", 1), ("D", -1)):
         p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.78, -0.52, 0.14)))
-        a.bouton("oeil_" + nom, p + n * 0.003, n, 0.028)
-        a.piece("lourde_" + nom, K.paupiere(0.032, 0.10), SOUS, mat=A.cadre(p + n * 0.006, n, H3 @ Vector((0, 0, 1))))
+        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0270)
 
     # ----- le casque de cornes : le bouclier ivoire sur le front, puis la corne qui descend le long de la joue et
     #       remonte, la pointe corne tournée vers l'avant -----

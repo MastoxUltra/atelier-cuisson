@@ -99,7 +99,7 @@ def construire():
     a.piece("museau", O.teinte(museau, SABLE * 0.97), None, mat=RT @ A.repere((0.0, -0.092, -0.020)))
     nez = A.boule(1.0, 14, 8).etire(0.024, 0.016, 0.012)
     a.piece("bec", nez, BEC, mat=RT @ A.repere((0.0, -0.133, -0.012)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.86, -0.40, 0.22), 0.0220, couleur_lourde=tuple(SABLE * 0.90), coupe=-0.10, decolle=0.003)
+    O.paire_yeux(a, "tete", H, (0.84, -0.46, 0.20), 0.0300, decolle=0.004)
     O.broder(a, "gueule", "museau", RT @ Vector((0, -0.092, -0.020)), [(0.60 * u_, -0.82, -0.36 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 9)], 0.0030, FIL)
     a.tete = H + Vector((0.0, -0.13, 0.0))
 

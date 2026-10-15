@@ -43,7 +43,8 @@ def couche(m, mat):
 def rayon(f):
     """La pagaie fine (aplatie ensuite), le corps épais, le cou un peu plus fin, la petite tête ronde au bout."""
     s = f * L
-    base = 0.048 * np.interp(f, [0.0, 0.08, 0.30, 0.70, 0.90, 0.955, 0.985, 1.0], [0.40, 0.75, 1.0, 1.0, 0.72, 0.78, 0.92, 0.0])
+    base = 0.048 * np.interp(f, [0.0, 0.08, 0.30, 0.70, 0.88, 0.915, 0.945, 0.970, 0.988, 0.998, 1.0],
+                                 [0.40, 0.75, 1.0, 1.0, 0.64, 0.78, 1.18, 1.00, 0.62, 0.22, 0.0])
     return float(base)
 
 
@@ -69,6 +70,9 @@ def construire():
         f = np.clip(1.0 - v[:, 2] / (0.16 * L), 0.0, 1.0)
         s[:, 0] *= 1 + 0.9 * f
         s[:, 1] *= 1 - 0.55 * f
+        h = np.clip((v[:, 2] / L - 0.915) / 0.05, 0.0, 1.0)                    # la tête : un peu aplatie, plus large que le cou
+        s[:, 0] *= 1 + 0.16 * h
+        s[:, 1] *= 1 - 0.20 * h
         return s
     a.piece("corps", corps.sculpte(pagaie).sculpte(FIL_.couche), None)
 
@@ -77,9 +81,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         cc, dd = FIL_.vise((TETE_F + 0.010) * L, 0.28, c * 0.92, 0.32)
         pos, n = a.surface("corps", cc, dd)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0155)
-        haut_oeil = (nuque - n * n.dot(nuque)).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.0155, 0.10), tuple(NOIR), mat=A.cadre(pos + n * 0.002, n, haut_oeil), poil=False)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0150)
     c_, a_ = Vector(FIL_.cadre(L)[0]), Vector(FIL_.cadre(L)[1])
     fourche = [(0.0, -0.0026), (0.040, -0.0028), (0.060, -0.0120), (0.064, -0.0092), (0.046, 0.0), (0.064, 0.0092), (0.060, 0.0120),
                (0.040, 0.0028), (0.0, 0.0026)]

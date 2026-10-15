@@ -48,7 +48,7 @@ def construire():
         t = np.tile(NACRE, (len(ang), 1))
         t[ang < 0.9] = DOS
         t[ang > 2.3] = VENTRE
-        t[(f > 0.18) & (f < 0.27) & (ang > 0.9) & (ang < 2.4)] = OUIE                   # les ouïes
+        pass                                                                             # (plus de bande rose)
         return t
 
     def comprime(L):

@@ -105,9 +105,9 @@ def construire():
     a.piece("patte_avant_G", O.membre(lev, [0.098 * k for k in O.RAYONS_AV], [(0.58, tuple(SOMBRE)), (1.0, tuple(PALE))], 22), None)
     a.piece("pied_avant_G", O.teinte(A.boule(1.0, 24, 12).etire(0.044, 0.078, 0.030), PALE * 0.85), None, pos=(0.110, -0.512, 0.440), rot=(30, 0, 0), poil=False)
     for sgn, nom in ((1, "G"), (-1, "D")):
-        O.jambe(a, "arriere_" + nom, (sgn * 0.100, 0.660, 0.960), (sgn * 0.108, 0.730, 0.064), 0.118, SOMBRE, bas=PALE, bas_frac=0.58, sorte="ar", plie=0.11,
+        O.jambe(a, "arriere_" + nom, (sgn * 0.100, 0.420, 0.960), (sgn * 0.108, 0.500, 0.064), 0.118, SOMBRE, bas=PALE, bas_frac=0.58, sorte="ar", plie=0.11,
                 pied_dim=(0.048, 0.090, 0.028))
-    queue = O.tube_r([(0.0, 1.000, 0.960), (0.0, 1.050, 0.920), (0.0, 1.060, 0.870)], [0.040, 0.034, 0.028], 12)
+    queue = O.tube_r([(0.0, 0.520, 0.960), (0.0, 0.570, 0.920), (0.0, 0.580, 0.870)], [0.040, 0.034, 0.028], 12)
     a.piece("queue", O.teinte(queue, SOMBRE), None)
     return a
 

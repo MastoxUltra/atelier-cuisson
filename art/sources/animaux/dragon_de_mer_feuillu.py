@@ -30,9 +30,9 @@ BRUN = np.array(M.hexa("#9a6a24"))            # les bandes du tronc
 FIL = M.hexa("#5a3a14")
 
 # de l'enroulement du bout de la queue au bout du museau : la queue en spirale, le tronc à plat, le cou en arc, la tête tendue
-CHEMIN = [(0.0, 0.60, 0.200), (0.0, 0.66, 0.160), (0.0, 0.68, 0.110), (0.0, 0.62, 0.075), (0.0, 0.50, 0.062), (0.0, 0.36, 0.060),
-          (0.0, 0.20, 0.068), (0.0, 0.04, 0.086), (0.0, -0.10, 0.116), (0.0, -0.20, 0.160), (0.0, -0.26, 0.212), (0.0, -0.34, 0.236),
-          (0.0, -0.48, 0.228)]
+CHEMIN = [(0.0, 0.60, 0.240), (0.0, 0.66, 0.200), (0.0, 0.68, 0.150), (0.0, 0.62, 0.115), (0.0, 0.50, 0.102), (0.0, 0.36, 0.100),
+          (0.0, 0.20, 0.108), (0.0, 0.04, 0.126), (0.0, -0.10, 0.156), (0.0, -0.20, 0.200), (0.0, -0.26, 0.252), (0.0, -0.34, 0.276),
+          (0.0, -0.48, 0.268)]
 
 
 def rayon(f):
@@ -96,7 +96,7 @@ def construire():
         p, n = O.sur_corps(fil, L, rayon, f, ang, cote, 1.0, 1.0, 0.0)
         c, av, nq = (Vector(q) for q in fil.cadre(f * L))
         fl = Vector(fil.flanc).normalized()
-        long = 0.115 + 0.040 * rng.random() - (0.040 if f > 0.78 else 0.0)
+        long = (0.115 + 0.040 * rng.random() - (0.040 if f > 0.78 else 0.0)) * (0.62 if ang == 180 else 1.0)
         large = 0.034 + 0.012 * rng.random()
         dirv = (n * 0.80 + (-av) * 0.55 + fl * (0.30 * cote if 10 < ang < 170 else 0.0)).normalized()          # vers l'extérieur et l'arrière
         haut = (nq if abs(dirv.dot(nq)) < 0.9 else fl)

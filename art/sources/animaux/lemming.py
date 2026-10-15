@@ -1,6 +1,6 @@
 """Le lemming en peluche, cousu main : une poire caramel doré, la calotte et la grande selle charbon qui lui couvre les épaules, le ventre et le
 museau crème, les petites pattes roses. Il se dresse sur ses pattes de derrière, le torse bombé, un poing levé au ciel
-et l'autre sur la hanche, les sourcils froncés vers le museau : il va sauter de la falaise, et c'est une décision.
+et l'autre sur la hanche, le regard calme et vif tourné vers nous : il va peut-être sauter de la falaise, mais il y réfléchit.
 
     python lemming.py        fabrique la fiche art/apercus/animaux/lemming.png (cousu main, palier 2)
 """
@@ -100,12 +100,10 @@ def construire():
             a.broderie("moustache_%s%d" % (nom, k), [depart, depart + H3 @ Vector((c * 0.050, 0.004, dz * 0.8)),
                                                       depart + H3 @ Vector((c * 0.092, 0.010, dz * 1.5))], 0.0013, CHARBON)
 
-    # ----- les yeux : vivants, serrés ; deux gros sourcils charbon brodés, froncés vers le museau : la décision est prise -----
+    # ----- les yeux : grands, vivants, au regard calme et curieux (plus de sourcils froncés) -----
     for nom, c in (("G", 1), ("D", -1)):
         p, n = a.surface("tete", TETE, H3 @ Vector((c * 0.46, -0.82, 0.18)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0165)
-        brow = [H3 @ Vector((c * (0.16 + 0.44 * t), -0.92 + 0.22 * t, 0.30 + 0.26 * t)) for t in np.linspace(0, 1, 6)]
-        a.broderie("sourcil_" + nom, propres(a.trace("tete", TETE, brow, 0.004)), 0.0040, CHARBON)
+        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0180)
 
     # ----- les oreilles : deux petits ronds, le dedans rose -----
     po = A.profil([(0, 0), (0.026, 0.008), (0.030, 0.028), (0.022, 0.048), (0.008, 0.058), (0, 0.062)], 5)
