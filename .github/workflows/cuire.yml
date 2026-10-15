@@ -43,7 +43,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ${{ matrix.lot.lot }}
+          name: ${{ matrix.lot.lot }}-${{ matrix.lot.n }}
           path: ${{ runner.temp }}/sortie
           retention-days: 1
           if-no-files-found: warn

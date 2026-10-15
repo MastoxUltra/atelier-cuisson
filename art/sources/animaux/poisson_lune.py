@@ -1,0 +1,103 @@
+"""Le poisson-lune en peluche : un énorme disque d'argent froid, nacré, qui n'est que tête : pas de queue, une frange
+ondulante à la place, un aileron en haut et un autre dessous, deux grands comme des voiles. Debout sur la tranche, sur
+son aileron du bas, il regarde de côté d'un œil rond sous une paupière à demi tombée, la petite bouche en « o » :
+il a l'air de n'avoir rien pensé depuis sa naissance, et d'en être très content.
+
+    python poisson_lune.py        fabrique la fiche art/apercus/animaux/poisson_lune.png (style du palier : B, peluche de magasin)
+"""
+import math
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bpy  # avant mathutils
+import numpy as np
+from mathutils import Vector
+
+import atelier as A
+import matieres as M
+import peluche as K
+import outils_a as O                          # (garde-fous : aucun tube à segment nul)
+
+ARGENT = np.array(M.hexa("#b3bfd0"))          # la dominante (registre : argent bleuté, plus froid et nacré)
+NACRE = np.array(M.hexa("#e7ecf4"))           # le ventre, les reflets
+GRIS = np.array(M.hexa("#7f8a9e"))            # les nageoires, la frange
+FIL = M.hexa("#3a4256")
+TOURNE = -55                                  # la fiche le prend de profil, le disque face à la caméra ; 0 pour le jeu
+
+
+def couche(m, mat):
+    r = np.array(mat)
+    m.v = m.v @ r[:3, :3].T + r[:3, 3]
+    return m
+
+
+def construire():
+    a = K.Animal("poisson_lune")
+    a.taille = 3.00
+
+    # ----- le disque : un large galet aplati sur les côtés, plus haut que long, le menton qui pointe en bas à l'avant ;
+    #       argenté dessus, nacré dessous, moucheté de gris -----
+    def galet(v):
+        s = np.zeros_like(v)
+        s[:, 0] = 0.115 * v[:, 0] * (1 - 0.35 * np.abs(v[:, 2]))                          # épaisseur (X)
+        s[:, 1] = 0.300 * v[:, 1] + 0.020 * np.clip(-v[:, 1], 0, None) * 0           # longueur (Y)
+        s[:, 2] = 0.360 * v[:, 2]                                                         # hauteur (Z)
+        return s
+    corps = A.boule(1.0, 64, 32)
+    u = corps.v / np.maximum(np.linalg.norm(corps.v, axis=1, keepdims=True), 1e-9)
+    t = np.tile(ARGENT, (len(u), 1))
+    t[u[:, 2] < -0.35] = NACRE
+    rng = np.random.default_rng(8)
+    graines = rng.normal(size=(60, 3))
+    graines /= np.linalg.norm(graines, axis=1, keepdims=True)
+    proche = u @ graines.T > np.cos(0.13 * rng.uniform(0.7, 1.3, 60))[None, :]
+    t[proche.any(axis=1)] = GRIS * 0.55 + ARGENT * 0.45
+    corps.teinte = t
+    a.piece("corps", corps.sculpte(galet), None, pos=(0.0, 0.0, 0.790))
+
+    # ----- la frange arrière : la « queue » qui n'en est pas une, une jupe ondulée qui borde le derrière du disque -----
+    def ondule(v):
+        s = v.copy()
+        s[:, 0] += 0.014 * np.sin(v[:, 2] * 38)
+        return s
+    frange = A.boule(1.0, 40, 16).sculpte(ondule).etire(0.050, 0.080, 0.300)
+    frange.teinte = np.tile(GRIS, (len(frange.v), 1))
+    a.piece("frange", frange, None, pos=(0.0, 0.265, 0.790), poil=False)
+
+    # ----- les deux grands ailerons : dorsal en haut, anal en bas (celui sur lequel il se tient), en faucilles ; plats -----
+    haut = A.decoupe([(0, 0), (0.05, 0.14), (0.12, 0.27), (0.17, 0.43), (0.205, 0.50), (0.21, 0.34), (0.17, 0.18), (0.10, 0.06), (0.14, 0.0)],
+                     0.034, 0.010)
+    haut.teinte = np.tile(GRIS * 1.08, (len(haut.v), 1))
+    a.piece("dorsale", couche(haut, A.cadre((0.0, 0.050, 1.125), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
+    bas = A.decoupe([(0, 0), (0.05, -0.12), (0.12, -0.24), (0.17, -0.38), (0.20, -0.44), (0.20, -0.30), (0.16, -0.15), (0.10, -0.05), (0.14, 0.0)],
+                    0.034, 0.010)
+    bas.teinte = np.tile(GRIS * 1.08, (len(bas.v), 1))
+    a.piece("anale", couche(bas, A.cadre((0.0, 0.050, 0.462), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
+
+    # ----- le visage, sur le côté gauche : l'œil rond sous une paupière lourde, la petite bouche en « o » devant -----
+    CENTRE = Vector((0.0, 0.0, 0.790))
+    for nom, c in (("G", 1), ("D", -1)):
+        pos, n = a.surface("corps", CENTRE, Vector((c * 0.92, -0.38, 0.08)))
+        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0420)
+        haut_oeil = (Vector((0, 0, 1)) - n * n.z).normalized()
+        a.piece("lourde_" + nom, K.paupiere(0.0420, 0.02), tuple(ARGENT), mat=A.cadre(pos + n * 0.002, n, haut_oeil), poil=False)
+    p, n = a.surface("corps", CENTRE, Vector((0.0, -0.98, -0.12)))
+    lèvre = A.tore(0.034, 0.012, 32, 8)
+    a.piece("bouche", lèvre, tuple(GRIS), mat=A.cadre(p + n * 0.004, n), poil=False)
+    a.tete = p + n * 0.05
+
+    # ----- deux petites pectorales, qui battent comme des mains ; la gauche pendante -----
+    for nom, c in (("G", 1), ("D", -1)):
+        pec = A.boule(1.0, 20, 10).etire(0.014, 0.060, 0.058)
+        pec.teinte = np.tile(GRIS * 1.1, (len(pec.v), 1))
+        a.piece("pectorale_" + nom, pec, None, pos=(c * 0.100, -0.060, 0.680), rot=(0, 0, c * -26), poil=False)
+    if TOURNE:
+        O.tourner(a, TOURNE)
+    return a
+
+
+if __name__ == "__main__":
+    import styles
+    K.planche(lambda: styles.construire("poisson_lune", styles.style_de("poisson_lune"), sys.modules[__name__]), "Poisson-lune")

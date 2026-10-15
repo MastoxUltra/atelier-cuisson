@@ -14,6 +14,13 @@ verrou, aucun Blender de la session Art ne démarre ; et elles n'attendent jamai
 
 Sur une machine louée (Kaggle, Colab : voir art/distant/), BIBELOTS_DISTANT=1 rend tour, prendre, rendre, souffler et
 ceder immédiats et sans effet : ni verrou, ni jeu à ménager, ni carte qui chauffe. Sans cette variable, rien ne change.
+
+OBLIGATOIRE depuis le 15/10/2026 (surchauffe de 9 h 15 : sept rendus Blender hors du verrou, le processeur à 97 %) :
+- tout Python du venv des outils qui charge le VRAI bpy prend le verrou de lui-même, au chargement, sous le nom
+  « rendu : <script> <arguments> », et le garde jusqu'à sa fin (verrou_auto ; le crochet est
+  bibelots-outils/venv/Lib/site-packages/bibelots_verrou.pth). Ses enfants et ses « tour » imbriqués ne le reprennent pas ;
+- avant de calculer, on regarde aussi le processeur : chargé à 60 % ou plus sur 5 s (sans compter le détenteur du verrou,
+  qui à ce moment-là ne calcule pas encore), on ATTEND. La commande « prendre » (les essais du jeu) aussi.
 """
 import os
 import subprocess
@@ -28,6 +35,9 @@ PRIORITE = VERROU + ".priorite"
 _COURANT = None                                     # le tour que tient ce processus : (nom, durée)
 PRESSES = ("styles", "essai du jeu", "la fiche", "la photo")   # ce qui est court ou attendu tout de suite passe devant les longues fabrications
 DISTANT = os.environ.get("BIBELOTS_DISTANT") == "1"  # une machine louée (art/distant/) : on ne ménage rien
+CPU_MAX, CPU_SECONDES = 60.0, 5.0                   # le processeur : au-delà de 60 % de charge sur 5 s, on attend
+AUTO = "BIBELOTS_VERROU_AUTO"                       # le pid du processus qui tient le verrou pour tout son calcul (pris au
+                                                    # chargement de bpy) : lui, ses enfants et ses tours imbriqués ne le reprennent pas
 ARRET = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".pas_de_calcul_ici")
 # L'INTERRUPTEUR : tant que ce fichier existe, aucun calcul de l'art (Blender, fiches, fabrications) ne tourne sur ce PC ;
 # tout part sur Kaggle (art/distant/). Sans ce fichier : permis, un calcul à la fois par ce verrou. Les essais du jeu
@@ -85,11 +95,49 @@ def etat():
     return temp, occupation, jeu
 
 
-def _raison(occupation_comptee=True, seuil=CHAUD):
-    """Ce qui empêche de lancer un calcul lourd tout de suite, ou None si la machine est prête."""
+def _temps_cpu():
+    """(temps d'inactivité, temps total) de tous les cœurs, en centaines de nanosecondes (Windows : GetSystemTimes)."""
+    import ctypes
+    from ctypes import wintypes
+    inactif, noyau, usager = wintypes.FILETIME(), wintypes.FILETIME(), wintypes.FILETIME()
+    if not ctypes.windll.kernel32.GetSystemTimes(ctypes.byref(inactif), ctypes.byref(noyau), ctypes.byref(usager)):
+        raise OSError("GetSystemTimes")
+    f = lambda t: (t.dwHighDateTime << 32) | t.dwLowDateTime
+    return f(inactif), f(noyau) + f(usager)          # le temps « noyau » compte déjà l'inactivité
+
+
+def charge_cpu(secondes=CPU_SECONDES):
+    """La charge du processeur, en pour cent, mesurée sur « secondes » (None si on ne sait pas la lire)."""
+    try:
+        i0, t0 = _temps_cpu()
+        time.sleep(secondes)
+        i1, t1 = _temps_cpu()
+    except Exception:
+        return None
+    total = t1 - t0
+    return max(0.0, min(100.0, 100.0 * (1.0 - (i1 - i0) / total))) if total > 0 else None
+
+
+def _raison(occupation_comptee=True, seuil=CHAUD, cpu=False):
+    """Ce qui empêche de lancer un calcul lourd tout de suite, ou None si la machine est prête. cpu : regarder aussi la charge
+    du processeur (5 s de mesure ; seulement au moment de prendre la machine, pas entre deux photos)."""
     temp, occupation, jeu = etat()
-    return ("le jeu « %s » tourne" % jeu if jeu else "la carte graphique est à %d °C" % temp if temp is not None and temp >= seuil
-            else "la carte graphique est occupée à %d %%" % occupation if occupation_comptee and occupation is not None and occupation >= OCCUPEE else None)
+    raison = ("le jeu « %s » tourne" % jeu if jeu else "la carte graphique est à %d °C" % temp if temp is not None and temp >= seuil
+              else "la carte graphique est occupée à %d %%" % occupation if occupation_comptee and occupation is not None and occupation >= OCCUPEE else None)
+    if raison is None and cpu:
+        charge = charge_cpu()
+        if charge is not None and charge >= CPU_MAX:
+            raison = "le processeur est chargé à %d %% (sur %d s)" % (charge, CPU_SECONDES)
+    return raison
+
+
+def _tenu_par_moi():
+    """Le verrou est-il à ce processus, ou à son parent qui le tient pour tout son calcul (verrou_auto) ?"""
+    try:
+        _nom, pid, _duree = open(VERROU, encoding="utf-8").read().strip().split("|")
+    except Exception:
+        return False
+    return pid == str(os.getpid()) or (pid != "" and pid == os.environ.get(AUTO, ""))
 
 
 def souffler(quoi, occupation_comptee=True, seuil=CHAUD):
@@ -134,6 +182,8 @@ def prendre(nom, duree, patience=PATIENCE):
     if DISTANT:
         return
     _interdit(nom)
+    if _tenu_par_moi():                             # déjà à moi (ou à mon parent) : rien à reprendre
+        return
     debut = time.time()
     while True:
         if _presse(nom):
@@ -155,9 +205,12 @@ def prendre(nom, duree, patience=PATIENCE):
         time.sleep(15)
 
 
-def rendre(nom=None):
-    """Rend le verrou : le sien (même processus), ou celui qui porte ce nom (pris par la commande « prendre »)."""
+def rendre(nom=None, force=False):
+    """Rend le verrou : le sien (même processus), ou celui qui porte ce nom (pris par la commande « prendre »). Celui d'un
+    calcul entier (verrou_auto) ne se rend qu'à sa fin, ou de force (ceder)."""
     if DISTANT:
+        return
+    if not force and nom is None and os.environ.get(AUTO) == str(os.getpid()):
         return
     try:
         tenant, pid, _duree = open(VERROU, encoding="utf-8").read().strip().split("|")
@@ -180,10 +233,17 @@ def tour(nom, duree):
     if DISTANT:
         yield
         return
+    if _tenu_par_moi():                             # dans un calcul qui tient déjà la machine (verrou_auto) : on continue
+        ancien, _COURANT = _COURANT, (nom, duree)
+        try:
+            yield
+        finally:
+            _COURANT = ancien
+        return
     debut = time.time()
     while True:
         prendre(nom, duree)
-        raison = _raison()
+        raison = _raison(cpu=True)
         if raison is None:
             break
         rendre()
@@ -213,7 +273,7 @@ def ceder():
         return
     print("[machine] je laisse passer « %s », je reprends après" % attend, flush=True)
     global _REPRISE
-    rendre()
+    rendre(force=True)
     time.sleep(25)                                  # le temps qu'il prenne le verrou (il se présente toutes les quinze secondes)
     _REPRISE = True                                 # puis on reprend avant les autres : le travail est à moitié fait, et on attend plus longtemps
     try:
@@ -222,9 +282,65 @@ def ceder():
         _REPRISE = False
 
 
+def _battre():
+    """Tant que le calcul tourne, le verrou reste frais (s'il est tué net, il est périmé dix minutes plus tard)."""
+    while True:
+        time.sleep(60)
+        try:
+            if _tenu_par_moi():
+                os.utime(VERROU, None)
+        except OSError:
+            pass
+
+
+def verrou_auto():
+    """Le verrou obligatoire : appelé au chargement du vrai bpy (le crochet bibelots_verrou.pth du venv des outils). Attend son
+    tour comme « tour » (verrou libre, pas de jeu, carte froide, processeur à moins de 60 %), puis tient la machine jusqu'à la
+    fin du processus. Sans effet sur une machine louée, ou si le verrou est déjà à ce processus ou à son parent."""
+    if DISTANT or os.environ.get(AUTO) or _tenu_par_moi():
+        return
+    import atexit
+    import threading
+    nom = "rendu : " + " ".join([os.path.basename(sys.argv[0] if sys.argv and sys.argv[0] else "python")] + list(sys.argv[1:3]))
+    _interdit(nom)
+    debut = time.time()
+    while True:
+        prendre(nom, 600)
+        raison = _raison(cpu=True)
+        if raison is None:
+            break
+        rendre(force=True)
+        if time.time() - debut > PATIENCE:
+            raise SystemExit("[machine] arrêt avant %s : %s depuis %d minutes" % (nom, raison, PATIENCE // 60))
+        print("[machine] j'attends avant %s (verrou rendu) : %s" % (nom, raison), flush=True)
+        time.sleep(30)
+    os.environ[AUTO] = str(os.getpid())
+    print("[machine] verrou pris pour tout le calcul : « %s »" % nom, flush=True)
+    atexit.register(lambda: rendre(force=True))
+    threading.Thread(target=_battre, daemon=True).start()
+
+
+def prendre_au_frais(nom, duree):
+    """La commande « prendre » (un essai du jeu) : le verrou, puis on attend que le processeur soit retombé sous 60 %
+    (sinon on rend le verrou, et on se représente trente secondes plus tard)."""
+    debut = time.time()
+    while True:
+        prendre(nom, duree)
+        if DISTANT:
+            return
+        charge = charge_cpu()
+        if charge is None or charge < CPU_MAX:
+            return
+        rendre(nom)
+        if time.time() - debut > PATIENCE:
+            raise SystemExit("[machine] arrêt : le processeur est resté chargé (%d %%) pendant %d minutes" % (charge, PATIENCE // 60))
+        print("[machine] j'attends avant « %s » (verrou rendu) : le processeur est chargé à %d %%" % (nom, charge), flush=True)
+        time.sleep(30)
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "prendre":
-        prendre(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 240)
+        prendre_au_frais(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 240)
         print("[machine] verrou pris par « %s »" % sys.argv[2])
         sys.exit(0)
     if len(sys.argv) >= 3 and sys.argv[1] == "rendre":
@@ -233,6 +349,8 @@ if __name__ == "__main__":
         sys.exit(0)
     temp, occupation, jeu = etat()
     tenant = _tenu()
-    libre = not jeu and (temp is None or temp < CHAUD) and (occupation is None or occupation < OCCUPEE) and tenant is None
-    print("[machine] carte graphique %s °C, occupée à %s %%, jeu : %s, verrou : %s -> %s" % (
-        temp, occupation, jeu or "aucun", tenant or "libre", "LIBRE" if libre else "ATTENDRE"))
+    charge = charge_cpu()
+    libre = not jeu and (temp is None or temp < CHAUD) and (occupation is None or occupation < OCCUPEE) and tenant is None and \
+        (charge is None or charge < CPU_MAX)
+    print("[machine] carte graphique %s °C, occupée à %s %%, processeur %s %%, jeu : %s, verrou : %s -> %s" % (
+        temp, occupation, "?" if charge is None else int(round(charge)), jeu or "aucun", tenant or "libre", "LIBRE" if libre else "ATTENDRE"))

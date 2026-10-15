@@ -414,12 +414,22 @@ def apercus(nom, a, arm, animateur, animations, modele, images):
     centre = Vector(((bas[0] + haut[0]) * 0.5, (bas[1] + haut[1]) * 0.5, haut[2] * 0.55))
     depuis = centre + Vector((0.55, -0.80, 0.36)).normalized() * (2.7 * taille + 0.3)
     os.makedirs(APERCUS, exist_ok=True)
+    # allégés le 15/10 (session Puissance, mesure sur le héron : les aperçus = 65 % du temps) : la scène n'est plus
+    # resynchronisée à chaque image ; seules les 6 images de la planche gardent 640 x 360 et 16 échantillons, celles du GIF
+    # sont prises à leur taille finale (480 x 270) à 8 échantillons ; une boucle longue (100 images et plus) : une sur 4.
+    sc.render.use_persistent_data = True
     for n, (images_, fonction, boucle) in animations.items():
+        pas = 4 if images_ >= 100 else 2
+        cadres_f = list(range(0, images_ if boucle else images_ + 1, pas))
+        planche_i = {int(i * (len(cadres_f) - 1) / 5) for i in range(6)}       # les mêmes 6 que « choisies »
         vues = []
-        for f in range(0, images_ if boucle else images_ + 1, 2):
+        for i, f in enumerate(cadres_f):
             animateur.poser(fonction(f / images_))
             chemin = os.path.join(APERCUS, "_%s_%s_%03d.png" % (nom, n, f))
-            A.photo(chemin, depuis, centre, 46, (640, 360), 16)
+            if i in planche_i:
+                A.photo(chemin, depuis, centre, 46, (640, 360), 16)
+            else:
+                A.photo(chemin, depuis, centre, 46, (480, 270), 8)
             vues.append(chemin)
         choisies = [vues[int(i * (len(vues) - 1) / 5)] for i in range(6)]
         planche = Image.new("RGB", (1920, 720))
@@ -428,7 +438,7 @@ def apercus(nom, a, arm, animateur, animations, modele, images):
         planche.save(os.path.join(APERCUS, "%s-poses-%s.png" % (nom, n)))
         cadres = [Image.open(c).convert("RGB").resize((480, 270), Image.LANCZOS).quantize(colors=128, method=Image.Quantize.MEDIANCUT) for c in vues]
         cadres = cadres * (3 if len(cadres) < 20 else 1)
-        cadres[0].save(os.path.join(APERCUS, "%s-%s.gif" % (nom, n)), save_all=True, append_images=cadres[1:], duration=int(2000 / 30), loop=0)
+        cadres[0].save(os.path.join(APERCUS, "%s-%s.gif" % (nom, n)), save_all=True, append_images=cadres[1:], duration=int(1000 * pas / 30), loop=0)
         for c in vues:
             os.remove(c)
         print("[apercu]", nom, n, flush=True)
@@ -471,7 +481,7 @@ def _fabriquer(nom, avec_apercus=True):
     lids = paupieres(a)
     piques = _epingles(a, module)
     k = a.a_taille()
-    global TAILLE                                              # une baleine de 15 m en 2048 px est floue de près
+    global TAILLE                                              # un géant de 15 m en 2048 px est floue de près
     TAILLE = TAILLE_GEANT if (a.taille or 0.0) > GEANT else TAILLE_NORMALE
     porteurs = epingle.porteurs(piques) + list(module.PORTEURS) + [("paupiere", "paupiere", True), ("cil", "paupiere", True)]
     porter(a, porteurs)

@@ -61,10 +61,20 @@ class Maillage:
                 b, c = c, b
             part["tri"].append((a + base, b + base, c + base))
 
-    def boite(self, matiere, centre, dims, rot=None, teinte=(1, 1, 1), motif=1.0):
-        """Une planche, un poteau, une caisse : le fil du bois suit sa plus grande longueur."""
+    BISEAU_MAX, BISEAU_MIN_PIECE, BISEAU_PART = 0.03, 0.03, 0.2     # les arêtes arrondies (l'auteur, 15/10 : « trop de formes GameCube »)
+
+    def boite(self, matiere, centre, dims, rot=None, teinte=(1, 1, 1), motif=1.0, biseau=None):
+        """Une planche, un poteau, une caisse : le fil du bois suit sa plus grande longueur. Ses arêtes sont biseautées (biseau :
+        la largeur du biseau en mètres ; None : un cinquième du plus petit côté, 3 cm au plus, rien sous 3 cm d'épaisseur ; 0 :
+        des arêtes vives). Les normales du biseau sont celles des deux faces qu'il joint : l'ombrage passe en douceur, comme sur
+        un bord arrondi, pour 32 triangles de plus."""
         rot = np.eye(3) if rot is None else rot
         centre, demi = np.asarray(centre, float), np.asarray(dims, float) * 0.5
+        if biseau is None:
+            petit = float(min(dims))
+            biseau = min(self.BISEAU_PART * petit, self.BISEAU_MAX) if petit >= self.BISEAU_MIN_PIECE else 0.0
+        if biseau > 0.0:
+            return self._boite_biseautee(matiere, centre, demi, rot, teinte, motif, min(float(biseau), 0.45 * float(min(demi))))
         decal = self.rng.uniform(0, 1, 2)
         for axe in range(3):
             a, b = [k for k in range(3) if k != axe]
@@ -82,6 +92,65 @@ class Maillage:
                     coins = coins[::-1]
                 uv = [(q[a] / motif + decal[0], q[b] / motif + decal[1]) for q in coins]
                 self.ajoute(matiere, [centre + rot @ q for q in coins], [rot @ n] * 4, uv, [(0, 1, 2), (0, 2, 3)], teinte)
+
+    def _boite_biseautee(self, matiere, centre, demi, rot, teinte, motif, b):
+        """La boîte aux arêtes biseautées : six faces rentrées de b sur leurs bords, douze bandes de biseau, huit coins."""
+        decal = self.rng.uniform(0, 1, 2)
+        axes_uv = {}
+        for axe in range(3):
+            a_, b_ = [k for k in range(3) if k != axe]
+            if demi[a_] < demi[b_]:
+                a_, b_ = b_, a_                                # u le long du plus grand côté
+            axes_uv[axe] = (a_, b_)
+        uv_de = lambda axe, q: (q[axes_uv[axe][0]] / motif + decal[0], q[axes_uv[axe][1]] / motif + decal[1])
+        e = np.eye(3)
+        coul = tuple(teinte)
+        arete = tuple(min(1.0, c * 1.05) for c in teinte)      # les arêtes un peu usées, plus claires
+
+        def poser(points, normales, couleurs, sens):
+            q = [np.asarray(x, float) for x in points]
+            tris = [(0, 1, 2)] if len(q) == 3 else [(0, 1, 2), (0, 2, 3)]
+            if np.dot(np.cross(q[1] - q[0], q[2] - q[0]), sens) < 0:
+                tris = [(0, 2, 1)] if len(q) == 3 else [(0, 2, 1), (0, 3, 2)]
+            uv = [uv_de(int(np.argmax(np.abs(n))), x) for x, n in zip(q, normales)]
+            self.ajoute(matiere, [centre + rot @ x for x in q], [rot @ n for n in normales], uv, tris, list(couleurs))
+
+        r = demi - b                                           # la boîte intérieure
+        for axe in range(3):                                   # les six faces
+            a_, b_ = axes_uv[axe]
+            for signe in (-1, 1):
+                n = e[axe] * signe
+                coins = []
+                for sa, sb in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+                    q = np.zeros(3)
+                    q[axe], q[a_], q[b_] = signe * demi[axe], sa * r[a_], sb * r[b_]
+                    coins.append(q)
+                poser(coins, [n] * 4, [coul] * 4, n)
+        for i, j, k in ((0, 1, 2), (0, 2, 1), (1, 2, 0)):        # les douze bandes, le long de k
+            for si in (-1, 1):
+                for sj in (-1, 1):
+                    ni, nj = e[i] * si, e[j] * sj
+                    pts = []
+                    for sk, cote in ((-1, "i"), (1, "i"), (1, "j"), (-1, "j")):
+                        q = np.zeros(3)
+                        q[k] = sk * r[k]
+                        if cote == "i":
+                            q[i], q[j] = si * demi[i], sj * r[j]
+                        else:
+                            q[i], q[j] = si * r[i], sj * demi[j]
+                        pts.append(q)
+                    poser(pts, [ni, ni, nj, nj], [arete] * 4, ni + nj)
+        for si in (-1, 1):                                     # les huit coins
+            for sj in (-1, 1):
+                for sk in (-1, 1):
+                    s3 = np.array([si, sj, sk], float)
+                    pts, nrm = [], []
+                    for axe in range(3):
+                        q = r * s3
+                        q[axe] = s3[axe] * demi[axe]
+                        pts.append(q)
+                        nrm.append(e[axe] * s3[axe])
+                    poser(pts, nrm, [arete] * 3, s3)
 
     def poutre(self, matiere, a, b, section=(0.08, 0.08), teinte=(1, 1, 1), motif=1.0):
         """Une pièce de bois droite entre deux points (une lisse, une écharpe, un limon d'escalier)."""

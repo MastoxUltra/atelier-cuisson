@@ -122,7 +122,7 @@ def _tour(m, rep, fraction):
 def poil_par_taille(mesure):
     """La longueur du duvet (en mètres) d'un animal dont la plus grande mesure est « mesure » : elle suit la taille jusqu'à
     6 mm (vers 0,76 m), puis grandit comme sa racine carrée, pour que les géants à leur vraie taille aient un poil « entre
-    les deux » (l'auteur, 15/10/2026) : environ 1,3 cm pour 3,5 m, 2,5 cm au plus (la baleine de 15 m). Les animaux déjà
+    les deux » (l'auteur, 15/10/2026) : environ 1,3 cm pour 3,5 m, 2,5 cm au plus (un géant de 15 m). Les animaux déjà
     faits, sous 0,76 m, ne changent pas."""
     lineaire = 0.0055 * mesure / 0.7
     if lineaire <= 0.0060:

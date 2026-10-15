@@ -1,0 +1,129 @@
+"""L'ocelot en peluche de magasin : un sable clair, presque crème, le ventre blanc, et sur les flancs de longues
+rayures-chaînes chocolat, qui s'enchaînent en ovales cernés ; la tête ronde et petite, de grands yeux d'ambre, les
+oreilles rondes à tache blanche, les pattes à taches, la queue annelée. Un petit félin tout en élégance, peluche
+d'étagère : assis bien droit, le dos tendu, les pattes de devant serrées, la queue enroulée autour des pieds, la tête
+penchée de côté, qui nous observe de très haut, sans un bruit.
+
+    python ocelot.py        fabrique la fiche art/apercus/animaux/ocelot.png (peluche de magasin, palier 4)
+"""
+import math
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import bpy  # avant mathutils
+import numpy as np
+from mathutils import Vector
+
+import atelier as A
+import matieres as M
+import peluche as K
+
+
+def propres(points, eps=2e-4):
+    """Les points d'un tracé sans doublons consécutifs (un tube dont deux points se suivent à l'identique se déforme en NaN) ;
+    au moins deux points, écartés d'un millimètre au pire."""
+    sortie = []
+    for q in points:
+        if not sortie or (np.asarray(q, float) - np.asarray(sortie[-1], float)).dot(np.asarray(q, float) - np.asarray(sortie[-1], float)) > eps * eps:
+            sortie.append(q)
+    if len(sortie) < 2:
+        base = sortie[0] if sortie else Vector((0.0, 0.0, 0.0))
+        sortie = [base, Vector(base) + Vector((0.0, 0.0, 0.001))]
+    return sortie
+
+# le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
+SABLE = M.hexa("#fff0c8")                     # la dominante : sable clair, presque crème
+CHOCOLAT = M.hexa("#7a4a30")                  # l'accent : les chaînes de rayures
+BLANC = M.hexa("#fffaf0")                     # le ventre, le dedans des pattes
+OEIL = M.hexa("#e8b84a")                      # les yeux
+CORPS = Vector((0.0, 0.040, 0.300))
+TETE = Vector((0.0, -0.080, 0.610))
+LACET, PENCHE = 28.0, 12.0
+
+
+def chaines(m, graine=0.0, freq=10.0, ventre=None):
+    """Peint une pièce encore droite en sable et lui pose des chaînes d'ovales chocolat cernés de sable (un produit de
+    sinus dans une bande étroite, étiré dans le sens du flanc) ; le ventre, blanc."""
+    v = m.v
+    n = np.sin(freq * v[:, 2] + graine) * np.sin(1.6 * freq * v[:, 1] + 1.9 * graine + 0.5) * np.sin(freq * 0.55 * v[:, 0] + 0.7)
+    t = np.tile(np.asarray(SABLE, float), (len(v), 1))
+    t[(n > 0.30) & (n < 0.62)] = CHOCOLAT
+    if ventre is not None:
+        t[ventre(v)] = BLANC
+    m.teinte = t
+    return m
+
+
+def construire():
+    a = K.Animal("ocelot")
+    a.taille = 1.00
+
+    # ----- le corps : un œuf dressé (assis), le poitrail rond, les hanches larges ; chaînes de rayures chocolat -----
+    def oeuf(v):
+        v = K.bosse(v, (0, -0.9, 0.3), 0.12, 0.45)
+        s = v * [0.150, 0.175, 0.230]
+        s[:, 0] *= 1 + 0.18 * K.lisse((-v[:, 2] + 0.2) / 1.0)
+        return s
+    corps = chaines(A.boule(1.0, 56, 28), 0.0, ventre=lambda v: (v[:, 1] < -0.55) & (v[:, 2] < 0.7))
+    a.piece("corps", corps.sculpte(oeuf), None, pos=CORPS, rot=(-8, 0, 0))
+
+    # ----- la tête : ronde et petite, les joues rondes, les moustaches ; penchée de côté, tournée vers nous -----
+    T = A.repere(TETE, (0, PENCHE, LACET))
+    T3 = T.to_3x3()
+
+    def tete_f(v):
+        for cote in (1, -1):
+            v = K.bosse(v, (cote * 0.90, -0.25, -0.35), 0.22, 0.30)
+        return v * [0.115, 0.105, 0.100]
+    tete = chaines(A.boule(1.0, 48, 24), 3.0, 14.0, ventre=None)
+    tete.teinte[(tete.v[:, 1] < -0.45) & (tete.v[:, 2] < 0.0)] = BLANC
+    a.piece("tete", tete.sculpte(tete_f), None, mat=T)
+    a.piece("museau", A.boule(1.0, 32, 16).etire(0.052, 0.046, 0.042), BLANC, mat=T @ A.repere((0, -0.096, -0.034)))
+    a.piece("truffe", A.boule(1.0, 20, 10).etire(0.018, 0.012, 0.012), M.hexa("#d98a8a"), mat=T @ A.repere((0, -0.138, -0.016)), poil=False)
+    a.tete = T @ Vector((0, -0.100, -0.004))
+    for c in (1, -1):
+        bouche = [T3 @ Vector(d) for d in ((c * 0.02, -0.55, -0.78), (c * 0.20, -0.64, -0.72), (c * 0.40, -0.58, -0.62))]
+        a.broderie("bouche_" + ("G" if c > 0 else "D"),
+                   A.courbe(propres(a.trace("museau", T @ Vector((0, -0.096, -0.034)), bouche, 0.004)), 4), 0.0026, CHOCOLAT)
+
+    # ----- les yeux : grands, ronds, d'ambre, sous deux trait de rayure brodés qui tombent vers le nez -----
+    for nom, c in (("G", 1), ("D", -1)):
+        regard = T3 @ Vector((c * 0.50, -0.82, 0.18))
+        a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.30, OEIL, 0.003, 0)
+        p, n = a.surface("tete", T.to_translation(), regard)
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0185)
+        brow = [T3 @ Vector((c * (0.18 + 0.36 * t), -0.94 + 0.16 * t, 0.26 + 0.10 * t)) for t in np.linspace(0, 1, 5)]
+        a.broderie("sourcil_" + nom, propres(a.trace("tete", T.to_translation(), brow, 0.004)), 0.0030, CHOCOLAT)
+        E = A.cadre(T @ Vector((c * 0.080, 0.040, 0.070)), T3 @ Vector((c * 0.30, 0.22, 0.93)), T3 @ Vector((c * 0.4, -0.9, 0.0)))
+        po = A.profil([(0, 0), (0.034, 0.008), (0.042, 0.030), (0.034, 0.052), (0.015, 0.066), (0, 0.072)], 5)
+        a.piece("oreille_" + nom, A.tour(po, 28).etire(1.0, 0.42, 1.0), CHOCOLAT, mat=E)
+        a.piece("tache_" + nom, A.tour(po, 20).etire(0.55, 0.30, 0.62).pose((0, 0.008, 0.006)), BLANC, mat=E, poil=False)
+
+    # ----- les pattes de devant : deux piliers serrés, les pieds blancs, les griffes rentrées ; les hanches : deux jambons -----
+    for nom, c in (("G", 1), ("D", -1)):
+        chemin = [(c * 0.070, -0.100, 0.350), (c * 0.075, -0.140, 0.190), (c * 0.075, -0.150, 0.045)]
+        patte = K.tube_peint(A.courbe(chemin, 6), lambda t: 0.052 - 0.010 * t, [(0.76, SABLE), (1, BLANC)], 16)
+        a.piece("patte_" + nom, patte, None)
+        a.piece("pied_" + nom, A.boule(1.0, 24, 12).etire(0.050, 0.075, 0.032), BLANC, pos=(c * 0.075, -0.165, 0.032))
+        h = chaines(A.boule(1.0, 32, 16), 5.0 + c, 12.0)
+        a.piece("hanche_" + nom, h.etire(0.085, 0.130, 0.105), None, pos=(c * 0.125, 0.090, 0.130))
+
+    # ----- la queue : annelée de chocolat, enroulée autour des pieds ; le bout noir -----
+    chemin = [(0.0, 0.200, 0.110), (0.120, 0.250, 0.060), (0.230, 0.130, 0.050), (0.210, -0.040, 0.050), (0.120, -0.150, 0.050),
+              (0.020, -0.130, 0.050)]
+    bagues, f, c = [], 0.0, SABLE
+    while f < 0.90:
+        f += 0.11
+        bagues.append((min(f, 0.90), c))
+        c = CHOCOLAT if c is SABLE else SABLE
+    bagues[-1] = (0.90, bagues[-1][1])
+    bagues.append((1.0, M.hexa("#3a2a22")))
+    queue = K.tube_peint(A.courbe(chemin, 6), lambda t: 0.052 - 0.014 * t, bagues, 14)
+    a.piece("queue", queue, None)
+    return a
+
+
+if __name__ == "__main__":
+    import styles
+    K.planche(lambda: styles.construire("ocelot", styles.style_de("ocelot"), sys.modules[__name__]), "Ocelot")
