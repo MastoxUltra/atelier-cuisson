@@ -76,7 +76,7 @@ def construire():
     x, y, z = corps.v[:, 0], corps.v[:, 1], corps.v[:, 2]
     f = z / L
     th = np.arctan2(x, y)
-    ecaille = (f > 0.12)                                                              # le museau seul est en peau
+    ecaille = (f > 0.02)                                                              # la tête conique est écaillée aussi (le bout du museau seul est clair)
     rang = z / 0.050
     k = np.floor(rang)
     frac = rang - k
@@ -97,11 +97,11 @@ def construire():
     a.tete = Vector(fil.cadre(0.10 * L)[0])
 
     # ----- les yeux minuscules sur la tête ; le nez ; les pattes : courtes, la peau crème, de grandes griffes -----
-    c1, av1, nq1 = fil.cadre(0.12 * L)
+    c1, av1, nq1 = fil.cadre(0.085 * L)
     lat1 = np.cross(np.array(av1), np.array(nq1))
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("corps", Vector(c1), Vector(lat1 * c * 0.85 + np.array(nq1) * 0.40))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0120)
+        p, n = a.surface("corps", Vector(c1), Vector(lat1 * c * 0.80 + np.array(nq1) * 0.55))
+        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0215)       # deux yeux bien visibles, de chaque côté de la tête conique
     c2, av2, nq2 = fil.cadre(0.012 * L)
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.016, 0.012), CHARBON, pos=tuple(np.array(c2) + np.array(av2) * 0.006), poil=False)
     for nom, x_, y_, av in (("av_G", 0.170, -0.260, -0.060), ("av_D", -0.170, -0.260, 0.020), ("ar_G", 0.170, 0.330, 0.0), ("ar_D", -0.170, 0.330, 0.0)):

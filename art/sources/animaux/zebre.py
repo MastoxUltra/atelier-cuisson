@@ -65,7 +65,7 @@ def construire():
     chemin = [(0.0, y, z) for y, z in ((0.560, 0.640), (0.440, 0.690), (0.200, 0.700), (-0.050, 0.700), (-0.290, 0.720), (-0.450, 0.720))]
     fil = K.Fil(chemin, (1, 0, 0))
     L = fil.long
-    corps = fuseau([(0.0, 0.0), (0.03, 0.095), (0.12, 0.160), (0.30, 0.172), (0.55, 0.170), (0.80, 0.180), (0.94, 0.145), (1.0, 0.0)], L)   # un corps plus mince (l'auteur : « trop gros »)
+    corps = fuseau([(0.0, 0.0), (0.03, 0.078), (0.12, 0.130), (0.30, 0.140), (0.55, 0.138), (0.80, 0.146), (0.94, 0.118), (1.0, 0.0)], L)   # un corps plus mince (l'auteur : « trop gros »)
 
     def phase(z, u):
         sw = 0.075 * u ** 1.6 + 0.020 * np.exp(-((z - 0.20 * L) / 0.15) ** 2) * u        # vers l'arrière en descendant ; arcs sur la croupe
@@ -103,8 +103,8 @@ def construire():
     a.piece("tete", tete.sculpte(lambda v: v * [0.86, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.060, -0.050), (0, 0, 0)))
     a.tete = T @ Vector((0, 0.060, 0.200))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.62, 0.62, 0.42)))
-        a.rustine("cerne_" + nom, "tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.62, 0.62, 0.42)), 0.30, tuple(CHARBON), 0.003, 0)
+        pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.80, 0.22, 0.40)))
+        a.rustine("cerne_" + nom, "tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.80, 0.22, 0.40)), 0.30, tuple(CHARBON), 0.003, 0)
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0200)
         po = A.profil([(0, 0), (0.026, 0.012), (0.036, 0.050), (0.028, 0.092), (0.010, 0.120), (0, 0.130)], 6)
         vers = Vector((c * 0.22, 0.22, 0.95)).normalized()

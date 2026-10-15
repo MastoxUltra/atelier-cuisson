@@ -194,7 +194,7 @@ def plan_dos(pos, haut=(0, 0, 1)):
 def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11, incline=30.0, z0=0.12,
            tete_r=(0.062, 0.072, 0.060), tete_pos=(0.0, -0.10, 0.06), bec_long=0.07, bec_ray=0.024, bec_baisse=0.0,
            aile_dim=(0.022, 0.085, 0.180), aile_pos=(0.0, 0.0, 0.0), queue_dim=(0.040, 0.085, 0.014), queue_haut=-24.0,
-           patte_long=0.10, patte_ray=0.011, oeil_r=0.016, oeil_dir=(0.74, -0.58, 0.22), bout_aile=None, coupe_dos=1.20, yeux=True, tete_rot=(-6, 0, 0)):
+           patte_long=0.10, patte_ray=0.011, oeil_r=0.016, oeil_dir=(0.74, -0.58, 0.22), bout_aile=None, coupe_dos=1.20, yeux=True, tete_rot=(-6, 0, 0), cou_ray=0.0, aile_pointue=False):
     """Un oiseau debout, d'une seule volée : un œuf incliné (le dos d'une couleur, le ventre d'une autre), une tête ronde,
     un bec en cône, deux ailes plates, une queue plate, deux pattes minces. Rend un dictionnaire de repères pour que
     l'appelant ajoute ce qui fait SON oiseau (huppe, queue en ciseaux, plastron, masque…) :
@@ -214,6 +214,13 @@ def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11
     tt = A.boule(1.0, 40, 20)
     tt.teinte = np.tile(np.asarray(tete, float), (len(tt.v), 1))
     a.piece("tete", tt.etire(*tete_r), None, pos=tuple(H), rot=tete_rot)
+    if cou_ray > 0:                                   # un cou : la tête est emmanchée sur le corps, plus une boule posée dessus
+        P0 = Vector(T @ Vector((0, 0, 0.250 * long / 0.34)))
+        P2 = H + Vector((0.0, 0.020, -0.006))
+        P1 = (P0 + P2) * 0.5 + Vector((0.0, -0.018, 0.0))
+        cou = tube_r([tuple(P0), tuple(P1), tuple(P2)], [cou_ray * 1.30, cou_ray * 1.05, cou_ray * 0.92], 20)
+        cou.teinte = np.tile(np.asarray(tete, float), (len(cou.v), 1))
+        a.piece("cou", cou, None)
     a.tete = H + Vector((0.0, -0.08, 0.0))
     # le bec
     b = A.tour(A.profil([(bec_ray, 0), (0.88 * bec_ray, 0.30 * bec_long), (0.52 * bec_ray, 0.65 * bec_long), (0.18 * bec_ray, 0.92 * bec_long),
@@ -225,6 +232,12 @@ def oiseau(a, *, dos, ventre, tete, aile, queue, bec, patte, long=0.34, ray=0.11
     for nom, c in (("G", 1), ("D", -1)):
         al = A.boule(1.0, 28, 14).etire(*aile_dim)
         f = al.v[:, 2] / aile_dim[2]
+        if aile_pointue:                                  # une aile qui s'effile en pointe et se bombe, pas un ovale plat
+            bout = np.clip((-f - 0.05) / 0.95, 0.0, 1.0)
+            al = al.sculpte(lambda v: np.stack([v[:, 0] * (1 - 0.30 * np.clip(-v[:, 2] / aile_dim[2], 0, 1)) * (1.55 - 0.9 * 0) / 1.55,
+                                                v[:, 1] * (1 - 0.75 * np.clip((-v[:, 2] / aile_dim[2] - 0.05) / 0.95, 0, 1) ** 1.4),
+                                                v[:, 2]], axis=1))
+            f = al.v[:, 2] / aile_dim[2]
         tl = np.tile(np.asarray(aile, float), (len(f), 1))
         if bout_aile is not None:
             tl[f < -0.55] = np.asarray(bout_aile, float)

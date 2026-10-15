@@ -76,7 +76,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         centre, direction = fil.vise(0.095 * L, 0.35, -c * 0.95, 0.18)
         pos, n = a.surface("corps", centre, direction)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0270)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0270)
     pts = []
     for u_ in np.linspace(0.0, 1.0, 7):
         cc, dd = fil.vise((0.015 + 0.075 * u_) * L, 0.0, 1.0, -0.30 + 0.20 * u_)

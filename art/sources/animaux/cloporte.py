@@ -20,15 +20,15 @@ import matieres as M
 import peluche as K
 import outils_a as O                          # (garde-fous : aucun tube à segment nul)
 
-BLEUTE = np.array(M.hexa("#b3bfcd"))          # la dominante (registre : gris bleuté clair), un cran plus clair (cousu main)
-ANNEAU = np.array(M.hexa("#76869a"))          # l'accent : les anneaux plus sombres
+BLEUTE = np.array(M.hexa("#9aa9c0"))          # la dominante (registre : gris bleuté clair), un cran plus clair (cousu main)
+ANNEAU = np.array(M.hexa("#566782"))          # l'accent : les anneaux plus sombres
 VENTRE = np.array(M.hexa("#d6dde6"))          # le dessous, les pattes
 FIL = M.hexa("#4a5668")
 
 
 def construire():
     a = K.Animal("cloporte")
-    a.taille = 0.20
+    a.taille = 0.34                                # plus gros : il se perdait dans l'herbe
 
     # ----- le corps : sept plaques qui se chevauchent, chacune un peu plus large vers le milieu, un anneau sombre au bord ;
     #       la tête arrondie devant, le dernier segment pointu -----
@@ -56,7 +56,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         ant = O.tube_r([(c * 0.026, -0.138, 0.050), (c * 0.050, -0.185, 0.066), (c * 0.080, -0.222, 0.060)], [0.0070, 0.0058, 0.0042], 8)
         a.piece("antenne_" + nom, O.teinte(ant, ANNEAU), None, poil=False)
-        a.bouton("oeil_" + nom, Vector((c * 0.046, -0.120, 0.058)), Vector((c * 0.80, -0.50, 0.32)).normalized(), 0.0100)
+        a.oeil("oeil_" + nom, Vector((c * 0.046, -0.120, 0.058)), Vector((c * 0.80, -0.50, 0.32)).normalized(), 0.0150)
         # sept paires de pattes : de petits crochets sous le bord
         for k in range(7):
             y = -0.015 + 0.058 * k

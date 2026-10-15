@@ -73,7 +73,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         centre, direction = fil.vise(0.090 * L, 0.35, -c * 0.95, 0.18)
         pos, n = a.surface("corps", centre, direction)
-        a.bouton("oeil_" + nom, pos + n * 0.002, n, 0.0300)
+        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0300)
         h = Vector(fil.cadre(0.09 * L)[2])
         a.piece("lourde_" + nom, K.paupiere(0.0300, 0.12), tuple(ARDOISE), mat=A.cadre(pos + n * 0.002, n, (h - n * n.dot(h)).normalized()), poil=False)
     pts = []

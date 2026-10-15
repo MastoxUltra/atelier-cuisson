@@ -49,7 +49,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         tige = O.tube_r([(c * 0.050, -0.105, 0.150), (c * 0.058, -0.125, 0.195)], [0.012, 0.011], 10)
         a.piece("tige_" + nom, O.teinte(tige, PATTE), None, poil=False)
-        a.bouton("oeil_" + nom, Vector((c * 0.058, -0.134, 0.207)), Vector((c * 0.25, -0.9, 0.30)), 0.0240)
+        a.oeil("oeil_" + nom, Vector((c * 0.058, -0.134, 0.207)), Vector((c * 0.25, -0.9, 0.30)), 0.0240)
     O.broder(a, "sourire", "carapace", Vector((0.0, 0.0, 0.14)),
              [(0.62 * u_, -0.80, -0.06 + 0.22 * u_ * u_) for u_ in np.linspace(-1, 1, 9)], 0.0026, FIL, decolle=0.003)
     a.tete = Vector((0.0, -0.14, 0.17))

@@ -74,7 +74,7 @@ def construire():
         a.piece("antenne_" + nom, O.teinte(antenne, PIEDS), None, poil=False)
         tige = O.tube_r([(c * 0.040, -0.205, 0.180), (c * 0.058, -0.235, 0.215)], [0.0085, 0.0085], 8)
         a.piece("tige_" + nom, O.teinte(tige, PIEDS), None, poil=False)
-        a.bouton("oeil_" + nom, Vector((c * 0.060, -0.243, 0.222)), Vector((c * 0.45, -0.85, 0.30)), 0.0155)
+        a.oeil("oeil_" + nom, Vector((c * 0.060, -0.243, 0.222)), Vector((c * 0.45, -0.85, 0.30)), 0.0155)
     a.tete = Vector((0.0, -0.26, 0.15))
 
     # ----- les petites pattes : quatre de chaque côté, sous le thorax -----

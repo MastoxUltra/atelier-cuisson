@@ -37,7 +37,7 @@ def construire():
                  ray=0.115, incline=36.0, z0=0.140, tete_r=(0.064, 0.074, 0.062), tete_pos=(0.0, -0.100, 0.052), bec_long=0.050,
                  bec_ray=0.0245, bec_baisse=-0.35, aile_dim=(0.026, 0.085, 0.230), aile_pos=(0.0, 0.035, 0.0),
                  queue_dim=(0.044, 0.140, 0.012), queue_haut=-16.0, patte_long=0.120, patte_ray=0.0135, oeil_r=0.0185,
-                 oeil_dir=(0.76, -0.50, 0.20), bout_aile=BRIQUE * 0.55, coupe_dos=1.25, tete_rot=(-6, 0, 18))
+                 oeil_dir=(0.76, -0.50, 0.20), bout_aile=BRIQUE * 0.55, coupe_dos=1.25, tete_rot=(-6, 0, 18), cou_ray=0.062, aile_pointue=True)
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # ----- les mouchetures : de petites taches brunes sur le dos, des traits sur le ventre -----
@@ -56,7 +56,7 @@ def construire():
     # ----- la moustache noire sous l'œil, la cire jaune, le bec crochu : deux sourcils lourds -----
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", H, Vector((c * 0.74, -0.50, -0.10)))
-        mous = A.boule(1.0, 16, 8).etire(0.0075, 0.012, 0.040)
+        mous = A.boule(1.0, 16, 8).etire(0.0075, 0.010, 0.026)                       # la tache malaire : une goutte sous l'œil, pas des moustaches au bec
         a.piece("moustache_" + nom, O.teinte(mous, np.array(NOIR)), None, mat=A.cadre(pos + n * 0.001, n, (0, 0, 1)), poil=False)
     cire = A.boule(1.0, 16, 8).etire(0.018, 0.014, 0.012)
     a.piece("cire", cire, JAUNE, pos=tuple(H + Vector((0.0, -0.072, -0.004))), poil=False)

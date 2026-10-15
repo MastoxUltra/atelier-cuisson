@@ -36,7 +36,7 @@ def construire():
     r = O.oiseau(a, dos=ROUX, ventre=VENTRE, tete=ROUX * 1.02, aile=ROUX * 0.96, queue=SOMBRE, bec=BEC, patte=PATTE, long=0.40, ray=0.130,
                  incline=34.0, z0=0.140, tete_r=(0.066, 0.070, 0.064), tete_pos=(0.0, -0.105, 0.075), bec_long=0.058, bec_ray=0.0205,
                  bec_baisse=-0.10, aile_dim=(0.030, 0.140, 0.230), aile_pos=(0.0, 0.040, 0.0), queue_dim=(0.050, 0.150, 0.014), queue_haut=-18.0,
-                 patte_long=0.100, patte_ray=0.0115, oeil_r=0.0215, oeil_dir=(0.74, -0.56, 0.26), bout_aile=SOMBRE, coupe_dos=1.40)
+                 patte_long=0.100, patte_ray=0.0115, oeil_r=0.0215, oeil_dir=(0.74, -0.56, 0.26), bout_aile=SOMBRE, coupe_dos=1.40, cou_ray=0.064)
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # ----- le crochet du bec, et les longues soies raides qui l'entourent comme une moustache -----
@@ -44,7 +44,7 @@ def construire():
                        A.cadre(H + Vector((0.0, -0.126, -0.012)), Vector((0.0, -0.25, -1.0)), (0, 1, 0)))
     a.piece("crochet", crochet, None, poil=False)
     soies = None
-    for k in range(7):
+    for k in range(2):                                   # deux soies seulement de chaque côté : plus de moustaches
         for c in (1, -1):
             dx = c * (0.014 + 0.007 * k)
             d = Vector((c * (0.40 + 0.06 * k), -0.85, -0.10 - 0.04 * k)).normalized()

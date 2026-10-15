@@ -33,7 +33,7 @@ def construire():
     r = O.oiseau(a, dos=NOIR, ventre=NOIR * 1.15, tete=NOIR, aile=REFLET, queue=NOIR * 0.9, bec=BEC, patte=GRIS, long=0.40, ray=0.120,
                  incline=40.0, z0=0.165, tete_r=(0.074, 0.088, 0.072), tete_pos=(0.0, -0.110, 0.050), bec_long=0.140, bec_ray=0.048,
                  bec_baisse=-0.10, aile_dim=(0.028, 0.100, 0.230), aile_pos=(0.0, 0.040, 0.0), queue_dim=(0.050, 0.130, 0.014),
-                 queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0185, oeil_dir=(0.78, -0.50, 0.20), coupe_dos=1.30,
+                 queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0185, oeil_dir=(0.78, -0.50, 0.20), coupe_dos=1.30, cou_ray=0.066, aile_pointue=True,
                  tete_rot=(-6, 0, 22))
     H, T, haut = r["H"], r["T"], r["haut"]
 
@@ -44,7 +44,7 @@ def construire():
         a.piece("sourcil_" + nom, O.teinte(brow, NOIR * 0.7), None, pos=tuple(pos + Vector((0.0, 0.0, 0.026))), rot=(0, 0, c * -20))
 
     # ----- la gorge hérissée : cinq petites plumes pointues sous le bec -----
-    for k, dx in enumerate((-0.040, -0.020, 0.0, 0.020, 0.040)):
+    for k, dx in enumerate(()):                          # plus de pointes sous le bec : elles se lisaient comme des dents
         plume = O.pointe(0.060, 0.016, 10)
         d = Vector((dx * 4, -0.20, -1.0)).normalized()
         a.piece("barbe_%d" % k, O.couche(O.teinte(plume, NOIR * 0.85), A.cadre(H + Vector((dx, -0.050, -0.050)), d, (0, 1, 0))), None, poil=False)
