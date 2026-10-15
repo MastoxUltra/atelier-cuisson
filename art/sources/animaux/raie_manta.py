@@ -1,7 +1,7 @@
 """La raie manta en peluche, deuxième dessin : une vraie raie, en virage. Une seule pièce, du bout d'une aile à l'autre,
 la tête en lobes qui avancent, les bouts d'ailes relevés en vagues et filant vers l'arrière ; elle penche de tout le
 corps et laisse voir son ventre blanc, les cinq fentes des branchies, la bouche tirée sur toute la largeur du museau,
-entre les deux cornes céphaliques roulées comme des cornets. Noir bleuté dessus, deux croissants blancs sur les épaules,
+entre les deux cornes céphaliques, deux palettes déroulées. Noir bleuté dessus, deux croissants blancs sur les épaules,
 de petits yeux sages sur le côté des lobes et la longue queue en fouet qui traîne dans le sable.
 
     python raie_manta.py        fabrique la fiche art/apercus/animaux/raie_manta.png (style du palier : B, peluche de magasin)
@@ -65,12 +65,14 @@ def construire():
     a.piece("corps", corps, None, mat=RM)
     R3 = RM.to_3x3()
 
-    # ----- les cornes céphaliques : deux cornets roulés devant les lobes, la bouche large entre eux -----
+    # ----- les cornes céphaliques : deux palettes DÉROULÉES, minces, qui avancent devant les lobes ; la bouche large entre elles -----
     for nom, c in (("G", 1), ("D", -1)):
-        pts = [Vector((c * 0.070, -0.185, 0.020)), Vector((c * 0.098, -0.250, 0.040)), Vector((c * 0.078, -0.305, 0.075)),
-               Vector((c * 0.040, -0.300, 0.105)), Vector((c * 0.034, -0.262, 0.100)), Vector((c * 0.052, -0.250, 0.078))]
-        cor = O.tube_r([tuple(RM @ p) for p in pts], [0.032, 0.036, 0.034, 0.028, 0.020, 0.012], 16)
-        a.piece("corne_" + nom, O.teinte(cor, NOIR * 0.92), None, poil=False)
+        contour = [(0.0, -0.022), (0.040, -0.027), (0.100, -0.022), (0.145, -0.010), (0.165, 0.0), (0.145, 0.010), (0.100, 0.022), (0.040, 0.027), (0.0, 0.022)]
+        pal = O.nageoire(contour, 0.012, NOIR * 0.92, 0.0045)
+        base = RM @ Vector((c * 0.078, -0.180, 0.022))
+        ex = R3 @ Vector((c * 0.22, -1.0, 0.10))
+        ey = R3 @ Vector((c * 1.0, 0.22, 0.0))
+        a.piece("corne_" + nom, O.couche(pal, O.plan(base, ex, ey)), None, poil=False)
     # la bouche : une grande fente sur toute la largeur du museau, dessous ; on l'écrit sur le bord avant, côté blanc
     bouche = [RM @ Vector((0.20 * (k - 5) / 5 * 1.0, -0.196 + 0.020 * (1 - ((k - 5) / 5) ** 2) * 0 - 0.020 * abs((k - 5) / 5) ** 2, -0.016)) for k in range(11)]
     a.broderie("bouche", A.courbe([tuple(p) for p in bouche], 3), 0.0044, FIL)
