@@ -58,7 +58,7 @@ def construire():
         d = O.couche(O.teinte(O.pointe(0.040, 0.0070, 8), ROSE), RT @ A.cadre(pos, dire, (0, 1, 0)))
         etoile = d if etoile is None else etoile + d
     a.piece("etoile", etoile, None, poil=False)
-    O.paire_yeux(a, "tete", H, (0.74, -0.52, 0.20), 0.0085, decolle=0.001, R=RT)
+    O.paire_yeux(a, "tete", H, (0.60, -0.72, 0.26), 0.0165, decolle=0.002, R=RT)
 
     # ----- les mains : de grosses pelles roses brandies devant, les cinq griffes claires dehors ; l'arrière : petits pieds roses -----
     for nom, c in (("G", 1), ("D", -1)):

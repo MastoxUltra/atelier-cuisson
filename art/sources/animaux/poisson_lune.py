@@ -24,7 +24,7 @@ ARGENT = np.array(M.hexa("#b3bfd0"))          # la dominante (registre : argent 
 NACRE = np.array(M.hexa("#e7ecf4"))           # le ventre, les reflets
 GRIS = np.array(M.hexa("#7f8a9e"))            # les nageoires, la frange
 FIL = M.hexa("#3a4256")
-TOURNE = -38                                  # la fiche le prend de profil, le disque face à la caméra ; 0 pour le jeu
+TOURNE = -22                                  # la fiche le prend de profil, le disque face à la caméra ; 0 pour le jeu
 
 
 def couche(m, mat):
@@ -79,7 +79,7 @@ def construire():
     # ----- le visage, sur le côté gauche : l'œil rond sous une paupière lourde, la petite bouche en « o » devant -----
     CENTRE = Vector((0.0, 0.0, 0.790))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("corps", CENTRE, Vector((c * 0.92, -0.38, 0.08)))
+        pos, n = a.surface("corps", CENTRE, Vector((c * 0.62, -0.78, 0.08)))
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0420)
         haut_oeil = (Vector((0, 0, 1)) - n * n.z).normalized()
         a.piece("lourde_" + nom, K.paupiere(0.0420, 0.60), tuple(ARGENT), mat=A.cadre(pos + n * 0.002, n, haut_oeil), poil=False)

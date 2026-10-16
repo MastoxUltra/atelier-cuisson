@@ -34,7 +34,7 @@ NOIRBR = M.hexa("#2e2420")                  # la tête, la barbe
 CORNE = M.hexa("#2a2624")                   # les cornes
 LARGE, LONG, HAUT = 0.180, 0.280, 0.165     # les demi-mesures du tonneau
 NUQUE = Vector((0.0, -0.330, 0.410))     # l'arrière du crâne : plus bas que la bosse, devant elle
-LACET, PIQUE, PENCHE = 0.0, 18.0, 0.0     # la tête basse mais en vue : le mufle vers le bas, presque de face
+LACET, PIQUE, PENCHE = 24.0, 18.0, 0.0    # la tête basse, tournée vers la caméra (~25°) : les deux yeux se voient de face
 
 
 def tache(rayon, a2, p2, a3, p3):
@@ -111,7 +111,7 @@ def construire():
 
     # ----- les yeux : deux yeux vivants, grands ouverts, sur l'avant de la tête (visibles de face) -----
     for nom, c in (("G", 1), ("D", -1)):
-        pos, vers = a.surface("tete", T @ Vector((0, 0, 0.080)), T3 @ Vector((c * 0.64, 0.58, 0.40)))
+        pos, vers = a.surface("tete", T @ Vector((0, 0, 0.080)), T3 @ Vector((c * 0.52, 0.55, 0.58)))
         if c == 1:
             a.oeil("oeil", pos + vers * 0.010, vers, 0.030, paire=True)      # une paire : le reflet du même côté pour les deux (plus un terne, un brillant)
 
@@ -122,8 +122,8 @@ def construire():
         return s
     for nom, c in (("G", 1), ("D", -1)):
         # une corne en lyre : elle part de côté, monte, et sa pointe se retourne vers l'avant ; crème, le bout charbon
-        corne = A.courbe([T @ Vector((c * x, y, z)) for x, y, z in ((0.058, 0.020, 0.028), (0.100, 0.034, 0.024),
-                                                                     (0.130, 0.062, 0.052), (0.128, 0.100, 0.104))], 6)
+        corne = A.courbe([T @ Vector((c * x, y, z)) for x, y, z in ((0.060, 0.050, -0.030), (0.105, 0.070, -0.040),
+                                                                     (0.135, 0.095, -0.015), (0.133, 0.140, 0.035))], 6)
         a.piece("corne_" + nom, K.tube_peint(corne, lambda t: 0.026 * (1 - t) ** 0.7 + 0.005, [(9, CORNE)], 14), None, poil=False)
         tombe = (T3 @ Vector((c * 0.93, -0.20, 0.30))).normalized()
         E = A.cadre(T @ Vector((c * 0.088, -0.012, 0.048)) + tombe * 0.058, tombe, T3 @ Vector((0, 0.75, 0.65)))

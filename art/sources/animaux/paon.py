@@ -134,6 +134,105 @@ def construire():
     a.piece("patte", patte, K.MOUTARDE, pos=(0.048, -0.035, 0.009), poil=False, paire=True)
     return a
 
+# ---------------------------------------------------------------- pour le jeu : son squelette et ses animations
+# (voir usine.py : python usine.py paon). Les mesures sont celles du modèle (avant a.taille). Gardé par l'auteur (vague 2,
+# 13/10). Sa pose de repos : la roue faite, le poitrail haut, le cou cambré.
+
+from poses import Pose, borne, cloche, onde
+
+OS = [
+    ("racine", None, (0, 0, 0)),
+    ("corps", "racine", (0.0, -0.030, 0.225)),         # le milieu du corps
+    ("cou", "corps", (0.0, -0.105, 0.290)),            # le pied du cou, sur le poitrail
+    ("tete", "cou", (0.0, -0.172, 0.530)),             # la nuque
+    ("roue", "corps", (0.0, 0.100, 0.270)),            # le moyeu de la roue, au croupion
+    ("aile_G", "corps", (0.090, -0.020, 0.250)),       # l'épaule de l'aile (la droite : son miroir)
+    ("patte_G", "corps", (0.048, -0.035, 0.150)),      # le haut de la patte (la droite : son miroir)
+]
+
+PORTEURS = [("corps", "corps"), ("poitrail", "corps"),
+            ("cou", "cou"),
+            ("tete", "tete"), ("oeil", "tete"), ("dessus", "tete"), ("dessous", "tete"), ("bec", "tete"),
+            ("brin", "tete"), ("houppes", "tete"),
+            ("roue", "roue"), ("ocelle", "roue"), ("petit", "roue"), ("nervure", "roue"),
+            ("aile", "aile", True),
+            ("patte", "patte", True),
+            # les yeux sont posés un par un : l'usine appelle leurs paupières paupiere_0 et paupiere_1, chacune sur son os
+            ("paupiere_0", "paupiere_0"), ("paupiere_1", "paupiere_1"), ("cil_0", "paupiere_0"), ("cil_1", "paupiere_1")]
+
+
+def repos(t):
+    """Il fait la roue et s'admire : il respire, fait tourner lentement sa roue d'un côté puis de l'autre pour qu'on la
+    voie bien, la fait frissonner une fois, hoche sa petite tête couronnée."""
+    p = Pose()
+    p.add("corps", ech=(1 + 0.010 * onde(t, 2), 1, 1 + 0.014 * onde(t, 2)))
+    tourne = cloche(t, 0.30, 0.14) - cloche(t, 0.70, 0.14)
+    frisson = cloche(t, 0.50, 0.04) * onde(t, 24)
+    p.add("corps", rot=(0, 0, 8 * tourne))
+    p.add("roue", rot=(2 * frisson, 0, 0))
+    p.add("cou", rot=(0, 0, -4 * tourne))
+    p.add("tete", rot=(5 * onde(t, 3), 0, -6 * tourne))
+    p.ouvert = 1 - cloche(t, 0.15, 0.03) - cloche(t, 0.85, 0.03)
+    return p
+
+
+def avance(t):
+    """Sa marche de parade : un pas lent et haut, la tête qui avance et recule à chaque pas, la roue qui balance."""
+    p = Pose()
+    for os_, phase in (("patte_G", 0.0), ("patte_D", 0.5)):
+        a = math.tau * (t + phase)
+        p.add(os_, rot=(-22 * math.sin(a), 0, 0), pos=(0, 0, 0.012 * max(0.0, -math.cos(a))))
+    p.add("corps", pos=(0, 0, 0.006 * (0.5 - 0.5 * math.cos(2 * math.tau * t))), rot=(0, 3 * onde(t, 1), 0))
+    p.add("cou", rot=(-8 * onde(t, 2), 0, 0))
+    p.add("tete", rot=(6 * onde(t, 2), 0, 0))
+    p.add("roue", rot=(0, 3 * onde(t, 1, 0.25), 0))
+    return p
+
+
+def mange(t):
+    """Il baisse son long cou et picore deux fois, la roue toujours dressée, puis relève la tête, très digne."""
+    p = Pose()
+    bas = cloche(t, 0.30, 0.13) + cloche(t, 0.66, 0.13)
+    pique = onde(t, 14) * bas
+    p.add("cou", rot=(58 * bas, 0, 0))
+    p.add("tete", rot=(22 * bas + 6 * pique, 0, 0))
+    p.add("corps", rot=(10 * bas, 0, 0))
+    p.add("roue", rot=(-10 * bas, 0, 0))
+    return p
+
+
+def joie(t):
+    """Sa fête : la roue frissonne et cliquette, il se dresse sur ses pattes, déploie les ailes et lance un cri, la
+    tête au ciel ; puis il reprend la pose."""
+    p = Pose()
+    haut = cloche(t, 0.45, 0.16)
+    frisson = onde(t, 18) * cloche(t, 0.45, 0.22)
+    p.add("corps", pos=(0, 0, 0.030 * haut), rot=(-6 * haut, 0, 0))
+    p.add("roue", rot=(4 * frisson - 6 * haut, 0, 0), ech=(1 + 0.06 * haut, 1 + 0.06 * haut, 1))
+    p.add("aile_G", rot=(0, 0, 30 * haut))
+    p.add("cou", rot=(-14 * haut, 0, 0))
+    p.add("tete", rot=(-24 * haut, 0, 0))
+    return p
+
+
+def dort(t):
+    """Accroupi, la roue repliée et couchée derrière lui, le cou rentré, la tête posée sur le dos ; il respire
+    lentement."""
+    p = Pose()
+    r = onde(t, 1)
+    p.add("corps", pos=(0, 0, -0.110), rot=(18, 0, 0), ech=(1 + 0.012 * r, 1, 1 + 0.016 * r))
+    p.add("patte_G", rot=(-80, 0, 0))
+    p.add("patte_D", rot=(-80, 0, 0))
+    p.add("roue", rot=(-62, 0, 0), ech=(0.55, 0.55, 1))
+    p.add("cou", rot=(-30, 0, 0))
+    p.add("tete", rot=(40, 0, 60))
+    p.ouvert = 0.0
+    return p
+
+
+ANIMATIONS = {"repos": (120, repos, True), "avance": (24, avance, True), "mange": (60, mange, True),
+              "joie": (48, joie, False), "dort": (120, dort, True)}
+
 
 if __name__ == "__main__":
     K.planche(construire, "Paon")

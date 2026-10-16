@@ -100,7 +100,7 @@ def construire():
     tete = fuseau([(0.0, 0.0), (0.05, 0.070), (0.20, 0.090), (0.45, 0.074), (0.68, 0.062), (0.84, 0.066), (0.96, 0.056), (1.0, 0.0)], 0.360, 48)
     rayer(tete, lambda z, u: (z + 0.030 * u) / 0.050, lambda z, u: 0.50 * (1.0 - 0.5 * u), ventre=0.84)
     tete.teinte[tete.v[:, 2] > 0.280] = GRIS
-    a.piece("tete", tete.sculpte(lambda v: v * [0.86, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.060, -0.050), (0, 0, 0)))
+    a.piece("tete", tete.sculpte(lambda v: v * [0.76, 0.88, 0.86]), None, mat=T @ A.repere((0, 0.060, -0.050), (0, 0, 0)))      # une tête un peu plus petite : la vue de tête recule d'autant
     a.tete = T @ Vector((0, 0.060, 0.100))                          # on vise le milieu de la tête : la caméra de la vue de tête recule
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.50, 0.42, 0.60)))

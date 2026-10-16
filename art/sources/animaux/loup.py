@@ -58,7 +58,7 @@ def construire():
     a.piece("fraise", col.etire(1.0, 1.0, 1.15), None, pos=(0.0, -0.39, 0.745), rot=(33, 0, 0))
 
     H = Vector((0.0, -0.51, 0.99))
-    RT = A.repere(H, (-58, 0, 0))                 # la tête renversée : le museau au ciel
+    RT = A.repere(H, (-28, 0, 0))                 # la tête relevée sans se renverser : les deux yeux restent de face
     crane = A.boule(1.0, 48, 24)
     for c in (1, -1):
         crane.sculpte(lambda v, c=c: K.bosse(v, (c * 0.9, -0.4, -0.2), 0.16, 0.28))      # les joues

@@ -33,8 +33,8 @@ def construire():
     r = O.oiseau(a, dos=NOIR, ventre=NOIR * 1.15, tete=NOIR, aile=REFLET, queue=NOIR * 0.9, bec=BEC, patte=GRIS, long=0.40, ray=0.120,
                  incline=40.0, z0=0.165, tete_r=(0.074, 0.088, 0.072), tete_pos=(0.0, -0.110, 0.050), bec_long=0.140, bec_ray=0.048,
                  bec_baisse=-0.10, aile_dim=(0.028, 0.100, 0.230), aile_pos=(0.0, 0.040, 0.0), queue_dim=(0.050, 0.130, 0.014),
-                 queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0185, oeil_dir=(0.58, -0.80, 0.20), coupe_dos=1.30, cou_ray=0.066, aile_pointue=True,
-                 tete_rot=(-6, 0, 22))
+                 queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0185, oeil_dir=(0.42, -0.88, 0.20), coupe_dos=1.30, cou_ray=0.066, aile_pointue=True,
+                 tete_rot=(-6, 0, 0))
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # ----- le sourcil lourd : un bourrelet noir au-dessus de chaque œil, qui donne l'air sévère -----

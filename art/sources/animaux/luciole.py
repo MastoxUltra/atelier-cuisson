@@ -30,7 +30,7 @@ FIL = M.hexa("#241a16")
 
 def construire():
     a = K.Animal("luciole")
-    a.taille = 0.45                                # plus gros : il se noyait dans l'herbe (« flou »)
+    a.taille = 0.60                                # plus gros : il se noyait dans l'herbe (« flou »)
 
     # ----- le thorax : un bouclier bombé à liseré rouge, la tête cachée dessous ; les élytres : deux lames brunes écartées -----
     thorax = A.boule(1.0, 36, 18).etire(0.070, 0.062, 0.050)
@@ -52,11 +52,11 @@ def construire():
 
     # ----- la tête : une petite boule noire sous le thorax, deux gros boutons, les longues antennes -----
     H = Vector((0.0, -0.120, 0.100))
-    tete = A.boule(1.0, 28, 14).etire(0.044, 0.040, 0.038)
-    a.piece("tete", O.teinte(tete, BRUN * 0.8), None, pos=tuple(H))
-    O.paire_yeux(a, "tete", H, (0.62, -0.75, 0.20), 0.0240, decolle=0.003)
+    tete = A.boule(1.0, 28, 14).etire(0.062, 0.056, 0.052)                      # une vraie tête, plus une petite boule
+    a.piece("tete", O.teinte(tete, BRUN * 0.95), None, pos=tuple(H))
+    O.paire_yeux(a, "tete", H, (0.45, -0.88, 0.18), 0.0270, decolle=0.003)
     for nom, c in (("G", 1), ("D", -1)):
-        ant = O.tube_r([(c * 0.020, -0.150, 0.115), (c * 0.050, -0.215, 0.160), (c * 0.075, -0.265, 0.150)], [0.0058, 0.0050, 0.0040], 8)
+        ant = O.tube_r([(c * 0.030, -0.168, 0.125), (c * 0.050, -0.205, 0.150), (c * 0.065, -0.230, 0.146)], [0.0085, 0.0070, 0.0050], 8)
         a.piece("antenne_" + nom, O.teinte(ant, BRUN * 0.8), None, poil=False)
     a.tete = H + Vector((0.0, -0.06, 0.0))
 
