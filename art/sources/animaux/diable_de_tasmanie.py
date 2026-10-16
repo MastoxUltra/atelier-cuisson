@@ -96,6 +96,9 @@ def construire():
         s[:, 1] *= np.where(v[:, 1] < 0, 0.70, 0.74 + 0.12 * np.exp(-((f - 0.66) / 0.16) ** 2))
         return s
     a.piece("corps", corps.sculpte(trapu).sculpte(fil.couche), None)
+    # la barre blanche du poitrail, cousue bien en face (peinte dans la teinte, elle ne se voyait pas de face : 16/10)
+    poitrail, _av, _nq = fil.cadre(0.90 * long)
+    a.rustine("barre", "corps", Vector(poitrail), (0.0, -0.80, -0.45), lambda th: 0.42 + 0.10 * math.cos(2 * th), NEIGE, 0.004, 0)
 
     # ----- la tête : un coin pointu, le crâne plat, les bajoues larges ; dans son repère, X la gauche, Y le dessus, Z vers
     #       la truffe. Le masque : une raie blanche sur le front, deux bandes noires du nez aux oreilles, les joues blanches,
@@ -130,9 +133,8 @@ def construire():
     centre = T @ Vector((0, 0, 0.100))
     for nom, c in (("G", 1), ("D", -1)):
         d = T3 @ Vector((c * 0.58, 0.26, 0.74))
-        a.rustine("iris_" + nom, "tete", centre, d, 0.20, OEIL, 0.003, 0)
         pos, n = a.surface("tete", centre, d)
-        a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0170)            # ouverts, sans paupière lourde
+        a.oeil("oeil_" + nom, pos + n * 0.005, n, 0.0215)            # noirs et simples, assez gros pour briller sur le noir
 
     # ----- les oreilles : rondes et dressées, le dedans qui rougit -----
     for nom, c in (("G", 1), ("D", -1)):
@@ -197,7 +199,7 @@ def _cote(g, d):
     return lambda points, cote: {g if cote == "_G" else d: np.ones(len(points))}
 
 
-PORTEURS = [("corps", "corps"), ("tete", "tete"), ("truffe", "tete"), ("oeil", "tete"), ("iris", "tete"), ("lourde", "tete"),
+PORTEURS = [("corps", "corps"), ("tete", "tete"), ("truffe", "tete"), ("oeil", "tete"), ("lourde", "tete"), ("barre", "corps"),
             ("oreille", _cote("oreille_g", "oreille_d")), ("dedans", _cote("oreille_g", "oreille_d")),
             ("patte_avant", _cote("av_g", "av_d")), ("griffes", _cote("av_g", "av_d")),
             ("patte_arriere", "ar", True), ("cuisse", "ar", True), ("queue", "queue"),

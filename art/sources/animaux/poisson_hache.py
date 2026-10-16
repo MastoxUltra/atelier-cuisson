@@ -49,7 +49,7 @@ def construire():
     t = np.tile(ARGENT, (len(u), 1))
     t[u[:, 2] > 0.55] = DOS
     corps.teinte = t
-    a.piece("corps", corps.sculpte(lame).etire(0.028, 0.120, 0.160), None, pos=(0.0, 0.0, 0.200), poil=False)      # argenté et lisse : le corps plat en hache
+    a.piece("corps", corps.sculpte(lame).etire(0.044, 0.120, 0.160), None, pos=(0.0, 0.0, 0.200), poil=False)      # argenté et lisse : le corps plat en hache
     pedoncule = A.tour(A.profil([(0.0, 0.0), (0.040, 0.020), (0.024, 0.090), (0.012, 0.170), (0.010, 0.200)], 4), 20)
     pedoncule.teinte = np.tile(ARGENT * 0.96, (len(pedoncule.v), 1))
     a.piece("pedoncule", O.couche(pedoncule, A.cadre(Vector((0.0, 0.080, 0.225)), Vector((0.0, 1.0, 0.05)), (0, 0, 1))), None, poil=False)
@@ -70,8 +70,8 @@ def construire():
         tube.teinte = np.tile(ORBE, (len(tube.v), 1))
         # (plus de tubes à tiges : les yeux sont posés directement sur la tête)
         pupille = A.boule(1.0, 14, 8).etire(0.016, 0.016, 0.010)
-        a.oeil("oeil_" + nom, Vector((c * 0.030, -0.100, 0.292)), Vector((c * 0.35, -0.88, 0.32)).normalized(), 0.030)      # sur le front, regardant vers l'avant : les deux se voient de face
-    bouche = A.tour(A.profil([(0.026, 0.0), (0.020, 0.020), (0.010, 0.036), (0.0, 0.040)], 3), 18).etire(1.0, 0.6, 1.0)
+        a.oeil("oeil_" + nom, Vector((c * 0.036, -0.100, 0.292)), Vector((c * 0.40, -0.86, 0.32)).normalized(), 0.022)      # sur le front, regardant vers l'avant : les deux se voient de face
+    bouche = A.tour(A.profil([(0.014, 0.0), (0.011, 0.014), (0.006, 0.026), (0.0, 0.030)], 3), 18).etire(1.0, 0.6, 1.0)
     bouche.teinte = np.tile(ARGENT * 0.92, (len(bouche.v), 1))
     a.piece("bouche", O.couche(bouche, A.cadre(Vector((0.0, -0.110, 0.285)), Vector((0.0, -1.0, 0.70)), (0, 0, 1))), None, poil=False)      # lisse : plus de boule grise sur la face
 

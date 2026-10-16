@@ -93,38 +93,32 @@ def construire():
     t[(u[:, 1] < -0.36) & ((u[:, 0] / 0.82) ** 2 + ((u[:, 2] + 0.06) / 0.72) ** 2 < 1.0)] = ROSE                  # la face nue : un disque
     t[(u[:, 2] > 0.38) & (u[:, 1] < -0.10) & (np.abs(u[:, 0]) < 0.8)] = BRUME * 0.94                              # le front bas, sous les mèches
     tete.teinte = t
-    a.piece("tete", tete.etire(0.130, 0.112, 0.116), None, mat=RT)
-    masque = A.boule(1.0, 28, 14).etire(0.074, 0.018, 0.062)                       # la face nue : un masque rouge LISSE, sans poil par-dessus
-    a.piece("masque", O.teinte(masque, ROSE), None, mat=RT @ A.repere((0.0, -0.086, -0.010)), poil=False)
-    a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.007, 0.009), tuple(CHAIR * 0.70), mat=RT @ A.repere((0.0, -0.103, -0.026)), poil=False)
+    a.piece("tete", tete.etire(0.168, 0.145, 0.150), None, mat=RT)
+    masque = A.boule(1.0, 28, 14).etire(0.095, 0.022, 0.080)                       # la face nue : un masque rouge LISSE, sans poil par-dessus
+    a.piece("masque", O.teinte(masque, ROSE), None, mat=RT @ A.repere((0.0, -0.112, -0.012)), poil=False)
+    a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.007, 0.009), tuple(CHAIR * 0.70), mat=RT @ A.repere((0.0, -0.134, -0.034)), poil=False)
     for c in (1, -1):
-        a.piece("narine_%d" % c, A.boule(1.0, 10, 6).etire(0.0065, 0.004, 0.006), NEZ, mat=RT @ A.repere((c * 0.0105, -0.1105, -0.027)), poil=False)
+        a.piece("narine_%d" % c, A.boule(1.0, 10, 6).etire(0.0065, 0.004, 0.006), NEZ, mat=RT @ A.repere((c * 0.0135, -0.1440, -0.035)), poil=False)
     O.paire_yeux(a, "tete", H, (0.34, -0.90, 0.10), 0.0135, couleur_lourde=tuple(ROSE * 0.93), coupe=0.60, decolle=0.016, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 22, 12).etire(0.034, 0.014, 0.032)
-        a.piece("oreille_" + nom, O.teinte(ore, CHAIR), None, mat=RT @ A.repere((c * 0.122, 0.018, 0.006)), poil=False)
-    # la collerette : de longues mèches claires autour du disque rouge, qui retombent sur les joues et sur le menton
-    colle = None
-    for k in range(30):
-        an = -math.pi * 0.20 + math.pi * 1.40 * k / 29                                   # de la joue droite, par le menton, à la joue gauche
-        cx, cz = 0.098 * math.cos(an + math.pi), 0.092 * math.sin(an + math.pi)
-        p = RT @ Vector((cx, -0.062 - 0.030 * math.cos(an * 1.5) ** 2, cz - 0.018))
-        d = Vector((cx * 5.0, -0.35, cz * 3.0 - 0.45 if cz < 0 else cz * 2.0)).normalized()
-        m = meche(p, RT.to_3x3() @ d, 0.044 + 0.010 * (k % 3), 0.0210, PALE * 0.98)
-        colle = m if colle is None else colle + m
-    a.piece("collerette", colle, None, poil=False)
+        a.piece("oreille_" + nom, O.teinte(ore, CHAIR), None, mat=RT @ A.repere((c * 0.158, 0.022, 0.008)), poil=False)
+    # la collerette : un bourrelet doux de poil clair autour de la face (plus de pointes blanches)
+    colle = A.tore(0.118, 0.038, 40, 12)
+    colle.teinte = np.tile(PALE * 0.98, (len(colle.v), 1))
+    a.piece("collerette", colle.etire(1.0, 0.70, 1.05), None, mat=RT @ A.repere((0.0, -0.075, -0.014), (90, 0, 0)))
     # le front : des mèches grises qui tombent sur le haut de la face
     front = None
     for k in range(9):
-        x = -0.074 + 0.0185 * k
-        p = RT @ Vector((x, -0.080 + 0.005 * abs(k - 4), 0.052 + 0.010 * math.cos(k)))
+        x = -0.096 + 0.0240 * k
+        p = RT @ Vector((x, -0.104 + 0.006 * abs(k - 4), 0.068 + 0.013 * math.cos(k)))
         d = Vector((x * 1.5, -0.45, -0.85)).normalized()
         m = meche(p, RT.to_3x3() @ d, 0.040, 0.0190, BRUME * 0.96)
         front = m if front is None else front + m
     a.piece("front", front, None, poil=False)
-    neige = A.boule(1.0, 28, 14).etire(0.084, 0.076, 0.034)
-    a.piece("neige", O.teinte(neige, NEIGE), None, mat=RT @ A.repere((0.0, 0.004, 0.092), (-8, 0, 0)))
-    bouche = [tuple(RT @ Vector((0.050 * u_, -0.092 - 0.010 * (1 - u_ * u_), -0.058 + 0.020 * u_ * u_))) for u_ in np.linspace(-1, 1, 7)]
+    neige = A.boule(1.0, 28, 14).etire(0.108, 0.098, 0.044)
+    a.piece("neige", O.teinte(neige, NEIGE), None, mat=RT @ A.repere((0.0, 0.005, 0.120), (-8, 0, 0)))
+    bouche = [tuple(RT @ Vector((0.064 * u_, -0.120 - 0.012 * (1 - u_ * u_), -0.075 + 0.026 * u_ * u_))) for u_ in np.linspace(-1, 1, 7)]
     a.broderie("bouche", A.courbe(bouche, 3), 0.0022, FIL)
     a.tete = H + Vector((0.0, -0.17, 0.0))
 
