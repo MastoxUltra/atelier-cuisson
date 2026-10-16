@@ -24,7 +24,7 @@ ARGENT = np.array(M.hexa("#b3bfd0"))          # la dominante (registre : argent 
 NACRE = np.array(M.hexa("#e7ecf4"))           # le ventre, les reflets
 GRIS = np.array(M.hexa("#7f8a9e"))            # les nageoires, la frange
 FIL = M.hexa("#3a4256")
-TOURNE = 35                                    # la fiche le prend de face, les deux yeux vers la caméra (à -22, de trois quarts : un seul œil) ; 0 pour le jeu
+TOURNE = 5                                     # de trois quarts avant : les deux yeux ET les grands ailerons (à 35, de face, ils se lisaient comme des tiges ; à -22, un seul œil) ; 0 pour le jeu
 
 
 def couche(m, mat):

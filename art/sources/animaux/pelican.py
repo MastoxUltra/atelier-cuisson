@@ -39,20 +39,21 @@ def construire():
     # la poche orange pendue dessous ; les ailes repliées, gardées à part, aux rémiges noires ; les pattes courtes, les palmes.
 
     # ----- le corps : un œuf couché, l'avant relevé, le dos saumon pâle, le ventre blanc -----
-    T = A.repere((0.0, 0.180, 0.300), (64, 0, 0))                   # l'axe de l'œuf : de la queue (derrière) au poitrail (devant, en haut)
-    pc = A.profil([(0, 0.0), (0.140, 0.020), (0.235, 0.110), (0.262, 0.260), (0.240, 0.420), (0.180, 0.540), (0.090, 0.610), (0, 0.640)], 6)
+    # (2e réglage : l'œuf rond faisait une boule ; le corps d'un pélican est bien plus long que haut)
+    T = A.repere((0.0, 0.360, 0.240), (70, 0, 0))                   # l'axe : de la queue (derrière) au poitrail (devant, un peu en haut)
+    pc = A.profil([(0, 0.0), (0.100, 0.020), (0.170, 0.120), (0.205, 0.300), (0.200, 0.480), (0.165, 0.640), (0.100, 0.760), (0, 0.820)], 6)
     corps = A.tour(pc, 52)
     ang = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     t_ = np.tile(BLANC, (len(ang), 1))
     t_[(ang < 1.25) & (corps.v[:, 2] > 0.05)] = SAUMON
     corps.teinte = t_
     a.piece("corps", corps, None, mat=T)
-    haut = Vector(T @ Vector((0, 0, 0.585)))                        # le haut du poitrail, où part le cou
+    haut = Vector(T @ Vector((0, 0, 0.760)))                        # le haut du poitrail, où part le cou
 
     # ----- le cou en S qui se replie, la petite tête posée haut au-dessus des épaules -----
-    H = haut + Vector((0.0, 0.110, 0.300))
-    cou = O.tube_r([tuple(haut + Vector((0, 0.015, 0.0))), tuple(haut + Vector((0, -0.045, 0.120))), tuple(haut + Vector((0, -0.010, 0.230))),
-                    tuple(H + Vector((0, 0.030, -0.040)))], [0.098, 0.082, 0.072, 0.066], 20)
+    H = haut + Vector((0.0, -0.090, 0.330))                         # le cou en S doux, la tête en avant
+    cou = O.tube_r([tuple(haut + Vector((0, 0.020, -0.010))), tuple(haut + Vector((0, -0.065, 0.120))), tuple(haut + Vector((0, -0.045, 0.230))),
+                    tuple(H + Vector((0, 0.035, -0.035)))], [0.092, 0.078, 0.070, 0.064], 20)
     a.piece("cou", O.teinte(cou, BLANC), None)
     tete = A.boule(1.0, 40, 20)
     u = tete.v
@@ -63,8 +64,8 @@ def construire():
     a.tete = H + Vector((0.0, -0.22, -0.08))
 
     # ----- le bec : long, étroit et plat, un peu crochu au bout ; il descend devant le cou ; la poche orange pendue dessous -----
-    LB = 0.440
-    sens_bec = Vector((0.0, -1.0, -0.62)).normalized()
+    LB = 0.460
+    sens_bec = Vector((0.0, -1.0, -0.32)).normalized()                 # vers l'avant, un peu vers le bas (il pendait à la verticale)
     B = A.cadre(H + Vector((0.0, -0.072, -0.016)), sens_bec, (0, 0, 1))
     e_ = 0.72
     prof_bec = [(0.046 * e_, 0.0), (0.045 * e_, 0.10 * LB), (0.042 * e_, 0.35 * LB), (0.037 * e_, 0.62 * LB), (0.031 * e_, 0.82 * LB),
@@ -103,18 +104,18 @@ def construire():
                                 (0, 0.630)], 6), 36)
         zz = aile.v[:, 2]
         aile.teinte = np.where((zz > 0.40)[:, None], tuple(np.array(M.hexa("#26211f"))), tuple(AILE))
-        depart = Vector((c * 0.205, -0.300, 0.540))
-        vers = Vector((c * 0.040, 0.92, -0.38)).normalized()
-        a.piece("aile_" + nom, aile.etire(0.38, 1.05, 1.0), None, mat=A.cadre(depart, vers, Vector((0, 0, 1))))
+        depart = Vector((c * 0.170, -0.250, 0.470))
+        vers = Vector((c * 0.030, 0.96, -0.26)).normalized()
+        a.piece("aile_" + nom, aile.etire(0.38, 1.00, 1.12), None, mat=A.cadre(depart, vers, Vector((0, 0, 1))))   # de l'épaule à la queue
     queue = A.boule(1.0, 24, 12).etire(0.070, 0.090, 0.022)
-    a.piece("queue", O.teinte(queue, BLANC), None, pos=(0.0, 0.250, 0.320), rot=(-20, 0, 0))
+    a.piece("queue", O.teinte(queue, BLANC), None, pos=(0.0, 0.420, 0.265), rot=(-20, 0, 0))
 
     # ----- les pattes courtes et fortes, rose orangé ; les grandes palmes -----
     for nom, c in (("G", 1), ("D", -1)):
-        jambe = O.tube_r([(c * 0.105, 0.040, 0.180), (c * 0.112, 0.010, 0.090), (c * 0.115, -0.010, 0.016)], [0.036, 0.030, 0.026], 12)
+        jambe = O.tube_r([(c * 0.095, 0.030, 0.210), (c * 0.100, 0.005, 0.100), (c * 0.103, -0.012, 0.016)], [0.028, 0.023, 0.020], 12)
         a.piece("jambe_" + nom, O.teinte(jambe, PATTE), None, poil=False)
         palme = A.boule(1.0, 20, 8).etire(0.074, 0.105, 0.012)
-        a.piece("palme_" + nom, O.teinte(palme, PATTE), None, pos=(c * 0.118, -0.080, 0.012), rot=(0, 0, c * 8), poil=False)
+        a.piece("palme_" + nom, O.teinte(palme, PATTE), None, pos=(c * 0.106, -0.082, 0.012), rot=(0, 0, c * 8), poil=False)
     return a
 
 

@@ -53,14 +53,16 @@ def construire():
         return s
     corps = A.boule(1.0, 56, 28)
     corps.teinte = np.where((corps.v[:, 2] < -0.45)[:, None], np.asarray(CLAIR), np.asarray(ROUILLE))
+    corps.teinte[(corps.v[:, 2] > 0.80) & (np.abs(corps.v[:, 0]) < 0.30)] = np.asarray(SOMBRE)        # la crinière PEINTE le long de l'échine : fondue dans le dos
     G.sillons(corps, [14], 0.005, 1.1)
     a.piece("corps", corps.sculpte(tonneau), None, pos=CORPS)
     a.couture("dos", "corps", 14, 0.35, 0.95)
     rng = np.random.default_rng(6)
-    for i, y in enumerate(np.linspace(-0.26, 0.30, 17)):
-        h = 0.060 - 0.022 * abs(y) / 0.3
-        a.piece("soie_%02d" % i, A.boule(1.0, 10, 6).etire(0.034, 0.040, h + 0.012 * rng.random()), SOMBRE,
-                pos=(0.0, CORPS.y + y, CORPS.z + 0.215 * (1 - 0.12 * ((y / 0.32 + 0.0) / 1.0)) + 0.020), rot=(rng.uniform(-14, 14), 0, 0), poil=False)
+    for i, y in enumerate(np.linspace(-0.27, 0.30, 26)):
+        h = 0.034 - 0.012 * abs(y) / 0.3
+        # des mèches PLATES et COURTES (minces en travers, couchées un peu vers l'arrière), plantées dans l'échine : plus de boudin
+        a.piece("soie_%02d" % i, A.boule(1.0, 10, 6).etire(0.010, 0.032, h + 0.008 * rng.random()), SOMBRE,
+                pos=(0.0, CORPS.y + y, CORPS.z + 0.215 * (1 - 0.12 * ((y / 0.32 + 0.0) / 1.0)) + 0.004), rot=(rng.uniform(-24, -6), 0, rng.uniform(-9, 9)), poil=False)
 
     # ----- la tête : large, plate sur le dessus, le museau carré ; quatre verrues ; les défenses recourbées ; de côté vers nous -----
     H = A.repere(TETE, (-10, 0, LACET))
