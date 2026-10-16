@@ -103,7 +103,7 @@ def construire():
     a.piece("tete", tete.sculpte(lambda v: v * [0.86, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.060, -0.050), (0, 0, 0)))
     a.tete = T @ Vector((0, 0.060, 0.100))                          # on vise le milieu de la tête : la caméra de la vue de tête recule
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 1.00, 0.12, 0.0)))
+        pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.78, 0.26, 0.42)))
         # (le cerne noir est retiré : il se lisait comme d'énormes yeux autour du museau)
         a.oeil("oeil_" + nom, pos + n * 0.008, n, 0.0300)
         po = A.profil([(0, 0), (0.026, 0.012), (0.036, 0.050), (0.028, 0.092), (0.010, 0.120), (0, 0.130)], 6)
