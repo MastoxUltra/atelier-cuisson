@@ -104,8 +104,9 @@ def construire():
     a.tete = T @ Vector((0, 0.060, 0.100))                          # on vise le milieu de la tête : la caméra de la vue de tête recule
     for nom, c in (("G", 1), ("D", -1)):
         # les yeux comme sur la planche 98 (ronds, de face, rien d'autre ne change), mais REMONTÉS nettement : au niveau du front,
-        # juste sous la base des oreilles (l'auteur : « pas assez haut »)
-        pos, n = a.surface("tete", T @ Vector((0, 0.070, 0.110)), T3 @ Vector((c * 0.46, 0.92, 0.38)))
+        # juste sous la base des oreilles (l'auteur : « pas assez haut ») ; plus haut le crâne se rétrécit : la direction latérale est
+        # élargie (0,92) pour garder le MÊME écart entre les yeux qu'à la planche 98 (9,6 cm)
+        pos, n = a.surface("tete", T @ Vector((0, 0.070, 0.110)), T3 @ Vector((c * 0.92, 0.92, 0.38)))
         a.oeil("oeil_" + nom, pos + n * 0.008, n, 0.0300)
         po = A.profil([(0, 0), (0.026, 0.012), (0.036, 0.050), (0.028, 0.092), (0.010, 0.120), (0, 0.130)], 6)
         vers = Vector((c * 0.22, 0.22, 0.95)).normalized()
