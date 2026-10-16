@@ -73,7 +73,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", H, R3 @ Vector((c * 0.62, 0.20, 0.76)))
         ore = A.boule(1.0, 24, 12).sculpte(lambda v: v + np.stack([0 * v[:, 0], 0 * v[:, 1], 0.6 * (v[:, 0] ** 2 + v[:, 1] ** 2)], axis=1))
-        a.piece("oreille_" + nom, O.teinte(ore.etire(0.040, 0.020, 0.036), NOISETTE * 0.85), None,
+        a.piece("oreille_" + nom, O.teinte(ore.etire(0.056, 0.026, 0.052), NOISETTE * 0.85), None,          # assez grandes pour se voir
                 mat=A.cadre(pos + n * 0.012, n, R3 @ Vector((0.0, -1.0, 0.0))))   # épaisseur d'avant en arrière
     a.tete = RT @ Vector((0.0, -0.250, -0.020))
 

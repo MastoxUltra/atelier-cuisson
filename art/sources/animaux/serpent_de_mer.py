@@ -25,11 +25,14 @@ VENTRE = np.array(M.hexa("#d8e6ec"))
 LANGUE = M.hexa("#e2778a")
 FIL = M.hexa("#10101a")
 
-# le fil du corps, de la pagaie au bout du nez : un S couché sur le sable, puis le cou qui se dresse et la tête qui revient
+# le fil du corps, de la pagaie au bout du nez : un S couché sur le sable, et la tête à peine relevée qui vient vers nous
+# (16/10, planches 19-20 : « corps et visage bizarres » ; la référence est un serpent marin couché à plat. Le cou dressé
+# en point d'interrogation est retiré, et « haut » garde le dos en haut le long des boucles : avec le flanc fixe, le corps
+# s'écrasait en ruban tordu là où le S passait par le flanc)
 CHEMIN = [(0.30, 0.46, 0.030), (0.17, 0.50, 0.040), (0.04, 0.42, 0.048), (-0.06, 0.28, 0.050), (-0.04, 0.12, 0.050),
-          (0.10, 0.02, 0.050), (0.22, -0.10, 0.050), (0.16, -0.24, 0.050), (0.00, -0.28, 0.056), (-0.12, -0.20, 0.080),
-          (-0.14, -0.08, 0.150), (-0.08, -0.06, 0.260), (-0.02, -0.12, 0.350), (0.01, -0.20, 0.390), (0.0, -0.27, 0.368)]
-FIL_ = K.Fil(CHEMIN, flanc=(1.0, 0.0, 0.0), pas=10)
+          (0.10, 0.02, 0.050), (0.22, -0.10, 0.050), (0.16, -0.24, 0.050), (0.00, -0.28, 0.056), (-0.10, -0.34, 0.066),
+          (-0.13, -0.44, 0.092), (-0.11, -0.54, 0.118), (-0.07, -0.62, 0.128)]
+FIL_ = K.Fil(CHEMIN, flanc=(1.0, 0.0, 0.0), pas=10, haut=(0.0, 0.0, 1.0))
 L = FIL_.long
 TETE_F = 1.0 - 0.050 / L                      # la fraction où commence la tête
 

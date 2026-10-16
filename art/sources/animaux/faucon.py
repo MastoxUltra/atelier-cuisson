@@ -26,7 +26,7 @@ CLAIR = np.array(M.hexa("#e8cfb0"))           # le ventre, moucheté
 GRISBLEU = np.array(M.hexa("#7f8c9a"))        # la tête
 NOIR = M.hexa("#1d1a1c")                      # la moustache
 JAUNE = M.hexa("#f0c030")                     # la cire, les pattes
-BEC = M.hexa("#3a3a42")
+BEC = M.hexa("#cfc8b4")                       # le bec : corne claire, bien visible sur la tête bleu-gris
 
 
 def peint_tete(m, t):
@@ -46,14 +46,14 @@ def construire():
     a.taille = 0.58
 
     r = O.oiseau(a, dos=BRIQUE, ventre=CLAIR, tete=GRISBLEU, aile=BRIQUE * 0.92, queue=BRIQUE * 0.85, bec=BEC, patte=JAUNE, long=0.36,
-                 ray=0.115, incline=36.0, z0=0.140, tete_r=(0.064, 0.074, 0.062), tete_pos=(0.0, -0.100, 0.052), bec_long=0.050,
-                 bec_ray=0.0245, bec_baisse=-0.35, aile_dim=(0.026, 0.085, 0.230), aile_pos=(0.0, 0.035, 0.0),
+                 ray=0.115, incline=36.0, z0=0.140, tete_r=(0.064, 0.074, 0.062), tete_pos=(0.0, -0.100, 0.052), bec_long=0.070,
+                 bec_ray=0.0330, bec_baisse=-0.35, aile_dim=(0.026, 0.085, 0.230), aile_pos=(0.0, 0.035, 0.0),
                  queue_dim=(0.044, 0.140, 0.012), queue_haut=-16.0, patte_long=0.120, patte_ray=0.0135, oeil_r=0.0230,
                  oeil_dir=(0.32, -0.93, 0.20), bout_aile=BRIQUE * 0.55, coupe_dos=1.25, tete_rot=(-6, 0, 0), cou_ray=0.062, aile_pointue=True, peint_tete=peint_tete)
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # le bec crochu : le bout du bec se recourbe vers le bas en un crochet pointu
-    a.piece("crochet", O.couche(O.teinte(O.pointe(0.036, 0.0135, 8), np.array(BEC)), A.cadre(H + Vector((0.0, -0.108, -0.014)), Vector((0.0, -0.12, -1.0)), (0, 1, 0))), None, poil=False)
+    a.piece("crochet", O.couche(O.teinte(O.pointe(0.052, 0.0190, 8), np.array(M.hexa("#4a4650"))), A.cadre(H + Vector((0.0, -0.126, -0.016)), Vector((0.0, -0.10, -1.0)), (0, 1, 0))), None, poil=False)
 
     # ----- les mouchetures : de petites taches brunes sur le dos, des traits sur le ventre -----
     rng = np.random.default_rng(12)

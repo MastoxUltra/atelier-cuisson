@@ -28,7 +28,7 @@ ROSE = M.hexa("#e2778a")                      # l'accent : le trait du sourire
 
 # le fil du corps, du bout du bec au bout de la queue : le bec haut, le ventre posé, la queue qui se redresse
 CHEMIN = [(0.0, -0.84, 0.66), (0.0, -0.58, 0.54), (0.0, -0.28, 0.36), (0.0, 0.05, 0.255), (0.0, 0.42, 0.235),
-          (0.0, 0.80, 0.30), (0.0, 1.08, 0.46), (0.0, 1.24, 0.62)]
+          (0.0, 0.80, 0.265), (0.0, 1.08, 0.280), (0.0, 1.32, 0.290)]
 FIL = K.Fil(CHEMIN, flanc=(-1.0, 0.0, 0.0), pas=10)       # avec ce flanc, le dos de la pièce est en haut
 L = FIL.long
 
