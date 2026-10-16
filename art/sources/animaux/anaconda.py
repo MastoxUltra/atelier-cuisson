@@ -108,7 +108,7 @@ def construire():
     a.piece("tete", tete.etire(0.062, 0.036, 0.098), None, mat=T, poil=False)
     a.tete = T @ Vector((0, 0.0, 0.080))
     for nom, c in (("G", 1), ("D", -1)):
-        vers = T3 @ Vector((c * 1.00, 0.12, 0.34))                      # sur le flanc de la tête : posés sur la surface, plus au-dessus
+        vers = T3 @ Vector((c * 0.58, 0.82, 0.42))                      # sur le dessus de la tête plate, de part et d'autre : posés sur la surface
         pe, ne = a.surface("tete", T.to_translation(), vers)
         a.piece("bille_" + nom, A.boule(1.0, 20, 10).etire(0.026, 0.026, 0.016), OR, mat=A.cadre(pe + ne * 0.0004, ne), poil=False)
         a.bouton("oeil_" + nom, pe + ne * 0.0022, ne, 0.0125)

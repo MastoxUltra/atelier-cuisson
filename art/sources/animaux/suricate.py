@@ -75,7 +75,7 @@ def construire():
     #       yeux ; de petites oreilles en croissant, plantées bas sur les côtés -----
     # le cou : un tube qui monte du haut du tronc et ENTRE dans la tête (plus de tête flottante)
     a.piece("cou", A.tube(A.courbe([(0.0, 0.030, 0.350), (0.0, 0.005, 0.455), (0.0, -0.022, 0.530)], 5), lambda t: 0.052 - 0.006 * t, 20), tuple(FAUVE))
-    H = A.cadre(Vector((0.0, -0.030, 0.545)), Vector((0.0, -1.0, 0.04)).normalized(), Vector((0, 0, 1)))
+    H = A.cadre(Vector((0.0, -0.030, 0.545)), Vector((0.36, -1.0, 0.04)).normalized(), Vector((0, 0, 1)))
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.10, 0.052), (0.34, 0.060), (0.62, 0.042), (0.86, 0.026), (0.97, 0.017), (1.0, 0.0)], 0.210, 40, 0.005)
     tete.v[:, 0] *= 0.82

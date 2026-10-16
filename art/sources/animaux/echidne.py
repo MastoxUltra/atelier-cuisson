@@ -78,7 +78,7 @@ def construire():
     # ----- le visage : deux boutons sous le bord du manteau, deux joues pêche, deux petites oreilles -----
     p, n = sur(a, "corps", CORPS, (0.42, -0.74, 0.50))
     a.oeil("oeil", p + n * 0.004, n, 0.021, paire=True)
-    a.rustine("joue", "corps", CORPS, (0.62, -0.76, 0.12), 0.17, PRUNE, 0.0025, 12, paire=True)
+    # (la joue cousue est retirée : son anneau jaune se lisait comme une boucle d'oreille)
     p, n = sur(a, "corps", CORPS, (0.66, -0.50, 0.56))
     oreille = p + n * 0.009
     O = A.cadre(oreille, n, (0, -1, 0.2))
