@@ -43,9 +43,14 @@ MELON = M.hexa("#dcedfb")                     # l'accent : le melon, à peine pl
 NAGEOIRE = M.hexa("#9cc4e6")                  # les nageoires, la queue : un ton plus bas
 MARINE = M.hexa("#3a5a82")                    # le sourire
 # l'échine, de la queue (en l'air) à la tête : (avance vers l'arrière, hauteur)
-ECHINE = [(0.64, 0.400), (0.54, 0.262), (0.36, 0.170), (0.12, 0.150), (-0.10, 0.172), (-0.24, 0.225), (-0.32, 0.275)]
-GALBE = [(0.0, 0.0), (0.02, 0.012), (0.10, 0.034), (0.22, 0.072), (0.40, 0.135), (0.58, 0.178), (0.72, 0.184), (0.82, 0.166),
-         (0.88, 0.150), (0.93, 0.158), (0.975, 0.122), (1.0, 0.0)]
+# (16/10, planche 27 : l'auteur veut les proportions d'un vrai modèle) : le galbe est relevé tranche par tranche sur la
+# référence (references_3d/beluga, CC-BY : mesurée, rien d'importé), un tiers plus dodu pour la peluche : le corps le plus
+# épais au premier tiers, une longue queue qui s'affine, un cou marqué, une tête plus étroite que le corps mais haute
+# (le melon) ; couché presque droit, comme le modèle
+ECHINE = [(0.60, 0.215), (0.48, 0.180), (0.30, 0.165), (0.10, 0.168), (-0.10, 0.178), (-0.24, 0.190), (-0.36, 0.200)]
+GALBE = [(0.0, 0.0), (0.015, 0.022), (0.045, 0.034), (0.13, 0.061), (0.22, 0.076), (0.30, 0.100), (0.39, 0.121), (0.48, 0.142),
+         (0.57, 0.150), (0.65, 0.148), (0.74, 0.138), (0.83, 0.110), (0.87, 0.100), (0.915, 0.098), (0.955, 0.088),
+         (0.985, 0.060), (1.0, 0.0)]
 
 
 def construire():
@@ -71,8 +76,8 @@ def construire():
     flanc = np.asarray(fil.flanc, float)
 
     # ----- le melon : le front bombé, plus clair, posé sur la tête -----
-    M_ = A.cadre(Vector(centre + nuque * 0.092 + avant * 0.012), Vector(avant), Vector(nuque))
-    a.piece("melon", A.boule(1.0, 40, 20).etire(0.112, 0.074, 0.112), MELON, mat=M_)
+    M_ = A.cadre(Vector(centre + nuque * 0.052 + avant * 0.015), Vector(avant), Vector(nuque))      # la tête du modèle : haute
+    a.piece("melon", A.boule(1.0, 40, 20).etire(0.078, 0.058, 0.080), MELON, mat=M_)                  # devant, le museau court
     a.tete = Vector(centre + avant * 0.10 + nuque * 0.03)
 
     # ----- le sourire : un trait brodé qui court le long du museau et remonte à la joue ; les yeux : de petites billes -----
@@ -84,15 +89,15 @@ def construire():
         # (le sourire brodé est retiré : vu de face, ses deux traits bleus faisaient des moustaches)
         cen, av, nq = fil.cadre(0.905 * L)
         p, n = a.surface("corps", Vector(cen), Vector(av * 0.55 + flanc * c * 0.70 + nq * 0.35))     # plus en avant : de face, les deux yeux (16/10)
-        a.bouton("oeil_" + ("G" if c > 0 else "D"), p + n * 0.002, n, 0.022)
+        a.bouton("oeil_" + ("G" if c > 0 else "D"), p + n * 0.002, n, 0.018)
 
     # ----- les nageoires : deux petites pagaies rondes posées à plat, sous le cou, qui pointent vers l'arrière -----
-    cen, av, nq = fil.cadre(0.80 * L)
+    cen, av, nq = fil.cadre(0.74 * L)                                                # là où le modèle les porte
     for nom, c in (("G", 1), ("D", -1)):
-        depart = Vector(cen + flanc * c * 0.150 - nq * 0.100)
-        vers = Vector(flanc * c * 0.70 - av * 0.60 - nq * 0.10)
+        depart = Vector(cen + flanc * c * 0.110 - nq * 0.075)
+        vers = Vector(flanc * c * 0.78 - av * 0.50 - nq * 0.12)
         W = A.cadre(depart, vers, Vector(nq))
-        a.piece("nageoire_" + nom, A.boule(1.0, 32, 16).etire(0.058, 0.016, 0.108).pose((0, 0, 0.090)), NAGEOIRE, mat=W)
+        a.piece("nageoire_" + nom, A.boule(1.0, 32, 16).etire(0.050, 0.014, 0.095).pose((0, 0, 0.082)), NAGEOIRE, mat=W)
 
     # ----- la queue : deux lobes plats en V au bout de la cambrure, de profil dans le plan de la queue -----
     cen0, av0, nq0 = fil.cadre(0.0)

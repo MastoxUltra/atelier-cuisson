@@ -27,7 +27,7 @@ LUEUR = np.array(M.hexa("#bfe6ff"))           # les photophores du ventre
 FIL = M.hexa("#5a6c86")
 
 
-TOURNE = 55                                   # la fiche tourne le poisson (très plat) presque de face : on compte les DEUX yeux ; 0 pour le jeu
+TOURNE = 34                                   # la fiche tourne le poisson (très plat) presque de face : on compte les DEUX yeux ; 0 pour le jeu
 
 
 def construire():
@@ -70,8 +70,7 @@ def construire():
         tube.teinte = np.tile(ORBE, (len(tube.v), 1))
         # (plus de tubes à tiges : les yeux sont posés directement sur la tête)
         pupille = A.boule(1.0, 14, 8).etire(0.016, 0.016, 0.010)
-        pos_e, n_e = a.surface("corps", Vector((0.0, -0.020, 0.250)), Vector((c * 0.95, -0.50, 0.40)))        # sur le flanc, de chaque côté : même taille, même hauteur
-        a.oeil("oeil_" + nom, pos_e + n_e * 0.003, n_e, 0.030)
+        a.oeil("oeil_" + nom, Vector((c * 0.030, -0.100, 0.292)), Vector((c * 0.35, -0.88, 0.32)).normalized(), 0.030)      # sur le front, regardant vers l'avant : les deux se voient de face
     bouche = A.tour(A.profil([(0.026, 0.0), (0.020, 0.020), (0.010, 0.036), (0.0, 0.040)], 3), 18).etire(1.0, 0.6, 1.0)
     bouche.teinte = np.tile(ARGENT * 0.92, (len(bouche.v), 1))
     a.piece("bouche", O.couche(bouche, A.cadre(Vector((0.0, -0.110, 0.285)), Vector((0.0, -1.0, 0.70)), (0, 0, 1))), None, poil=False)      # lisse : plus de boule grise sur la face

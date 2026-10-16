@@ -22,7 +22,7 @@ import outils_a as O
 
 BRONZE = np.array(M.hexa("#d6b068"))          # la dominante (registre : bronze doré clair)
 RAIE = np.array(M.hexa("#8a6a30"))            # les rayures du ventre
-FUMEE = M.hexa("#8f8670")                     # les ailes fumées
+FUMEE = M.hexa("#c9b48a")                     # les ailes fumées
 NERVURE = M.hexa("#3e3322")
 OEIL = M.hexa("#8a2a22")
 PATTE = np.array(M.hexa("#a88848"))
@@ -72,6 +72,9 @@ def construire():
             for x, y in nerv:
                 pts.append(Vector(rep @ Vector((x, y, 0.004))))
             a.broderie("nervure_%s%d" % (nom, k), A.courbe(pts, 4), 0.0020, NERVURE)
+        for k, y_ in enumerate((0.06, 0.12, 0.18, 0.24)):                  # des nervures en travers : l'aile se lit transparente et veinée
+            tr = [Vector(rep @ Vector((c * x_, y_ + 0.01 * math.sin(x_ * 30), 0.004))) for x_ in (0.015, 0.05, 0.09, 0.13, 0.165)]
+            a.broderie("travers_%s%d" % (nom, k), A.courbe(tr, 3), 0.0016, NERVURE)
 
     # ----- les pattes : deux de chaque côté, courtes ; les antérieures plus fortes -----
     for k, (y, ep) in enumerate(((-0.100, 0.018), (-0.040, 0.014), (0.010, 0.012))):

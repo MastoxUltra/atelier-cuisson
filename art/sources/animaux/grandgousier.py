@@ -54,7 +54,7 @@ def construire():
     ch, av, nq = (Vector(q) for q in fil.cadre(0.955 * L))
     poche = A.boule(1.0, 40, 20).sculpte(lambda v: np.stack([v[:, 0], v[:, 1], np.where(v[:, 2] > 0, v[:, 2] * 0.85, v[:, 2])], axis=1))
     poche.teinte = np.tile(POCHE, (len(poche.v), 1))
-    a.piece("poche", poche.etire(0.078, 0.105, 0.075), None, pos=tuple(ch + Vector((0.0, -0.085, -0.040))), rot=(-30, 0, 0), poil=False)      # lisse : plus un coussin rose duveteux
+    a.piece("poche", poche.etire(0.066, 0.088, 0.056), None, pos=tuple(ch + Vector((0.0, -0.070, -0.070))), rot=(-30, 0, 0), poil=False)      # lisse : plus un coussin rose duveteux
     palais = A.boule(1.0, 24, 12).etire(0.080, 0.120, 0.016)
     palais.teinte = np.tile(POCHE * 0.80, (len(palais.v), 1))
     a.piece("palais", palais, None, pos=tuple(ch + Vector((0.0, -0.090, 0.005))), rot=(-18, 0, 0), poil=False)
@@ -66,8 +66,8 @@ def construire():
 
     # ----- deux petits yeux au bout du museau, dessus -----
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = O.sur_corps(fil, L, rayon, 0.950, 40, c, 1.0, 1.0, 0.003)
-        a.oeil("oeil_" + nom, p, n, 0.032)               # deux yeux ronds bien visibles sur la tête
+        p, n = O.sur_corps(fil, L, rayon, 0.930, 85, c, 1.0, 1.0, 0.003)
+        a.oeil("oeil_" + nom, p, n, 0.036)               # deux yeux ronds bien visibles sur la tête
 
     # ----- la lanterne : au bout du fouet, une perle rose lumineuse ; une petite nageoire de chaque côté de la nuque -----
     c0, av0, nq0 = (Vector(q) for q in fil.cadre(0.0))
