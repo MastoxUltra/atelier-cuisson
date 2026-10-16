@@ -56,10 +56,12 @@ def construire():
     # le bec (refait le 16/10, planche 21 : « le bec bizarre ») : un long fer PLAT et droit, un peu bombé sur le dessus,
     # qui finit par un petit crochet vers le BAS (l'onglet) ; l'ancien remontait en spatule (son repère avait l'axe y vers
     # le bas). Le repère a maintenant y vers le haut : z le long du bec, x sur le côté.
-    LB = 0.400
-    sens_bec = Vector((0.0, -1.0, -0.42)).normalized()
+    LB = 0.460                                                               # 2e essai : plus long et plus à plat (il plongeait
+    sens_bec = Vector((0.0, -1.0, -0.24)).normalized()                       # contre la poitrine et se lisait mal)
+    k_ = LB / 0.400
     B = A.cadre(H + Vector((0.0, -0.068, -0.024)), sens_bec, (0, 0, 1))
-    prof_bec = [(0.050, 0.0), (0.049, 0.060), (0.045, 0.160), (0.040, 0.260), (0.035, 0.335), (0.029, 0.372), (0.017, 0.392), (0, LB)]
+    prof_bec = [(0.050, 0.0), (0.049, 0.060 * k_), (0.045, 0.160 * k_), (0.040, 0.260 * k_), (0.035, 0.335 * k_), (0.029, 0.372 * k_),
+                (0.017, 0.392 * k_), (0, LB)]
     bec = A.tour(A.profil(prof_bec, 4), 28)
 
     def fer(v):
@@ -75,7 +77,8 @@ def construire():
     a.piece("bec", O.couche(bec, B), None, poil=False)
     # la poche : la peau orange sous la mandibule, qui l'épouse sur presque toute sa longueur (sa ligne du haut colle au
     # dessous du bec), la plus profonde au premier tiers, et qui rejoint la gorge (fondue avec elle par la base gonflée)
-    prof_poche = [(0.040, 0.0), (0.056, 0.070), (0.060, 0.140), (0.050, 0.220), (0.033, 0.290), (0.015, 0.334), (0, 0.350)]
+    prof_poche = [(0.040, 0.0), (0.056, 0.070 * k_), (0.060, 0.140 * k_), (0.050, 0.220 * k_), (0.033, 0.290 * k_), (0.015, 0.334 * k_),
+                  (0, 0.350 * k_)]
     poche = A.tour(A.profil(prof_poche, 5), 32)
 
     def pendre(v):

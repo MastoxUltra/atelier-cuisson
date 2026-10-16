@@ -71,18 +71,31 @@ def construire():
     # les yeux : petits, rapprochés, à la racine du museau ; les oreilles rondes sur les coins du crâne
     O.paire_yeux(a, "tete", H, (0.50, -0.80, 0.34), 0.0175, decolle=0.002, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", H, R3 @ Vector((c * 0.62, 0.20, 0.76)))
+        pos, n = a.surface("tete", H, R3 @ Vector((c * 0.50, 0.12, 0.86)))            # plus haut : elles se voient de face
         ore = A.boule(1.0, 24, 12).sculpte(lambda v: v + np.stack([0 * v[:, 0], 0 * v[:, 1], 0.6 * (v[:, 0] ** 2 + v[:, 1] ** 2)], axis=1))
-        a.piece("oreille_" + nom, O.teinte(ore.etire(0.056, 0.026, 0.052), NOISETTE * 0.85), None,          # assez grandes pour se voir
-                mat=A.cadre(pos + n * 0.012, n, R3 @ Vector((0.0, -1.0, 0.0))))   # épaisseur d'avant en arrière
+        a.piece("oreille_" + nom, O.teinte(ore.etire(0.058, 0.028, 0.062), NOISETTE * 0.85), None,          # plus saillantes
+                mat=A.cadre(pos + n * 0.024, n, R3 @ Vector((0.0, -1.0, 0.0))))   # épaisseur d'avant en arrière
     a.tete = RT @ Vector((0.0, -0.250, -0.020))
 
-    # ----- les pattes : quatre piliers épais, sombres, sur de larges pieds plantigrades aux griffes pâles -----
+    # ----- les pattes : quatre piliers épais, sombres, sur de larges pattes rondes du même brun foncé, EN POIL (16/10 : les
+    #       pieds de feutrine gris pâle et les longues lames blanches faisaient des chaussons) ; cinq griffes crème courtes,
+    #       à moitié cachées dans le poil, au bord de chaque patte -----
     for sgn, nom in ((1, "G"), (-1, "D")):
-        O.jambe(a, "avant_" + nom, (sgn * 0.135, -0.290, 0.440), (sgn * 0.145, -0.345 - 0.030 * sgn, 0.056), 0.108, NOISETTE, bas=SOMBRE,
-                bas_frac=0.34, sorte="av", plie=0.025, pied_dim=(0.074, 0.112, 0.034), griffes=4, couleur_griffe=GRIFFE, griffes_bout=True)
-        O.jambe(a, "arriere_" + nom, (sgn * 0.140, 0.260, 0.420), (sgn * 0.150, 0.300 + 0.030 * sgn, 0.056), 0.122, NOISETTE, bas=SOMBRE,
-                bas_frac=0.40, sorte="ar", plie=0.050, pied_dim=(0.078, 0.120, 0.034), griffes=4, couleur_griffe=GRIFFE, griffes_bout=True)
+        for sorte, haut_, pied_, R_, dim, bf, pl in (
+                ("avant", (sgn * 0.135, -0.290, 0.440), (sgn * 0.145, -0.345 - 0.030 * sgn, 0.056), 0.108, (0.086, 0.104, 0.050), 0.34, 0.025),
+                ("arriere", (sgn * 0.140, 0.260, 0.420), (sgn * 0.150, 0.300 + 0.030 * sgn, 0.056), 0.122, (0.090, 0.112, 0.050), 0.40, 0.050)):
+            pts = O.jambe(a, sorte + "_" + nom, haut_, pied_, R_, NOISETTE, bas=SOMBRE, bas_frac=bf, sorte="av" if sorte == "avant" else "ar",
+                          plie=pl, pied_dim=dim, griffes=0)
+            fin = pts[-1]
+            centre = Vector((fin[0], fin[1] - dim[1] * 0.35, dim[2] * 0.95))
+            for k in range(5):
+                dx = (k - 2) * 0.30 * dim[0]
+                g = O.couche(O.teinte(O.griffe(0.034, 0.0105), np.array(GRIFFE)),
+                             A.cadre(centre + Vector((dx, -dim[1] * 0.86 + 0.004 * abs(k - 2), -dim[2] * 0.45)), (0.0, -1.0, -0.40), (0, 0, 1)))
+                a.piece("griffe_%s_%s%d" % (sorte, nom, k), g, None, poil=False)
+    for p in a._toutes():                                             # les pattes en poil, comme les jambes
+        if p["nom"].startswith("pied_"):
+            p["poil"], p["zone"] = "teinte", "poil"
 
     # ----- la queue : un moignon rond derrière -----
     queue = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.9)).etire(0.050, 0.052, 0.048)
