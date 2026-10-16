@@ -350,7 +350,7 @@ RAYONS_AV = (1.00, 0.78, 0.66, 0.44, 0.52, 0.42, 0.40)       # l'épaule, le gen
 RAYONS_AR = (1.20, 0.88, 0.64, 0.42, 0.50, 0.42, 0.40)       # la cuisse, le jarret (3e)
 
 
-def jambe(a, nom, haut, pied, R, couleur, bas=None, sorte="av", plie=0.06, bas_frac=0.56, pied_dim=None, griffes=0, couleur_griffe=None):
+def jambe(a, nom, haut, pied, R, couleur, bas=None, sorte="av", plie=0.06, bas_frac=0.56, pied_dim=None, griffes=0, couleur_griffe=None, griffes_bout=False):
     """Une patte articulée complète : le tube à genou et boulet marqués (rayon R à l'épaule), la chaussette 'bas', un pied à plat
     sous le dernier point, des griffes en option. Rend les points."""
     pts = points_jambe(haut, pied, sorte, plie)
@@ -363,8 +363,11 @@ def jambe(a, nom, haut, pied, R, couleur, bas=None, sorte="av", plie=0.06, bas_f
         for k in range(griffes):
             dx = (k - (griffes - 1) / 2.0) * 0.5 * dim[0] * 1.5 / max(griffes - 1, 1)
             g = teinte(griffe(0.060 * R / 0.06 * 0.9, 0.012 * R / 0.06), cg)
-            a.piece("griffe_%s%d" % (nom, k), couche(g, A.cadre(Vector((fin[0] + dx, fin[1] - dim[1] * 0.85, dim[2] * 1.6 + 0.012)), (0.0, -1.0, -0.06), (0, 0, 1))),
-                    None, poil=False)
+            if griffes_bout:                              # plantées au bout des doigts, dans la patte (jamais en l'air au-dessus du pied)
+                pos_g = Vector((fin[0] + dx, fin[1] - dim[1] * 1.12, dim[2] * 0.95)); dir_g = (0.0, -1.0, -0.16)
+            else:
+                pos_g = Vector((fin[0] + dx, fin[1] - dim[1] * 0.85, dim[2] * 1.6 + 0.012)); dir_g = (0.0, -1.0, -0.06)
+            a.piece("griffe_%s%d" % (nom, k), couche(g, A.cadre(pos_g, dir_g, (0, 0, 1))), None, poil=False)
     return pts
 
 

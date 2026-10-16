@@ -104,7 +104,7 @@ def construire():
     bout = Vector(centre)
 
     # ----- la tête : lourde, le museau large, la grosse lèvre ; le front frisé ; tournée vers nous -----
-    T = A.cadre(bout + Vector((0.0, -0.030, 0.020)), Vector((0.0, -1.0, -0.12)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(bout + Vector((0.0, -0.030, 0.020)), Vector((0.36, -1.0, -0.12)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.066), (0.22, 0.092), (0.46, 0.078), (0.72, 0.068), (0.90, 0.070), (0.97, 0.052), (1.0, 0.0)], 0.330, 52, 0.005)
     tete.teinte = np.where((tete.v[:, 2] > 0.20)[:, None], tuple(CLAIR), tuple(LAINE))
@@ -115,9 +115,9 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pn, nn = a.surface("tete", T @ Vector((0, 0.0, 0.200)), T3 @ Vector((c * 0.45, 0.89, 0.0)))
         a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.006, 0.014, 0.012), tuple(NOIR), mat=A.cadre(pn + nn * 0.002, nn, T3 @ Vector((0, 0, 1))), poil=False)
-        regard = T3 @ Vector((c * 0.84, 0.34, 0.06))
+        regard = T3 @ Vector((c * 0.60, 0.34, 0.50))
         p, n = a.surface("tete", T @ Vector((0, 0.0, 0.030)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0180)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0230)
         # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         po = A.profil([(0, 0), (0.026, 0.008), (0.032, 0.032), (0.024, 0.056), (0.009, 0.074), (0, 0.082)], 5)
         a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.45, 1.0), tuple(FONCE),

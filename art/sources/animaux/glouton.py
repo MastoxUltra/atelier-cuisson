@@ -75,9 +75,9 @@ def construire():
     # ----- les pattes : courtes et très fortes, les épaules remontées, les grosses griffes pâles ; l'antérieur gauche avancé -----
     for sgn, nom in ((1, "G"), (-1, "D")):
         O.jambe(a, "avant_" + nom, (sgn * 0.100, -0.120, 0.340), (sgn * 0.115, -0.215 if sgn < 0 else -0.280, 0.052), 0.092, SUIE, bas=NOIRC, bas_frac=0.50,
-                sorte="av", plie=0.030, pied_dim=(0.060, 0.095, 0.030), griffes=4)
+                sorte="av", plie=0.030, pied_dim=(0.060, 0.095, 0.030), griffes=4, griffes_bout=True)
         O.jambe(a, "arriere_" + nom, (sgn * 0.100, 0.130, 0.360), (sgn * 0.118, 0.200, 0.052), 0.100, SUIE, bas=NOIRC, bas_frac=0.50,
-                sorte="ar", plie=0.06, pied_dim=(0.062, 0.100, 0.030), griffes=4)
+                sorte="ar", plie=0.06, pied_dim=(0.062, 0.100, 0.030), griffes=4, griffes_bout=True)
 
     # ----- la queue : touffue, traînante, plus claire sur le dessus, le bout noir -----
     queue = K.tube_peint(A.courbe([(0.0, 0.250, 0.370), (0.0, 0.370, 0.290), (0.040, 0.450, 0.160), (0.040, 0.440, 0.060)], 6),

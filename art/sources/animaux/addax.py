@@ -71,7 +71,7 @@ def construire():
     a.piece("cou", A.tube(A.courbe([(0.0, -0.250, 0.920), (0.0, -0.390, 0.900), (0.0, -0.490, 0.830)], 5), lambda t: 0.150 - 0.052 * t, 24), tuple(BLANC))
     a.piece("collier", A.boule(1.0, 40, 20).etire(0.152, 0.152, 0.075), tuple(BRUN), mat=A.cadre(Vector((0.0, -0.345, 0.865)), Vector((0.0, -1.0, -0.20)), Vector((0, 0, 1))))
     a.piece("barbe", A.boule(1.0, 24, 12).etire(0.060, 0.040, 0.110), tuple(BRUN), pos=(0.0, -0.470, 0.700), rot=(-18, 0, 0))
-    T = A.cadre(Vector((0.0, -0.600, 0.790)), Vector((0.0, -1.0, -0.34)).normalized(), Vector((0, 0, 1)))
+    T = A.cadre(Vector((0.0, -0.600, 0.790)), Vector((0.40, -1.0, -0.34)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.07, 0.078), (0.26, 0.096), (0.52, 0.084), (0.78, 0.072), (0.95, 0.060), (1.0, 0.0)], 0.320, 52, 0.006)
     tt = np.tile(BLANC, (len(tete.v), 1))
@@ -82,9 +82,9 @@ def construire():
     a.piece("nez", A.boule(1.0, 20, 10).etire(0.034, 0.024, 0.024), tuple(NOIR), mat=T @ A.repere((0, 0.004, 0.232)), poil=False)
     a.tete = T @ Vector((0, 0.0, 0.150))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = T3 @ Vector((c * 0.82, 0.38, 0.02))
+        regard = T3 @ Vector((c * 0.60, 0.38, 0.50))
         p, n = a.surface("tete", T.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0170)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0225)
         # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         # la corne en vrille : un axe qui monte vers l'arrière, la tige qui tourne autour, deux tours et demi
         pts = []

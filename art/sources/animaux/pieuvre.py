@@ -85,7 +85,7 @@ def construire():
 
     # ----- les huit bras : ils partent du dessous de la tête, rayonnent tout autour, s'étalent en S sur le sable et se
     #       recourbent au bout ; celui de devant à gauche se lève pour un signe (en gardant son S et sa boucle) -----
-    config = [(-0.78, 0.50, 0.30, +1.6, 0.34),                     # devant à gauche : levé, le bout en point d'interrogation
+    config = [(-0.78, 0.50, 0.30, +1.6, 0.0),                      # devant à gauche : POSÉ au sol comme les autres (l'auteur : tentacules baissés par défaut)
               (-1.58, 0.46, -0.28, -1.2, 0.0), (-2.36, 0.50, 0.30, 1.0, 0.0), (-3.14, 0.52, -0.26, -1.4, 0.0),
               (2.36, 0.52, 0.28, 1.3, 0.0), (1.58, 0.48, -0.30, -1.0, 0.0), (0.78, 0.50, 0.26, 1.5, 0.0), (0.00, 0.46, -0.28, -1.1, 0.0)]
     pastilles = None
