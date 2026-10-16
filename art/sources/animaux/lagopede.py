@@ -1,11 +1,16 @@
-"""Le lagopède en peluche, quatrième dessin, sur une autre base (l'oiseau debout de outils_a, comme le pigeon) : la perdrix
-des neiges d'après la photo de référence (art/sources/references/lagopede/). Un gallinacé dodu, la poitrine en proue,
-le corps incliné d'une quarantaine de degrés, la petite tête ronde sur un cou court, le bec court et sombre, le sourcil
-rouge en croissant au-dessus de l'œil ; le dos et la poitrine grège moucheté de brun, les ailes et le ventre blancs, la
-queue noire qui dépasse en pointe vers le sol. Les pattes sont emplumées de blanc jusqu'aux orteils : de gros chaussons.
+"""Le lagopède en peluche, cinquième dessin (16/10, Art : d'après les vues d'un vrai gallinacé de la même famille, CC-BY,
+regardé pour les proportions seulement, rien d'importé ; ses couleurs ne sont pas celles du lagopède). Plus d'œuf debout :
+un gallinacé dodu POSÉ À L'HORIZONTALE, la poitrine ronde en avant et un peu relevée, le dos qui descend vers une
+queue courte en éventail ; une petite tête ronde sur un cou court, le bec court, noir et crochu ; la caroncule vermillon
+en croissant au-dessus de l'œil ; le dos, le cou et la tête grège mouchetés de brun, les ailes repliées, le ventre et
+le dessous de la queue blancs, la queue noire bordée de blanc dessus ; des pattes emplumées de blanc jusqu'aux doigts.
+
+    les 5 traits : le corps de perdrix dodu, horizontal ; la petite tête ronde au bec court et noir ; la caroncule rouge
+    au-dessus de l'œil ; les pattes emplumées en chaussons blancs ; les ailes et le ventre blancs sous un manteau grège
+    moucheté, la queue noire.
 
     python lagopede.py        fabrique la fiche art/apercus/animaux/lagopede.png (style du palier : C, velours ras)
-    (les trois premiers dessins, jugés le 15/10 : « une boule, des chaussons détachés, un œuf aux ailes en volets »)
+    (refusés : trois « boules » le 15/10, puis « un œuf aux chaussons détachés et à la queue en palette » le 16/10)
 """
 import math
 import os
@@ -22,59 +27,109 @@ import matieres as M
 import peluche as K
 import outils_a as O                          # (garde-fous : aucun tube à segment nul)
 
-GREGE = np.array(M.hexa("#bca586"))           # la dominante (registre : grège moucheté) ; le velours éclaircit un peu
+GREGE = np.array(M.hexa("#c4ad8e"))           # la dominante (registre : grège moucheté #cbb79a ; le velours la fonce un peu)
 MOUCHE = np.array(M.hexa("#7f6a55"))          # les mouchetures
 BLANC = np.array(M.hexa("#fbf9f4"))           # les ailes, le ventre, les chaussons
 NOIR = np.array(M.hexa("#26211f"))            # la queue
-VERMILLON = M.hexa("#ee3b22")                 # l'accent : le sourcil
+VERMILLON = np.array(M.hexa("#ee3b22"))       # l'accent : la caroncule
+CREME = np.array(M.hexa("#fffaf0"))           # le fin tour de l'œil
 BEC = M.hexa("#241e1c")
-LONG, RAY = 0.420, 0.140                      # le corps (16/10 : moins rond, plus long)
+TETE = Vector((0.0, -0.190, 0.392))
+
+
+def mouchetures(v, cote, rayon, graine=0, proba=0.6):
+    """Vrai là où un point tombe dans une petite tache (des sphères au hasard dans un quadrillage 3D, coupées par la peau)."""
+    v = np.asarray(v, float)
+    base = np.floor(v / cote).astype(np.int64)
+    dedans = np.zeros(len(v), bool)
+    for dx in (-1, 0, 1):
+        for dy in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                c = base + np.array([dx, dy, dz], dtype=np.int64)
+                h = ((c[:, 0] * 73856093) ^ (c[:, 1] * 19349663) ^ (c[:, 2] * 83492791) ^ (graine * 40503)) & 0x7FFFFFFF
+
+                def alea(m):
+                    return ((((h * m) + 12345) >> 9) & 0xFFFF) / 65535.0
+                present = alea(1103515245) < proba
+                centre = (c + np.stack([alea(214013), alea(1664525), alea(22695477)], axis=1)) * cote
+                r = rayon * (0.65 + 0.70 * alea(134775813))
+                dedans |= present & (np.linalg.norm(v - centre, axis=1) < r)
+    return dedans
 
 
 def construire():
     a = K.Animal("lagopede")
-    a.taille = 0.52
+    a.taille = 0.50
+    a.gonflage_reglages = {"fins": 0.0, "pointes": 0.0}    # la queue reste une queue plate (gonflée, elle faisait une palette ronde)
 
-    # 16/10 (planche 21 : à refaire ; pas de modèle 3D trouvé) : moins de boule, plus d'oiseau. Le corps penché plus bas
-    # (un gallinacé tapi, pas un œuf debout), un peu plus long et moins rond ; la tête plus grosse, emmanchée sur un cou
-    # court ; posé plus près du sol, sur de gros chaussons de plumes.
-    r = O.oiseau(a, dos=GREGE, ventre=BLANC * 0.98, tete=GREGE * 0.97, aile=GREGE * 0.96, queue=NOIR, bec=BEC, patte=BLANC, long=LONG, ray=RAY,
-                 incline=54.0, z0=0.125, tete_r=(0.066, 0.070, 0.063), tete_pos=(0.0, -0.070, 0.040), bec_long=0.036, bec_ray=0.0170,
-                 bec_baisse=-0.12, aile_dim=(0.026, 0.092, 0.150), aile_pos=(-0.004, 0.030, -0.012), queue_dim=(0.046, 0.115, 0.014),
-                 queue_haut=-22.0, patte_long=0.080, patte_ray=0.030, oeil_r=0.0150, oeil_dir=(0.50, -0.82, 0.24), bout_aile=BLANC,
-                 coupe_dos=1.35, cou_ray=0.042, bec_suit=True)
-    H, T, haut = r["H"], r["T"], r["haut"]
+    # ----- le corps : un fuseau dodu couché, la poitrine devant (-Y) relevée de 18°, la queue derrière -----
+    def peint(m, L):
+        ang = np.abs(np.arctan2(m.v[:, 0], m.v[:, 1]))              # 0 : le dos ; pi : le ventre
+        fr = m.v[:, 2] / L                                          # 0 : la croupe ; 1 : la poitrine
+        t_ = np.tile(GREGE, (len(ang), 1))
+        blanc = (ang > 1.95 + 0.55 * np.clip((fr - 0.55) / 0.40, 0.0, 1.0)) | ((fr < 0.22) & (ang > 1.35))
+        t_[blanc] = BLANC                                           # le ventre blanc ; la poitrine reste grège
+        taches = mouchetures(m.v, 0.030, 0.0085, 5) & ~blanc
+        t_[taches] = MOUCHE
+        return t_
+    rayon = O.interp([(0.0, 0.0), (0.06, 0.062), (0.25, 0.102), (0.55, 0.126), (0.80, 0.122), (0.94, 0.090), (1.0, 0.040)])
+    O.corps_h(a, "corps", (0.0, 0.130, 0.170), 0.300, rayon, peint, None, cotes=56, pitch=18.0,
+              deforme=O.gabarit(poitrail=0.06, ventre=0.0, croupe=0.0))
 
-    # ----- les mouchetures : de petites taches brunes semées sur le dos, la poitrine et le cou, posées à plat sur le corps -----
-    rng = np.random.default_rng(21)
-    taches = None
-    prof_z = [0.0, 0.010, 0.070, 0.160, 0.250, 0.315, 0.350, 0.362]
-    prof_r = [0.0, 0.55, 0.90, 1.0, 0.88, 0.62, 0.34, 0.0]
-    for k in range(95):
-        th = rng.uniform(-2.2, 2.2)                                                  # 0 : le dos ; ±π : le ventre
-        zz = rng.uniform(0.06, 0.34) * LONG / 0.34
-        rr = RAY * float(np.interp(zz / (LONG / 0.34), prof_z, prof_r))
-        if rr < 0.04 or abs(th) > 2.0 and zz < 0.16:
-            continue
-        n = (T.to_3x3() @ Vector((math.sin(th), math.cos(th), 0.0))).normalized()
-        pos = T @ Vector((rr * math.sin(th), rr * math.cos(th) + 0.001, zz))
-        g = A.boule(1.0, 10, 6).etire(0.014 + 0.006 * rng.random(), 0.010 + 0.005 * rng.random(), 0.0035)
-        g = O.couche(O.teinte(g, MOUCHE), A.cadre(pos, n, (0, 0, 1)))
-        taches = g if taches is None else taches + g
-    a.piece("mouchetures", taches, None, poil=False)
+    # ----- le cou, court et épais ; la tête ronde, un peu tournée vers nous -----
+    cou = O.tube_r([(0.0, -0.110, 0.300), (0.0, -0.145, 0.340), (0.0, -0.172, 0.368)], [0.072, 0.066, 0.060], 22)
+    tc = np.tile(GREGE, (len(cou.v), 1))
+    tc[mouchetures(cou.v, 0.030, 0.0085, 9)] = MOUCHE
+    cou.teinte = tc
+    a.piece("cou", cou, None)
+    RT = A.repere(TETE, (0, 0, 20))
+    tete = A.boule(1.0, 56, 28)
+    u = tete.v / np.maximum(np.linalg.norm(tete.v, axis=1, keepdims=True), 1e-9)
+    t = np.tile(GREGE, (len(u), 1))
+    t[mouchetures(tete.v * 0.075, 0.022, 0.0060, 13)] = MOUCHE
+    OEIL_DIR = np.array([0.55, -0.78, 0.26])
+    for c in (1, -1):
+        e = OEIL_DIR * [c, 1, 1]
+        e /= np.linalg.norm(e)
+        t[(u @ e) > 0.910] = GREGE                                  # pas de moucheture autour de l'œil (pas d'œil en plus)
+        t[(u @ e) > 0.9636] = CREME                                 # le fin tour clair de l'œil (l'œil couvre ~12,6°)
+        cr = e * 0.80 + np.array([0.0, 0.0, 0.32])
+        cr /= np.linalg.norm(cr)
+        croissant = ((u @ cr) > math.cos(math.radians(14))) & ((u @ e) < math.cos(math.radians(15.5))) & (u[:, 2] > e[2] + 0.04)
+        t[croissant] = VERMILLON                                    # la caroncule, en croissant au-dessus de l'œil
+    tete.teinte = t
+    a.piece("tete", tete.etire(0.076, 0.080, 0.072), None, mat=RT)
+    O.paire_yeux(a, "tete", TETE, tuple(OEIL_DIR), 0.0150, couleur_lourde=tuple(GREGE), coupe=0.62, decolle=0.002, R=RT)
+    a.tete = RT @ Vector((0.0, -0.085, -0.005))
 
-    # ----- le sourcil rouge : un croissant plat posé juste au-dessus de chaque œil -----
+    # ----- le bec : court, fort, noir, un peu crochu, planté dans la face -----
+    bec = O.pointe(0.040, 0.020, 14).sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.30 * 0.040 * (v[:, 2] / 0.040) ** 2, v[:, 2]], axis=1))
+    a.piece("bec", O.couche(bec.etire(1.0, 0.85, 1.0), RT @ A.cadre(Vector((0.0, -0.066, -0.010)), Vector((0.0, -1.0, -0.22)), Vector((0, 0, 1)))),
+            BEC, poil=False)
+
+    # ----- les ailes repliées, blanches, plaquées sur les flancs, le bout vers la queue -----
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", H, Vector((c * 0.74, -0.46, 0.50)))
-        sourcil = A.boule(1.0, 16, 8).etire(0.0195, 0.0070, 0.0050)
-        a.piece("sourcil_" + nom, O.couche(O.teinte(sourcil, np.array(VERMILLON)), A.cadre(pos + n * 0.001, n, (0, 0, 1))), None, poil=False)
+        aile = A.boule(1.0, 36, 18).sculpte(lambda v: K.emousse(v, 0.85))
+        aile.sculpte(lambda v: np.stack([v[:, 0], v[:, 1] * (1.0 - 0.35 * np.clip(v[:, 2], 0.0, 1.0) ** 1.5), v[:, 2]], axis=1))   # effilée vers l'arrière
+        a.piece("aile_" + nom, O.teinte(aile.etire(0.030, 0.070, 0.115), BLANC), None,
+                mat=A.cadre(Vector((c * 0.098, 0.040, 0.235)), Vector((c * 0.10, 1.0, -0.30)), Vector((0, 0, 1))))
 
-    # ----- les chaussons : deux gros pieds emplumés de blanc, les orteils à peine visibles dessous ; le dessous de la queue blanc -----
+    # ----- la queue : courte, en éventail, noire, le dessus bordé de blanc ; le dessous blanc -----
+    q = A.boule(1.0, 40, 20).sculpte(lambda v: K.emousse(v, 0.8))
+    q.sculpte(lambda v: np.stack([v[:, 0] * (0.70 + 0.30 * np.clip(v[:, 1], -1, 1) ** 2 + 0.30 * (v[:, 1] + 1) * 0.5), v[:, 1], v[:, 2]], axis=1))
+    tq = np.tile(NOIR, (len(q.v), 1))
+    tq[(q.v[:, 2] > 0.35) & (q.v[:, 1] < 0.35)] = BLANC             # les couvertures blanches sur le dessus
+    tq[q.v[:, 2] < -0.40] = BLANC                                   # le dessous
+    q.teinte = tq
+    a.piece("queue", q.etire(0.060, 0.075, 0.024), None, mat=A.repere((0.0, 0.180, 0.212), (-10, 0, 0)))          # plantée dans la croupe, un peu tombante
+
+    # ----- les pattes : courtes, emplumées de blanc jusqu'aux doigts, plantées sous le ventre -----
     for nom, c in (("G", 1), ("D", -1)):
-        chausson = A.boule(1.0, 28, 14).sculpte(lambda v: K.emousse(v, 0.8)).etire(0.050, 0.090, 0.040)      # gros, sous le ventre
-        a.piece("chausson_" + nom, O.teinte(chausson, BLANC), None, pos=(c * 0.055, -0.048, 0.040))
-    sous = A.boule(1.0, 20, 10).etire(0.034, 0.060, 0.026)
-    a.piece("sous_queue", O.teinte(sous, BLANC), None, mat=T @ A.repere((0.0, 0.055, 0.020), (-10, 0, 0)))
+        jambe = O.tube_r([(c * 0.044, 0.010, 0.135), (c * 0.048, -0.002, 0.075), (c * 0.050, -0.012, 0.035)], [0.034, 0.030, 0.028], 18)
+        a.piece("patte_" + nom, O.teinte(jambe, BLANC), None)
+        pied = A.boule(1.0, 24, 12).sculpte(lambda v: K.emousse(v, 0.8))
+        pied.sculpte(lambda v: K.bosse(v, (0.0, -1.0, 0.0), 0.35, 0.25))                     # les doigts emplumés devant
+        a.piece("pied_" + nom, O.teinte(pied.etire(0.036, 0.054, 0.020), BLANC), None, pos=(c * 0.052, -0.034, 0.020))
     return a
 
 

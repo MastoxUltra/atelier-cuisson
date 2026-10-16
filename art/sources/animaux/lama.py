@@ -33,8 +33,8 @@ AVANT = Vector((math.sin(COL), -math.cos(COL), 0.0))
 FLANC = np.array([math.cos(COL), math.sin(COL), 0.0])
 BASE = Vector((0.0, -0.215, 0.655))           # le pied du cou, enfoui dans le poitrail
 ARC = [(0.0, 0.0), (0.030, 0.110), (0.040, 0.220), (0.026, 0.320), (0.000, 0.388), (-0.020, 0.420)]   # haut, tiré en arrière
-LACET, PIQUE, PENCHE = 52.0, -24.0, -10.0      # la tête : tournée vers nous, le nez en l'air, un rien penchée
-GROSSE = 1.55
+LACET, PIQUE, PENCHE = 52.0, -6.0, -6.0        # la tête : tournée vers nous, le nez droit (en l'air, le gros plan ne montrait que le dessous du museau)
+GROSSE = 1.25                                 # une tête plus petite au bout du long cou (référence)
 
 
 def gauss(x):
@@ -72,8 +72,8 @@ def construire():
     a.taille = 1.70
 
     # ----- le corps : un tonneau bouclé, couché vers l'avant ; X la gauche, Y le dos, Z l'avant ; le poitrail crème -----
-    pc = A.profil([(0, 0), (0.100, 0.012), (0.152, 0.060), (0.168, 0.140), (0.166, 0.300), (0.170, 0.440),
-                   (0.158, 0.540), (0.114, 0.600), (0, LONG)], 6)
+    pc = A.profil([(0, 0), (0.090, 0.012), (0.134, 0.060), (0.148, 0.140), (0.146, 0.300), (0.150, 0.440),
+                   (0.140, 0.540), (0.102, 0.600), (0, LONG)], 6)      # moins tonneau, plus allongé (vues de la référence, 16/10)
     corps = A.tour(pc, 48)
     ang = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     t = np.tile(np.asarray(ROSE), (len(ang), 1))
@@ -130,7 +130,7 @@ def construire():
     # ----- les yeux : grands, vivants, sous une paupière lourde à demi baissée : il nous regarde de haut -----
     centre = T @ Vector((0, 0, 0.070))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.82, 0.42, 0.10)))
+        pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.64, 0.42, 0.42)))     # plus en avant : les deux yeux de face
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.020)
         haut = (T3 @ Vector((0, 1, 0)) - n * n.dot(T3 @ Vector((0, 1, 0)))).normalized()
         a.piece("lourde_" + nom, K.paupiere(0.020, 0.60), ROSE, mat=A.cadre(pos + n * 0.003, n, haut), poil=False)
@@ -142,11 +142,11 @@ def construire():
             s = v.copy()
             s[:, 0] -= c * 2.0 * np.clip(v[:, 2] - 0.03, 0, None) ** 2
             return s
-        oreille = K.bandes(A.tour(po, 32).etire(1.0, 0.55, 1.0), [(0.104, ROSE), (9, CHOCO)])
+        oreille = K.bandes(A.tour(po, 32).etire(1.0, 0.55, 1.45), [(0.150, ROSE), (9, CHOCO)])     # longues bananes (référence)
         vers = (T3 @ Vector((c * 0.42, 0.88, -0.24))).normalized()
         E = A.cadre(T @ Vector((c * 0.040, 0.044, 0.034)) - vers * 0.012, vers, T3 @ Vector((c * 0.25, 0.10, 0.96)))
         a.piece("oreille_" + nom, oreille.sculpte(banane), None, mat=E)
-        a.piece("pavillon_" + nom, A.tour(po, 24).etire(0.55, 0.40, 0.72).pose((0, 0.009, 0.012)).sculpte(banane), CREME, mat=E,
+        a.piece("pavillon_" + nom, A.tour(po, 24).etire(0.55, 0.40, 1.05).pose((0, 0.009, 0.012)).sculpte(banane), CREME, mat=E,
                 poil=False)
 
     # ----- la queue : un toupet bouclé, dressé -----

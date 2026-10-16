@@ -52,7 +52,7 @@ def construire():
     O.paire_yeux(a, "tete", H, (0.42, -0.86, 0.12), 0.034 * E, decolle=0.003)
     for nom, c in (("G", 1), ("D", -1)):                          # les antennes : de longues tiges qui partent du front
         ant = O.tube_r([(c * 0.035 * E, -0.235 * E, 0.330 * E), (c * 0.075 * E, -0.300 * E, 0.400 * E), (c * 0.125 * E, -0.345 * E, 0.420 * E)],
-                       [0.0075, 0.0060, 0.0050], 8)
+                       [0.0075, 0.0060, 0.0050], 16)   # 16 côtés : à 8, elles étaient facettées (16/10)
         a.piece("antenne_" + nom, O.teinte(ant, BRUN * 0.8), None, poil=False)
         a.piece("bout_antenne_" + nom, A.boule(1.0, 12, 6).etire(0.009, 0.009, 0.009), tuple(BRUN * 0.8),
                 pos=tuple(v(c * 0.125, -0.345, 0.420)), poil=False)

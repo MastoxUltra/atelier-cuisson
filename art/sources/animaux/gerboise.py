@@ -73,11 +73,13 @@ def construire():
         E = A.cadre(H @ Vector((c * 0.040, 0.014, 0.050)), H3 @ Vector((c * 0.26, 0.06, 0.96)), H3 @ Vector((c * 0.3, -0.9, 0.0)))
         a.piece("oreille_" + nom, A.boule(1.0, 28, 14).etire(0.030, 0.009, 0.086).pose((0, 0, 0.074)), tuple(SABLE), mat=E)
         a.piece("dedans_" + nom, A.boule(1.0, 24, 12).etire(0.019, 0.008, 0.068).pose((0, -0.005, 0.072)), ROSE, mat=E, poil=False)
-        # trois moustaches de chaque côté : de longs fils clairs
+        # trois moustaches de chaque côté : de longs fils clairs BRODÉS (16/10, Art : en pièces de tissu, la base gonflée
+        # les fondait dans la peau et les gonflait en un coin blanc devant le museau ; brodées, elle les refait souples)
         for k, (haut, ouvert) in enumerate(((0.012, 0.30), (0.0, 0.0), (-0.012, -0.30))):
             d = H3 @ Vector((c * 1.0, -0.40 + 0.30 * ouvert, 0.10 * ouvert * 2.0))
             dep = H @ Vector((c * 0.030, -0.078, -0.012 + haut))
-            a.piece("moustache_%s%d" % (nom, k), A.tube([tuple(dep), tuple(dep + d.normalized() * 0.100)], 0.0022, 6), tuple(CLAIR), poil=False)
+            a.broderie("moustache_%s%d" % (nom, k), [tuple(dep), tuple(dep + d.normalized() * 0.050), tuple(dep + d.normalized() * 0.100)],
+                       0.0016, tuple(CLAIR))
 
     # ----- les bras : minuscules, les mains serrées sur la poitrine ; les cuisses énormes, les longs pieds ; la queue -----
     for nom, c in (("G", 1), ("D", -1)):
