@@ -582,6 +582,8 @@ def _choisir(a, h_essai, L):
                 pourquoi = "pièce posée (griffe, dent, truffe, ourlet)"
             elif str(p.get("groupe", "")).startswith(epingle.OS_LIBRES):
                 pourquoi = "épingle"
+            elif nom.startswith(tuple(getattr(a, "fusion_a_part", ()))):   # la bête les veut à part (les ailes en cape du vautour, 16/10)
+                pourquoi = "à part (demandé par la bête)"
             else:
                 c, t = p["monde"].mean(axis=0), np.ptp(p["monde"], axis=0).max()
                 if any(np.linalg.norm(c - y) < 1.8 * r and t < 4.5 * r for y, r in yeux):

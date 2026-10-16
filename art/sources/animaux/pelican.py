@@ -56,18 +56,19 @@ def construire():
     # le bec (refait le 16/10, planche 21 : « le bec bizarre ») : un long fer PLAT et droit, un peu bombé sur le dessus,
     # qui finit par un petit crochet vers le BAS (l'onglet) ; l'ancien remontait en spatule (son repère avait l'axe y vers
     # le bas). Le repère a maintenant y vers le haut : z le long du bec, x sur le côté.
-    LB = 0.460                                                               # 2e essai : plus long et plus à plat (il plongeait
+    LB = 0.520                                                               # 3e essai : plus long et plus à plat (il plongeait
     sens_bec = Vector((0.0, -1.0, -0.24)).normalized()                       # contre la poitrine et se lisait mal)
     k_ = LB / 0.400
     B = A.cadre(H + Vector((0.0, -0.068, -0.024)), sens_bec, (0, 0, 1))
-    prof_bec = [(0.050, 0.0), (0.049, 0.060 * k_), (0.045, 0.160 * k_), (0.040, 0.260 * k_), (0.035, 0.335 * k_), (0.029, 0.372 * k_),
-                (0.017, 0.392 * k_), (0, LB)]
+    e_ = 0.78                                                                # plus étroit (de face, il faisait un bec de canard)
+    prof_bec = [(0.050 * e_, 0.0), (0.049 * e_, 0.060 * k_), (0.045 * e_, 0.160 * k_), (0.040 * e_, 0.260 * k_), (0.035 * e_, 0.335 * k_),
+                (0.029 * e_, 0.372 * k_), (0.017 * e_, 0.392 * k_), (0, LB)]
     bec = A.tour(A.profil(prof_bec, 4), 28)
 
     def fer(v):
         s = v.copy()
         t = np.clip(v[:, 2] / LB, 0.0, 1.0)
-        s[:, 1] = v[:, 1] * 0.32 + 0.006 * np.sin(np.pi * t)                 # plat, le dessus à peine bombé
+        s[:, 1] = v[:, 1] * 0.32 / e_ + 0.006 * np.sin(np.pi * t)            # plat, le dessus à peine bombé (épaisseur gardée)
         s[:, 1] -= 0.034 * np.clip((t - 0.86) / 0.14, 0.0, 1.0) ** 2          # l'onglet : le bout crochu vers le bas
         return s
     bec.sculpte(fer)
@@ -84,7 +85,7 @@ def construire():
     def pendre(v):
         s = v.copy()
         r = np.interp(v[:, 2], [p[1] for p in prof_poche], [p[0] for p in prof_poche])
-        s[:, 0] = v[:, 0] * 0.80                                             # un peu moins large que le bec
+        s[:, 0] = v[:, 0] * 0.80 * e_                                        # un peu moins large que le bec
         s[:, 1] = v[:, 1] - r - 0.010                                        # pendue : le haut sous la mandibule
         return s
     poche.sculpte(pendre)

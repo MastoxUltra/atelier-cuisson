@@ -94,27 +94,63 @@ def construire():
 
     # ----- la tête : petite, étroite, le museau crème ; penchée vers nous d'en haut ; deux ossicônes à houppe, les oreilles -----
     centre, avant, nuque = enc.cadre(Lc)
-    l, p = math.radians(40.0), math.radians(-8.0)
+    # 16/10, 3e essai de la TÊTE (« pas encore à la hauteur ») : 20 % plus grande ; le museau en coin, large au front, qui
+    # s'affine, le bout un peu élargi et aplati, deux narines en fente, une couture de bouche ; de gros yeux sous une paupière
+    # (bord à 0,62 : l'œil ouvert) et quelques longs cils sombres ; tournée moins vers nous et les yeux plus en avant : de
+    # trois quarts, le museau ne cache plus le second œil
+    G_ = 1.20
+    l, p = math.radians(10.0), math.radians(-10.0)                   # à peine tournée : de trois quarts, ses deux yeux se voient
     nez = Vector((math.sin(l) * math.cos(p), -math.cos(l) * math.cos(p), math.sin(p)))
     T = A.cadre(Vector(centre) + Vector((0.0, -0.020, 0.040)), nez, Vector((0, 0, 1)))
     T3 = T.to_3x3()
-    # 16/10 : une tête plus forte que le haut du cou (la tête fine sur un cou épais faisait un bâton), le front plein ; le museau
-    # d'un fauve uni, à peine plus sombre au bout (le bout CORNE faisait une truffe noire de chien, puis la crème une boule blanche)
-    tete = fuseau([(0.0, 0.0), (0.05, 0.062), (0.20, 0.082), (0.45, 0.064), (0.70, 0.052), (0.90, 0.047), (0.97, 0.038), (1.0, 0.0)], 0.420, 56, 0.006)
+    LT = 0.420 * G_
+    tete = fuseau([(0.0, 0.0), (0.05, 0.064 * G_), (0.18, 0.086 * G_), (0.42, 0.072 * G_), (0.68, 0.060 * G_), (0.88, 0.056 * G_),
+                   (0.96, 0.048 * G_), (1.0, 0.0)], LT, 56, 0.006)
     tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.5)[:, None], CREME, MIEL)
-    tete.teinte[tete.v[:, 2] > 0.360] = MIEL * 0.82
-    a.piece("tete", tete.sculpte(lambda v: v * [0.84, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.040, -0.060)))
-    a.tete = T @ Vector((0, 0.040, 0.140))
+    tete.teinte[tete.v[:, 2] > 0.86 * LT] = MIEL * 0.82                             # le bout du museau, un ton plus sombre
+
+    def coin(v):                                       # le coin : large au front, qui s'affine, le bout élargi et aplati
+        s = v.copy()
+        f = np.clip(v[:, 2] / LT, 0.0, 1.0)
+        s[:, 0] = v[:, 0] * np.interp(f, [0.0, 0.25, 0.70, 0.90, 1.0], [0.98, 0.92, 0.74, 0.86, 0.84])
+        s[:, 1] = v[:, 1] * np.interp(f, [0.0, 0.30, 0.70, 0.90, 1.0], [1.00, 1.00, 0.94, 0.74, 0.70])
+        s[:, 1] -= np.where(v[:, 1] > 0, 0.10 * v[:, 1] * np.clip((f - 0.3) / 0.7, 0.0, 1.0), 0.0)     # le chanfrein droit
+        return s
+    RT = T @ A.repere((0, 0.040 * G_, -0.060 * G_))                                  # le repère de la tête : z vers le bout du museau
+    RT3 = RT.to_3x3()
+    a.piece("tete", tete.sculpte(coin), None, mat=RT)
+    a.tete = RT @ Vector((0, 0.0, 0.50 * LT))
+    a.paupieres_lourdes = "fines"                      # la base gonflée garde les paupières, fines, le bord à 0,60 au moins
+    R_OEIL = 0.028
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", T @ Vector((0, 0.040, 0.050)), T3 @ Vector((c * 0.84, 0.42, 0.06)))
-        a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0200)                                 # plus grands : de grands yeux sombres
-        # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
+        pos, n = a.surface("tete", RT @ Vector((0.0, 0.010, 0.20 * LT)), RT3 @ Vector((c * 0.55, 0.40, 0.72)))   # plus en avant : vus de face et de trois quarts
+        a.oeil("oeil_" + nom, pos + n * 0.004, n, R_OEIL)
+        h = (Vector((0, 0, 1)) - n * n.z).normalized()
+        a.piece("lourde_" + nom, K.paupiere(R_OEIL * 1.15, 0.62), tuple(MIEL), mat=A.cadre(pos + n * 0.005, n, h), poil=False)
+        cote_ = h.cross(n).normalized()
+        for k, ang in enumerate((50.0, 75.0, 100.0, 125.0)):                       # quatre longs cils sombres sur le haut
+            r_ = math.radians(ang if c > 0 else 180.0 - ang)
+            bord = pos + n * 0.010 + (cote_ * math.cos(r_) + h * math.sin(r_)) * R_OEIL * 1.05
+            sort = (cote_ * math.cos(r_) + h * math.sin(r_)).normalized()
+            pts = [bord, bord + sort * 0.014 + n * 0.006, bord + sort * 0.028 + n * 0.004 + h * 0.008]
+            cil = A.tube(A.courbe([tuple(q) for q in pts], 4), lambda t_: 0.0026 * (1.0 - 0.6 * t_), 8)
+            a.piece("cils_%s%d" % (nom, k), cil, (0.10, 0.07, 0.05), poil=False)
+        # les narines en fente, sur le dessus du bout du museau, un peu de biais
+        pn, nn = a.surface("tete", RT @ Vector((0.0, 0.0, 0.88 * LT)), RT3 @ Vector((c * 0.45, 0.80, 0.30)))
+        fente = A.boule(1.0, 12, 6).etire(0.0045, 0.0130, 0.0030)
+        a.piece("narine_" + nom, fente, tuple(np.array(BRUN) * 0.8), mat=A.cadre(pn + nn * 0.001, nn, RT3 @ Vector((c * 0.35, 0.0, 1.0))), poil=False)
         oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.020, 0.050), (0.015, 0.088), (0, 0.102)], 5), 18)      # courts, comme une vraie
-        a.piece("ossicone_" + nom, oss, tuple(MIEL), mat=A.cadre(T @ Vector((c * 0.030, 0.092, -0.040)), Vector((c * 0.10, 0.20, 0.97)), (0, 1, 0)))
-        a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.022, 0.022, 0.022), BRUN, pos=tuple(T @ Vector((c * 0.034, 0.108, -0.040)) + Vector((c * 0.008, 0.016, 0.080))))
+        a.piece("ossicone_" + nom, oss, tuple(MIEL), mat=A.cadre(T @ Vector((c * 0.030 * G_, 0.092 * G_, -0.040 * G_)), Vector((c * 0.10, 0.20, 0.97)), (0, 1, 0)))
+        a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.022, 0.022, 0.022), BRUN,
+                pos=tuple(T @ Vector((c * 0.034 * G_, 0.108 * G_, -0.040 * G_)) + Vector((c * 0.008, 0.016, 0.080))))
         po = A.profil([(0, 0), (0.030, 0.008), (0.040, 0.032), (0.030, 0.060), (0.010, 0.078), (0, 0.084)], 5)
-        E = A.cadre(T @ Vector((c * 0.064, 0.056, -0.034)), Vector((c * 0.95, 0.10, 0.28)), (0, 0, 1))
+        E = A.cadre(T @ Vector((c * 0.064 * G_, 0.056 * G_, -0.034 * G_)), Vector((c * 0.95, 0.10, 0.28)), (0, 0, 1))
         a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.10, 0.36, 1.15), [(0.060, tuple(MIEL)), (9, BRUN)]), None, mat=E)   # plus petites
+    # la couture de la bouche, qui fait le tour du bout du museau, en bas
+    bouche = a.trace("tete", RT @ Vector((0.0, -0.012 * G_, 0.80 * LT)),
+                     [RT3 @ Vector((math.sin(th), -0.55, math.cos(th))) for th in np.linspace(-1.35, 1.35, 9)], 0.002)
+    if len(bouche) > 1:
+        a.broderie("bouche", A.courbe(bouche, 4), 0.0030, M.hexa("#3a2618"))
 
     # ----- les jambes : quatre longues, fines, les genoux noueux ; pavés en haut, crème en bas ; les sabots sombres -----
     def jambe(depart, plan, graine):
@@ -172,6 +208,7 @@ PORTEURS = [
     ('crin_20', 'corps'), ('crin_21', 'corps'), ('crin_22', 'corps'), ('crin_23', 'corps'), ('pinceau', 'queue'),
     ('houppe', 'corps'), ('corps', 'corps'), ('queue', 'queue'), ('tete', 'tete'), ('oeil', 'tete'), ('cou', 'cou'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
+    ('lourde', 'tete'), ('cils', 'tete'), ('narine', 'tete'), ('bouche', 'tete'),            # 16/10 : la tête refaite
 ]
 
 def repos(t):
