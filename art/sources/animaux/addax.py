@@ -115,6 +115,9 @@ def construire():
         a.piece("sabot_" + nom, A.boule(1.0, 24, 12).etire(0.052, 0.068, 0.032), tuple(NOIR), pos=(pts[-1][0], pts[-1][1] - 0.012, 0.030), poil=False)
     a.piece("queue", A.tube(A.courbe(propres([(0.0, 0.440, 0.760), (0.0, 0.500, 0.690), (0.0, 0.510, 0.560)]), 5), lambda t: 0.022 - 0.006 * t, 12), tuple(BLANC))
     a.piece("touffe", A.boule(1.0, 20, 10).etire(0.030, 0.030, 0.062), tuple(BRUN), pos=(0.0, 0.512, 0.520))
+    # les proportions de la bête réelle (silhouettes.py contre references_3d) : un corps plus long, des pattes et un cou plus courts
+    import deformer_b as DF
+    DF.etirer(a, sy=1.22, sz=0.86)
     return a
 
 
@@ -129,25 +132,25 @@ if __name__ == "__main__":
 
 from poses import Pose, borne, cloche, onde
 
-JAMBE = 0.741                                        # de l'épaule (ou de la hanche) au sol
+JAMBE = 0.637                                        # de l'épaule (ou de la hanche) au sol
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.213, 0.855)),
-    ('cou', 'corps', (-0.000, -0.240, 0.805)),
-    ('tete', 'cou', (0.011, -0.526, 0.825)),
-    ('oreille_G', 'tete', (0.062, -0.557, 0.832)),
-    ('patte_av_D', 'corps', (-0.111, -0.221, 0.772)),
-    ('patte_ar_G', 'corps', (0.122, 0.337, 0.678)),
-    ('patte_av_G', 'corps', (0.111, -0.228, 0.772)),
-    ('queue', 'corps', (0.001, 0.435, 0.753)),
+    ('corps', 'racine', (0.000, 0.260, 0.736)),
+    ('cou', 'corps', (-0.000, -0.291, 0.702)),
+    ('tete', 'cou', (0.011, -0.635, 0.695)),
+    ('oreille_G', 'tete', (0.063, -0.686, 0.723)),
+    ('patte_av_D', 'corps', (-0.111, -0.270, 0.664)),
+    ('patte_ar_G', 'corps', (0.122, 0.411, 0.583)),
+    ('patte_av_G', 'corps', (0.111, -0.278, 0.664)),
+    ('queue', 'corps', (0.002, 0.529, 0.644)),
 ]
 
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True),
     ('sabot_av', 'patte_av', True), ('sabot_ar', 'patte_ar', True), ('oreille', 'oreille', True),
-    ('collier', 'corps'), ('lourde', 'tete'), ('touffe', 'queue'), ('corps', 'corps'), ('corne', 'tete'),
-    ('queue', 'queue'), ('barbe', 'tete'), ('tete', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('nez', 'tete'),
+    ('collier', 'corps'), ('touffe', 'queue'), ('corps', 'corps'), ('corne', 'tete'), ('queue', 'queue'),
+    ('barbe', 'tete'), ('tete', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('nez', 'tete'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
@@ -204,7 +207,7 @@ def joie(t):
     vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
     salut = cloche(t, 0.72, 0.16, False)
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.222 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.191 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_av', rot=(-22 * vol, 0, 0))
     p.paire('patte_ar', rot=(18 * vol, 0, 0))
     p.add('cou', rot=(-8 * vol + 8 * tasse, 0, 0))
@@ -218,7 +221,7 @@ def dort(t):
     p = Pose()
     r = onde(t, 1)
     p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.407), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.add('corps', pos=(0, 0, -0.350), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
     p.paire('patte_av', rot=(-68, 0, 14))
     p.paire('patte_ar', rot=(66, 0, 10))
     p.add('cou', rot=(30, 0, 44))

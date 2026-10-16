@@ -77,10 +77,12 @@ def construire():
 
     # ----- le cou : long, en courbe douce, d'une seule pièce ; des pavés plus petits ; la crinière en brosse -----
     BASE = Vector((0.0, -0.250, 1.160))
-    pts = ((0.0, 0.0), (-0.050, 0.280), (-0.090, 0.560), (-0.040, 0.860), (0.090, 1.120), (0.210, 1.280))      # (recul, monte) : S doux
+    # 16/10 (l'auteur : « celle qui me perturbait le plus » ; d'après les vues d'une vraie girafe, CC-BY, rien d'importé) : le cou
+    # presque droit, penché d'une vingtaine de degrés vers l'avant, au lieu du S bosselé ; plus mince à la base
+    pts = ((0.0, 0.0), (0.095, 0.290), (0.190, 0.580), (0.280, 0.870), (0.355, 1.150))                       # (avance, monte)
     enc = K.Fil([tuple(BASE + Vector((0, -u, z))) for u, z in pts], (1, 0, 0))
     Lc = enc.long
-    tab = [(0.0, 0.130), (0.10, 0.170), (0.30, 0.132), (0.60, 0.104), (0.85, 0.086), (1.0, 0.074)]
+    tab = [(0.0, 0.140), (0.10, 0.148), (0.30, 0.122), (0.60, 0.098), (0.85, 0.084), (1.0, 0.074)]
     cou = fuseau(tab, Lc, 64)
     paver(cou, 5, 0.17, 0.016)
     a.piece("cou", cou.sculpte(lambda v: v * [0.86, 1.0, 1.0]).sculpte(enc.couche), None)
@@ -98,26 +100,27 @@ def construire():
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.05, 0.052), (0.20, 0.064), (0.45, 0.045), (0.70, 0.036), (0.90, 0.034), (0.97, 0.028), (1.0, 0.0)], 0.400, 56, 0.006)      # long et fin : un museau, pas une boule
     tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.4)[:, None] | (tete.v[:, 2] > 0.340)[:, None], CREME, MIEL)
-    tete.teinte[tete.v[:, 2] > 0.372] = CORNE                                          # le bout des lèvres, brun doux, sans truffe en boule
+    tete.teinte[tete.v[:, 2] > 0.372] = CREME * 0.80 + np.array(CORNE) * 0.20        # le bout des lèvres, à peine plus sombre
+    # (16/10 : le bout CORNE, gonflé, faisait une grosse truffe noire de chien ; le museau d'une girafe est clair)
     a.piece("tete", tete.sculpte(lambda v: v * [0.84, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.040, -0.060)))
     a.tete = T @ Vector((0, 0.040, 0.140))
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.040, 0.050)), T3 @ Vector((c * 0.84, 0.42, 0.06)))
-        a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0155)
+        a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0200)                                 # plus grands : de grands yeux sombres
         # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
         oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.019, 0.070), (0.013, 0.130), (0, 0.150)], 5), 18)
         a.piece("ossicone_" + nom, oss, tuple(MIEL), mat=A.cadre(T @ Vector((c * 0.030, 0.092, -0.040)), Vector((c * 0.10, 0.20, 0.97)), (0, 1, 0)))
         a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.024, 0.024, 0.026), BRUN, pos=tuple(T @ Vector((c * 0.034, 0.108, -0.040)) + Vector((c * 0.012, 0.024, 0.116))))
         po = A.profil([(0, 0), (0.030, 0.008), (0.040, 0.032), (0.030, 0.060), (0.010, 0.078), (0, 0.084)], 5)
         E = A.cadre(T @ Vector((c * 0.064, 0.056, -0.034)), Vector((c * 0.95, 0.10, 0.28)), (0, 0, 1))
-        a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.35, 0.36, 1.40), [(0.060, tuple(MIEL)), (9, BRUN)]), None, mat=E)
+        a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.10, 0.36, 1.15), [(0.060, tuple(MIEL)), (9, BRUN)]), None, mat=E)   # plus petites
 
     # ----- les jambes : quatre longues, fines, les genoux noueux ; pavés en haut, crème en bas ; les sabots sombres -----
     def jambe(depart, plan, graine):
         x, y, z = depart
         pts = [(x, y + dy, z - dz) for dy, dz in plan]
         f = K.Fil(pts, (1, 0, 0))
-        m = fuseau([(0.0, 0.092), (0.20, 0.072), (0.42, 0.046), (0.50, 0.078), (0.57, 0.044), (0.90, 0.040), (0.96, 0.048), (1.0, 0.0)], f.long, 36, 0.010)
+        m = fuseau([(0.0, 0.092), (0.20, 0.072), (0.42, 0.046), (0.50, 0.060), (0.57, 0.044), (0.90, 0.040), (0.96, 0.048), (1.0, 0.0)], f.long, 36, 0.010)   # genoux moins noueux
         paver(m, graine, 0.13, 0.016, clair=lambda v: v[:, 2] > 0.80 * f.long)
         return m.sculpte(f.couche), pts[-1], pts[len(pts) // 2 + 0]
     pieds = []
@@ -151,8 +154,8 @@ OS = [
     ('racine', None, (0, 0, 0)),
     ('corps', 'racine', (0.000, 0.239, 1.114)),
     ('cou', 'corps', (0.000, -0.098, 1.280)),
-    ('tete', 'cou', (0.010, -0.479, 2.466)),
-    ('oreille_G', 'tete', (0.075, -0.461, 2.550)),
+    ('tete', 'cou', (0.010, -0.630, 2.340)),                     # 16/10 : le cou droit, la tête plus en avant, un peu plus bas
+    ('oreille_G', 'tete', (0.075, -0.612, 2.424)),
     ('patte_av_G', 'corps', (0.130, -0.146, 1.002)),
     ('patte_ar_G', 'corps', (0.140, 0.411, 0.944)),
     ('queue', 'corps', (-0.001, 0.514, 1.002)),
