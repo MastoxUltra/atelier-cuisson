@@ -119,7 +119,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         chemin = [H @ Vector(q) for q in ((c * 0.100, -0.030, 0.110), (c * 0.170, -0.020, 0.085), (c * 0.205, -0.030, 0.000),
                                          (c * 0.205, -0.085, -0.075), (c * 0.180, -0.140, -0.060), (c * 0.165, -0.175, 0.010))]
-        corne = K.tube_peint(A.courbe(chemin, 6), lambda t: 0.034 - 0.025 * t, [(0.70, IVOIRE), (1, CORNE)], 18)
+        corne = K.tube_peint(A.courbe(chemin, 6), lambda t: 0.002 + 0.034 * (1 - t) ** 0.8, [(0.70, IVOIRE), (1, CORNE)], 18)   # la pointe fine (coupée net, elle faisait tube : 16/10)
         a.piece("corne_" + nom, corne, None, poil=False)
 
     return a

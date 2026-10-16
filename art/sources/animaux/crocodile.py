@@ -66,7 +66,7 @@ def construire():
                                        (0.200, 0.200), (0.550, 0.190), (0.900, 0.160), (1.250, 0.120), (1.600, 0.085))]
     # la queue ondule : le dernier tiers dévie sur le côté
     chemin = [(0.0 if y < 0.9 else 0.02 + 0.30 * (y - 0.9) ** 1.5, y, z) for _x, y, z in chemin]
-    fil = K.Fil(chemin, (1, 0, 0))
+    fil = K.Fil(chemin, (-1, 0, 0))      # (-1 : avec +1, le dessus du fil regardait le sol : ventre, dents et yeux sur le dos, 16/10)
     L = fil.long
     pts = [(0.0, 0.0), (0.012, 0.040), (0.036, 0.100), (0.044, 0.200), (0.046, 0.260), (0.062, 0.330), (0.100, 0.380),
            (0.120, 0.420), (0.150, 0.500), (0.170, 0.600), (0.165, 0.680), (0.140, 0.760), (0.100, 0.850), (0.062, 0.930),

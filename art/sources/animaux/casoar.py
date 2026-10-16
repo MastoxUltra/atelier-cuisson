@@ -56,7 +56,7 @@ def construire():
 
     # ----- le corps : un gros œuf couché vers l'arrière, le dos arrondi ; une jupe de crins qui tombe des flancs -----
     def oeuf(v):
-        s = v * [0.240, 0.300, 0.250]
+        s = v * [0.280, 0.360, 0.290]                 # gros et lourd (vues de la référence, 16/10)
         s[:, 1] += 0.040 * v[:, 2]
         return s
     a.piece("corps", A.boule(1.0, 56, 28).sculpte(oeuf), NOIR, pos=CORPS, rot=(-8, 0, 0))
@@ -68,7 +68,7 @@ def construire():
         t = rng.uniform(0.0, 2 * math.pi)
         r = math.sqrt(max(0.0, 1 - z * z))
         d = np.array([r * math.cos(t), r * math.sin(t), z])
-        p = np.array(CORPS) + d * np.array([0.236, 0.296, 0.246])
+        p = np.array(CORPS) + d * np.array([0.276, 0.356, 0.286])
         long_ = 0.090 + 0.070 * rng.random()
         m = A.boule(1.0, 10, 6).etire(0.060, 0.044, long_).pose(tuple(p + np.array([d[0] * 0.012, d[1] * 0.012, -long_ * 0.65])),
                                                                  (14 * d[1], -16 * d[0], 0))
@@ -77,7 +77,7 @@ def construire():
     jupe = None
     for i in range(56):
         t = 2 * math.pi * (i + rng.uniform(-0.3, 0.3)) / 56
-        base = np.array([0.232 * math.cos(t), CORPS.y + 0.288 * math.sin(t)])
+        base = np.array([0.272 * math.cos(t), CORPS.y + 0.348 * math.sin(t)])
         radial = np.array([math.cos(t), math.sin(t) * 0.80])
         radial /= np.linalg.norm(radial)
         hz = CORPS.z + rng.uniform(0.00, 0.10)
@@ -90,9 +90,9 @@ def construire():
     a.piece("jupe", jupe, NOIR)
 
     # ----- le cou : long et nu, cobalt, en S qui monte vers la tête tendue vers nous ; la nuque rouge -----
-    fil = K.Fil([(0.0, -0.180, 0.860), (0.0, -0.260, 1.000), (0.0, -0.250, 1.200), (0.0, -0.320, 1.380)], (1, 0, 0))
+    fil = K.Fil([(0.0, -0.200, 0.860), (0.0, -0.290, 0.980), (0.0, -0.290, 1.100), (0.0, -0.350, 1.200)], (1, 0, 0))   # plus court (référence)
     L = fil.long
-    pc = A.profil([(0, 0), (0.115, 0.03 * L), (0.085, 0.30 * L), (0.066, 0.70 * L), (0.058, 0.96 * L), (0, 1.02 * L)], 6)
+    pc = A.profil([(0, 0), (0.140, 0.03 * L), (0.108, 0.30 * L), (0.084, 0.70 * L), (0.070, 0.96 * L), (0, 1.02 * L)], 6)   # plus épais
     cou = A.tour(pc, 40)
     cou.teinte = np.where((cou.v[:, 1] > 0.02)[:, None] & (cou.v[:, 2] > 0.55 * L)[:, None], np.asarray(ROUGE), np.asarray(COBALT))
     cou.teinte[cou.v[:, 2] < 0.22 * L] = np.asarray(NOIR)                        # le pied du cou emplumé de noir : il sort du plumage, pas d'un sac
@@ -146,8 +146,8 @@ JAMBE = 0.255                                        # de l'épaule (ou de la ha
 OS = [
     ('racine', None, (0, 0, 0)),
     ('corps', 'racine', (0.000, 0.275, 0.570)),
-    ('cou', 'corps', (-0.001, -0.129, 0.896)),
-    ('tete', 'cou', (-0.002, -0.326, 1.333)),
+    ('cou', 'corps', (0.000, -0.200, 0.880)),           # (16/10 : cou plus court, d'après la référence)
+    ('tete', 'cou', (0.000, -0.335, 1.180)),
     ('patte_ar_G', 'corps', (0.112, 0.133, 0.481)),
     ('patte_av_G', 'corps', (0.118, 0.050, 0.028)),
 ]
