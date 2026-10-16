@@ -129,8 +129,17 @@ def construire():
         a.piece("oreille_" + nom, A.boule(1.0, 32, 16).sculpte(feuille).etire(0.034, 0.011, 0.066), CHARBON, mat=E)
         a.piece("dedans_" + nom, A.boule(1.0, 24, 12).sculpte(feuille).etire(0.022, 0.006, 0.048).pose((0, 0.0075, 0.002)),
                 VIEUX_ROSE, mat=E, poil=False)
-    toupet = A.boule(0.085, 24, 12).pose((0, 0.046, 0.006)) + meche((0.002, 0.076, 0.046), 4) \
-        + meche((0.030, 0.068, 0.036), 24) + meche((-0.028, 0.068, 0.036), -22)
+    # la crinière de LAINE BOUCLÉE : des boucles rondes qui se recouvrent (plus d'épines plates dressées), sur le front puis le long
+    # de la nuque jusqu'à la bosse
+    boucles = ((0.000, 0.075, 0.045, 0.040), (0.048, 0.070, 0.030, 0.036), (-0.048, 0.070, 0.030, 0.036), (0.026, 0.092, 0.000, 0.040),
+               (-0.026, 0.092, 0.000, 0.040), (0.000, 0.100, -0.036, 0.046), (0.056, 0.086, -0.030, 0.038), (-0.056, 0.086, -0.030, 0.038),
+               (0.000, 0.108, -0.085, 0.052), (0.040, 0.100, -0.080, 0.044), (-0.040, 0.100, -0.080, 0.044),
+               (0.000, 0.118, -0.140, 0.056), (0.046, 0.108, -0.135, 0.046), (-0.046, 0.108, -0.135, 0.046),
+               (0.000, 0.126, -0.200, 0.060), (0.050, 0.114, -0.196, 0.050), (-0.050, 0.114, -0.196, 0.050))
+    toupet = None
+    for bx, by, bz, br in boucles:
+        b = A.boule(br, 18, 9).pose((bx, by, bz))
+        toupet = b if toupet is None else toupet + b
     a.piece("toupet", toupet, LAINE, mat=T)
 
     # ----- quatre pattes fines, le genou noueux, le sabot en feutrine charbon ; elles sont posées en quinconce

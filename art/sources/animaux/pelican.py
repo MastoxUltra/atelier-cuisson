@@ -1,5 +1,5 @@
-"""Le pélican en peluche : un nuage blanc rosé, saumon pâle, tout en bec. Le cou replié en S sur la poitrine, le bec
-énorme posé sur le jabot, sous lequel pend la poche orange, gonflée comme une besace ; un petit œil de côté, sage et
+"""Le pélican en peluche (3e dessin, 16/10, d'après les vues d'un vrai pélican blanc) : un nuage blanc rosé, saumon pâle, tout en
+bec. Le cou replié en S, le long bec qui descend devant lui, sous lequel pend la poche orange, gonflée comme une besace ; un petit œil de côté, sage et
 tranquille, qui voit passer tous les poissons du monde. Les pattes courtes, orange, les ailes repliées en toit.
 
     python pelican.py        fabrique la fiche art/apercus/animaux/pelican.png (style du palier : C, velours ras)
@@ -33,80 +33,88 @@ def construire():
     a = K.Animal("pelican")
     a.taille = 1.55
 
-    # ----- le corps : un gros œuf, un peu penché, le dos saumon, le ventre blanc -----
-    T = A.repere((0.0, 0.080, 0.300), (20, 0, 0))
-    pc = A.profil([(0, 0.0), (0.150, 0.015), (0.250, 0.090), (0.285, 0.230), (0.250, 0.380), (0.170, 0.500), (0.080, 0.570), (0, 0.600)], 6)
+    # 16/10, 3e dessin (« on dirait pas que c'est depuis un modèle ») : au plus près des vues d'un vrai pélican blanc (CC-BY,
+    # rien d'importé). Le corps est un gros œuf COUCHÉ, penché vers l'avant (plus le manchot debout) ; le cou en S se replie,
+    # la petite tête posée haut, la peau rose autour de l'œil ; le long bec étroit (un quart de la bête) descend devant le cou,
+    # la poche orange pendue dessous ; les ailes repliées, gardées à part, aux rémiges noires ; les pattes courtes, les palmes.
+
+    # ----- le corps : un œuf couché, l'avant relevé, le dos saumon pâle, le ventre blanc -----
+    T = A.repere((0.0, 0.180, 0.300), (64, 0, 0))                   # l'axe de l'œuf : de la queue (derrière) au poitrail (devant, en haut)
+    pc = A.profil([(0, 0.0), (0.140, 0.020), (0.235, 0.110), (0.262, 0.260), (0.240, 0.420), (0.180, 0.540), (0.090, 0.610), (0, 0.640)], 6)
     corps = A.tour(pc, 52)
     ang = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
-    t = np.tile(BLANC, (len(ang), 1))
-    t[(ang < 1.3) & (corps.v[:, 2] > 0.05)] = SAUMON
-    corps.teinte = t
+    t_ = np.tile(BLANC, (len(ang), 1))
+    t_[(ang < 1.25) & (corps.v[:, 2] > 0.05)] = SAUMON
+    corps.teinte = t_
     a.piece("corps", corps, None, mat=T)
-    haut = Vector(T @ Vector((0, 0, 0.545)))
+    haut = Vector(T @ Vector((0, 0, 0.585)))                        # le haut du poitrail, où part le cou
 
-    # ----- le cou en S sur le jabot, la tête petite, le bec énorme posé sur la poitrine, la poche qui pend dessous -----
-    cou = O.tube_r([haut + Vector((0, 0.02, 0.00)), haut + Vector((0, 0.04, 0.12)), haut + Vector((0, -0.06, 0.26)),
-                    haut + Vector((0, -0.20, 0.32)), haut + Vector((0, -0.30, 0.30))], [0.115, 0.095, 0.082, 0.075, 0.070], 20)
+    # ----- le cou en S qui se replie, la petite tête posée haut au-dessus des épaules -----
+    H = haut + Vector((0.0, 0.110, 0.300))
+    cou = O.tube_r([tuple(haut + Vector((0, 0.015, 0.0))), tuple(haut + Vector((0, -0.045, 0.120))), tuple(haut + Vector((0, -0.010, 0.230))),
+                    tuple(H + Vector((0, 0.030, -0.040)))], [0.098, 0.082, 0.072, 0.066], 20)
     a.piece("cou", O.teinte(cou, BLANC), None)
-    H = haut + Vector((0.0, -0.320, 0.280))      # la tête loin devant la poitrine : le bec et la poche pendent dans le vide
-    tete = A.boule(1.0, 40, 20).etire(0.075, 0.095, 0.080)
-    a.piece("tete", O.teinte(tete, BLANC), None, pos=tuple(H), rot=(20, 0, 0))
-    a.tete = H + Vector((0.0, -0.20, -0.04))
+    tete = A.boule(1.0, 40, 20)
+    u = tete.v
+    tt = np.tile(BLANC, (len(u), 1))
+    tt[(u[:, 1] < -0.10) & (np.abs(u[:, 0]) > 0.45) & (u[:, 2] > -0.30) & (u[:, 2] < 0.45)] = np.array(M.hexa("#f2b0a8"))   # la peau rose de l'œil
+    tete.teinte = tt
+    a.piece("tete", tete.etire(0.068, 0.092, 0.074), None, pos=tuple(H), rot=(10, 0, 0))
+    a.tete = H + Vector((0.0, -0.22, -0.08))
 
-    # le bec (refait le 16/10, planche 21 : « le bec bizarre ») : un long fer PLAT et droit, un peu bombé sur le dessus,
-    # qui finit par un petit crochet vers le BAS (l'onglet) ; l'ancien remontait en spatule (son repère avait l'axe y vers
-    # le bas). Le repère a maintenant y vers le haut : z le long du bec, x sur le côté.
-    LB = 0.520                                                               # 3e essai : plus long et plus à plat (il plongeait
-    sens_bec = Vector((0.0, -1.0, -0.24)).normalized()                       # contre la poitrine et se lisait mal)
-    k_ = LB / 0.400
-    B = A.cadre(H + Vector((0.0, -0.068, -0.024)), sens_bec, (0, 0, 1))
-    e_ = 0.78                                                                # plus étroit (de face, il faisait un bec de canard)
-    prof_bec = [(0.050 * e_, 0.0), (0.049 * e_, 0.060 * k_), (0.045 * e_, 0.160 * k_), (0.040 * e_, 0.260 * k_), (0.035 * e_, 0.335 * k_),
-                (0.029 * e_, 0.372 * k_), (0.017 * e_, 0.392 * k_), (0, LB)]
+    # ----- le bec : long, étroit et plat, un peu crochu au bout ; il descend devant le cou ; la poche orange pendue dessous -----
+    LB = 0.440
+    sens_bec = Vector((0.0, -1.0, -0.62)).normalized()
+    B = A.cadre(H + Vector((0.0, -0.072, -0.016)), sens_bec, (0, 0, 1))
+    e_ = 0.72
+    prof_bec = [(0.046 * e_, 0.0), (0.045 * e_, 0.10 * LB), (0.042 * e_, 0.35 * LB), (0.037 * e_, 0.62 * LB), (0.031 * e_, 0.82 * LB),
+                (0.024 * e_, 0.93 * LB), (0.013 * e_, 0.98 * LB), (0, LB)]
     bec = A.tour(A.profil(prof_bec, 4), 28)
 
     def fer(v):
         s = v.copy()
-        t = np.clip(v[:, 2] / LB, 0.0, 1.0)
-        s[:, 1] = v[:, 1] * 0.32 / e_ + 0.006 * np.sin(np.pi * t)            # plat, le dessus à peine bombé (épaisseur gardée)
-        s[:, 1] -= 0.034 * np.clip((t - 0.86) / 0.14, 0.0, 1.0) ** 2          # l'onglet : le bout crochu vers le bas
+        t2 = np.clip(v[:, 2] / LB, 0.0, 1.0)
+        s[:, 1] = v[:, 1] * 0.32 / e_ + 0.005 * np.sin(np.pi * t2)          # plat, le dessus à peine bombé
+        s[:, 1] -= 0.030 * np.clip((t2 - 0.88) / 0.12, 0.0, 1.0) ** 2        # l'onglet : le bout crochu vers le bas
         return s
     bec.sculpte(fer)
     tb = np.tile(BEC, (len(bec.v), 1))
-    tb[bec.v[:, 2] > 0.90 * LB] = BEC * 0.80 + np.asarray(POCHE, float) * 0.20                # l'onglet plus soutenu
+    tb[bec.v[:, 2] > 0.90 * LB] = BEC * 0.78 + np.asarray(POCHE, float) * 0.22
     bec.teinte = tb
     a.piece("bec", O.couche(bec, B), None, poil=False)
-    # la poche : la peau orange sous la mandibule, qui l'épouse sur presque toute sa longueur (sa ligne du haut colle au
-    # dessous du bec), la plus profonde au premier tiers, et qui rejoint la gorge (fondue avec elle par la base gonflée)
-    prof_poche = [(0.040, 0.0), (0.056, 0.070 * k_), (0.060, 0.140 * k_), (0.050, 0.220 * k_), (0.033, 0.290 * k_), (0.015, 0.334 * k_),
-                  (0, 0.350 * k_)]
+    prof_poche = [(0.034, 0.0), (0.050, 0.12 * LB), (0.054, 0.32 * LB), (0.046, 0.55 * LB), (0.030, 0.74 * LB), (0.013, 0.86 * LB), (0, 0.90 * LB)]
     poche = A.tour(A.profil(prof_poche, 5), 32)
 
     def pendre(v):
         s = v.copy()
-        r = np.interp(v[:, 2], [p[1] for p in prof_poche], [p[0] for p in prof_poche])
-        s[:, 0] = v[:, 0] * 0.80 * e_                                        # un peu moins large que le bec
-        s[:, 1] = v[:, 1] - r - 0.010                                        # pendue : le haut sous la mandibule
+        r = np.interp(v[:, 2], [q[1] for q in prof_poche], [q[0] for q in prof_poche])
+        s[:, 0] = v[:, 0] * 0.80 * e_
+        s[:, 1] = v[:, 1] - r - 0.008
         return s
     poche.sculpte(pendre)
     poche.teinte = np.tile(np.asarray(POCHE, float), (len(poche.v), 1))
     a.piece("poche", poche, None, mat=B)
-    O.paire_yeux(a, "tete", H, (0.88, -0.30, 0.30), 0.0175, decolle=0.002)
+    O.paire_yeux(a, "tete", H, (0.86, -0.36, 0.30), 0.0165, decolle=0.002)
 
-    # ----- les ailes repliées en toit, le bout sombre ; la queue courte ; les pattes courtes, orange -----
+    # ----- les ailes repliées le long des flancs, gardées à part (on les lit), le bout noir (les rémiges) ; la queue courte -----
+    a.fusion_a_part = ("aile",)
     for nom, c in (("G", 1), ("D", -1)):
-        aile = A.boule(1.0, 36, 18).etire(0.040, 0.110, 0.300)
-        f = aile.v[:, 2] / 0.300
-        t = np.tile(AILE, (len(f), 1))
-        t[f < -0.62] = SOMBRE
-        aile.teinte = t
-        a.piece("aile_" + nom, aile, None, mat=T @ A.repere((c * 0.255, 0.050, 0.330), (0, 0, c * 6)))
-        jambe = O.tube_r([(c * 0.110, 0.050, 0.130), (c * 0.120, 0.000, 0.065), (c * 0.120, -0.030, 0.012)], [0.032, 0.026, 0.022], 12)
+        aile = A.tour(A.profil([(0, 0), (0.048, 0.030), (0.080, 0.100), (0.082, 0.220), (0.068, 0.360), (0.044, 0.480), (0.020, 0.570),
+                                (0, 0.630)], 6), 36)
+        zz = aile.v[:, 2]
+        aile.teinte = np.where((zz > 0.40)[:, None], tuple(np.array(M.hexa("#26211f"))), tuple(AILE))
+        depart = Vector((c * 0.205, -0.300, 0.540))
+        vers = Vector((c * 0.040, 0.92, -0.38)).normalized()
+        a.piece("aile_" + nom, aile.etire(0.38, 1.05, 1.0), None, mat=A.cadre(depart, vers, Vector((0, 0, 1))))
+    queue = A.boule(1.0, 24, 12).etire(0.070, 0.090, 0.022)
+    a.piece("queue", O.teinte(queue, BLANC), None, pos=(0.0, 0.250, 0.320), rot=(-20, 0, 0))
+
+    # ----- les pattes courtes et fortes, rose orangé ; les grandes palmes -----
+    for nom, c in (("G", 1), ("D", -1)):
+        jambe = O.tube_r([(c * 0.105, 0.040, 0.180), (c * 0.112, 0.010, 0.090), (c * 0.115, -0.010, 0.016)], [0.036, 0.030, 0.026], 12)
         a.piece("jambe_" + nom, O.teinte(jambe, PATTE), None, poil=False)
-        palme = A.boule(1.0, 20, 8).etire(0.068, 0.100, 0.010)
-        a.piece("palme_" + nom, O.teinte(palme, PATTE), None, pos=(c * 0.124, -0.090, 0.011), rot=(0, 0, c * 6), poil=False)
-    queue = A.boule(1.0, 24, 12).etire(0.065, 0.100, 0.020)
-    a.piece("queue", O.teinte(queue, AILE), None, pos=(0.0, 0.440, 0.240), rot=(-26, 0, 0))
+        palme = A.boule(1.0, 20, 8).etire(0.074, 0.105, 0.012)
+        a.piece("palme_" + nom, O.teinte(palme, PATTE), None, pos=(c * 0.118, -0.080, 0.012), rot=(0, 0, c * 8), poil=False)
     return a
 
 
