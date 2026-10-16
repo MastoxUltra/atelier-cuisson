@@ -61,9 +61,22 @@ def construire():
         return s
     a.piece("corps", A.boule(1.0, 56, 28).sculpte(oeuf), NOIR, pos=CORPS, rot=(-8, 0, 0))
     rng = np.random.default_rng(13)
+    # le dos et les flancs couverts de plumes longues et serrées qui retombent (lisse, le corps se lisait comme un sac noir : 16/10)
+    toison = None
+    for i in range(140):
+        z = rng.uniform(-0.25, 0.95)
+        t = rng.uniform(0.0, 2 * math.pi)
+        r = math.sqrt(max(0.0, 1 - z * z))
+        d = np.array([r * math.cos(t), r * math.sin(t), z])
+        p = np.array(CORPS) + d * np.array([0.236, 0.296, 0.246])
+        long_ = 0.090 + 0.070 * rng.random()
+        m = A.boule(1.0, 10, 6).etire(0.060, 0.044, long_).pose(tuple(p + np.array([d[0] * 0.012, d[1] * 0.012, -long_ * 0.65])),
+                                                                 (14 * d[1], -16 * d[0], 0))
+        toison = m if toison is None else toison + m
+    a.piece("plumage", toison, NOIR)
     jupe = None
-    for i in range(34):
-        t = 2 * math.pi * (i + rng.uniform(-0.3, 0.3)) / 34
+    for i in range(56):
+        t = 2 * math.pi * (i + rng.uniform(-0.3, 0.3)) / 56
         base = np.array([0.232 * math.cos(t), CORPS.y + 0.288 * math.sin(t)])
         radial = np.array([math.cos(t), math.sin(t) * 0.80])
         radial /= np.linalg.norm(radial)
@@ -82,6 +95,7 @@ def construire():
     pc = A.profil([(0, 0), (0.115, 0.03 * L), (0.085, 0.30 * L), (0.066, 0.70 * L), (0.058, 0.96 * L), (0, 1.02 * L)], 6)
     cou = A.tour(pc, 40)
     cou.teinte = np.where((cou.v[:, 1] > 0.02)[:, None] & (cou.v[:, 2] > 0.55 * L)[:, None], np.asarray(ROUGE), np.asarray(COBALT))
+    cou.teinte[cou.v[:, 2] < 0.22 * L] = np.asarray(NOIR)                        # le pied du cou emplumé de noir : il sort du plumage, pas d'un sac
     a.piece("cou", cou.sculpte(fil.couche), None)
     bout = Vector(fil.cadre(L)[0])
 
@@ -140,7 +154,7 @@ OS = [
 
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('caroncule', 'tete'), ('casque', 'tete'), ('doigts', 'patte_av', True),
-    ('corps', 'corps'), ('patte', 'patte_ar', True), ('patte', 'patte_av', True), ('jupe', 'corps'), ('tete', 'tete'),
+    ('corps', 'corps'), ('patte', 'patte_ar', True), ('patte', 'patte_av', True), ('jupe', 'corps'), ('plumage', 'corps'), ('tete', 'tete'),
     ('iris', 'tete'), ('oeil', 'tete'), ('cou', 'cou'), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'),
     ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]

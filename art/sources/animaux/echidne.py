@@ -74,14 +74,13 @@ def construire():
     museau = A.tour(A.profil([(0.036, 0.0), (0.029, 0.25 * LM), (0.022, 0.55 * LM), (0.016, 0.80 * LM), (0.010, 0.94 * LM), (0, LM)], 6), 32)
     a.fusion_a_part = ("museau", "narine")
     NEZ = A.repere(CORPS + Vector((0, -0.062, 0.000)), (96, 0, 0))      # dans ce repère : X la gauche, Y le haut, Z vers la truffe
-    a.piece("museau", museau, PRUNE, mat=NEZ, poil=False)
-    a.couture("museau", "museau", 8, 0.45, 0.94)
+    museau.teinte = np.where((museau.v[:, 2] > 0.80 * LM)[:, None], np.array(POINTE), np.array(PRUNE) * 0.88)   # le bout plus sombre
+    a.piece("museau", museau, None, mat=NEZ, poil=False)
+    # (la couture du museau est retirée : le museau gardé à part, le fil flotterait)
     # (2e essai : plus de truffe en boule noire, « un nez de clown » : deux petites narines au bout du tube)
     for nom_n, c in (("G", 1), ("D", -1)):
-        a.piece("narine_" + nom_n, A.boule(1.0, 12, 6).etire(0.0042, 0.0034, 0.0024), K.NOIR, mat=NEZ @ A.repere((c * 0.0040, 0.0012, LM - 0.008)), poil=False)
-    bouche = [a.trace("museau", NEZ @ Vector((0, 0, z * LM / 0.32)), [NEZ.to_3x3() @ Vector((math.cos(math.radians(d)), math.sin(math.radians(d)), 0))])[0]
-              for z, d in ((0.290, -52), (0.265, -40), (0.235, -31), (0.205, -27), (0.175, -25))]
-    a.broderie("bouche", bouche, 0.0024, paire=True)            # une bouche toute droite : pas impressionné
+        a.piece("narine_" + nom_n, A.boule(1.0, 12, 6).etire(0.0036, 0.0030, 0.0022), K.NOIR, mat=NEZ @ A.repere((c * 0.0034, 0.0010, LM - 0.0025)), poil=False)
+    # (la couture de bouche est retirée : le museau gardé à part, elle flottait dessous ; la bouche d'un échidné est une fente au bout)
 
     # ----- le visage : deux boutons sous le bord du manteau, deux joues pêche, deux petites oreilles -----
     p, n = sur(a, "corps", CORPS, (0.42, -0.74, 0.50))

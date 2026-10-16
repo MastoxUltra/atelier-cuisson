@@ -84,7 +84,7 @@ def construire():
     a.piece("tete", A.boule(1.0, 36, 18).etire(0.090, 0.110, 0.095), tuple(GRIS), pos=tuple(H + Vector((0.0, 0.040, 0.030))))
     a.tete = H + Vector((0.0, -0.220, -0.060))
     for nom, c in (("G", 1), ("D", -1)):
-        a.oeil("oeil_" + nom, tuple(H + Vector((c * 0.078, -0.020, 0.060))), (c * 0.55, -0.80, 0.30), 0.0190)
+        a.oeil("oeil_" + nom, tuple(H + Vector((c * 0.068, -0.040, 0.075))), (c * 0.45, -0.85, 0.30), 0.0200)     # plus en avant : de face, les deux yeux (16/10)
         po = A.profil([(0, 0), (0.026, 0.008), (0.032, 0.030), (0.024, 0.050), (0.008, 0.060), (0, 0.064)], 5)
         a.piece("oreille_" + nom, A.tour(po, 24).etire(1.0, 0.42, 1.0), tuple(NOIR),
                 mat=A.cadre(H + Vector((c * 0.070, 0.090, 0.090)), Vector((c * 0.40, 0.10, 0.90)), Vector((c * 0.3, -0.9, 0.0))))
