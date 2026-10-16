@@ -90,14 +90,14 @@ def construire():
         q2 = np.clip(v[:, 2] + 0.15, 0.0, 1.2) / 1.2                                  # la goutte DEBOUT : ronde en bas, effilée vers le haut (lisible de face)
         s[:, 0] *= 1.0 - 0.62 * q2 ** 1.4
         s[:, 1] *= 1.0 - 0.30 * q2 ** 1.4
-        s[:, 2] += 0.34 * q2 ** 2.0
+        s[:, 2] += 0.62 * q2 ** 1.6
         return s
-    a.piece("flotteur", ball.sculpte(goutte).etire(0.130, 0.260, 0.150), None, pos=tuple(f + Vector((0.0, -0.150, 0.150))))
+    a.piece("flotteur", ball.sculpte(goutte).etire(0.115, 0.230, 0.150), None, pos=tuple(f + Vector((0.0, -0.150, 0.150))), poil=False)      # nacré et lisse : plus une boule de fourrure grise
     # (la crête est la pointe de la goutte : plus de cône posé dessus)
     centre = f + Vector((0.0, -0.150, 0.150))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("flotteur", centre, Vector((c * 0.26, -0.96, 0.28)))
-        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.052)
+        pos, n = a.surface("flotteur", centre, Vector((c * 0.58, -0.80, 0.22)))
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.046)
     a.tete = centre + Vector((0.0, -0.28, 0.0))
     return a
 

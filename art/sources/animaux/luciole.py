@@ -24,47 +24,70 @@ BRUN = np.array(M.hexa("#4a3a34"))            # la dominante (registre : brun no
 LISERE = np.array(M.hexa("#c8452e"))          # le liseré rouge du thorax
 LANTERNE = M.hexa("#fff25a")                  # l'accent : le ventre-lanterne
 HALO = M.hexa("#fffbc0")
+VISAGE = np.array(M.hexa("#b8744a"))          # le visage, plus clair (la référence : un brun orangé)
+AILE = np.array(M.hexa("#5a463c"))            # les ailes, brunes
+AILE_BORD = np.array(M.hexa("#d9b48a"))       # leur bord, plus clair
 PATTE = np.array(M.hexa("#5a4840"))
 FIL = M.hexa("#241a16")
 
 
 def construire():
+    """(16/10, planche 27 : l'auteur veut la bête d'un vrai modèle) : d'après la référence (references_3d/luciole, CC-BY :
+    mesurée, rien d'importé), en part de l'envergure : une grosse tête ronde aux gros yeux, un petit thorax, et derrière
+    la LANTERNE, une boule aussi grosse que la tête et le thorax ensemble ; deux grandes ailes ouvertes en V au-dessus du
+    dos ; six petites pattes sous le thorax ; deux longues antennes."""
     a = K.Animal("luciole")
-    a.taille = 0.60                                # plus gros : il se noyait dans l'herbe (« flou »)
+    a.taille = 0.60                                # l'envergure
 
-    # ----- le thorax : un bouclier bombé à liseré rouge, la tête cachée dessous ; les élytres : deux lames brunes écartées -----
-    thorax = A.boule(1.0, 36, 18).etire(0.070, 0.062, 0.050)
-    thorax.teinte = np.tile(BRUN, (len(thorax.v), 1))
-    a.piece("thorax", thorax, None, pos=(0.0, -0.050, 0.125))
-    lisere = A.tore(0.055, 0.0085, 32, 8).etire(1.0, 0.9, 1.0)
-    a.piece("lisere", O.teinte(lisere, LISERE), None, pos=(0.0, -0.050, 0.118), poil=False)
-    for nom, c in (("G", 1), ("D", -1)):
-        elytre = A.boule(1.0, 32, 14).etire(0.036, 0.140, 0.034)
-        elytre.teinte = np.tile(BRUN * 0.88, (len(elytre.v), 1))
-        a.piece("elytre_" + nom, elytre, None, pos=(c * 0.040, 0.085, 0.132), rot=(-8, 0, c * 4))
+    E = 0.60                                       # les mesures de la référence, en part de l'envergure, mises à l'échelle
+    def v(x, y, z):
+        return Vector((x * E, y * E, z * E))
 
-    # ----- le ventre-lanterne : un gros bout jaune lumineux qui dépasse des élytres et se lève ; un halo plus pâle -----
-    ventre = A.tour(A.profil([(0, 0), (0.040, 0.012), (0.062, 0.060), (0.066, 0.130), (0.052, 0.200), (0.026, 0.250), (0, 0.272)], 5), 32)  # un abdomen effilé, pas une balle
-    ventre = ventre.sculpte(lambda v: np.stack([v[:, 0], v[:, 1] * 0.88, v[:, 2]], axis=1))
-    a.piece("lanterne", ventre, LANTERNE, pos=(0.0, 0.170, 0.150), rot=(-100, 0, 0))
-    halo = A.boule(1.0, 28, 14).etire(0.040, 0.050, 0.032)
-    a.piece("halo", halo, HALO, pos=(0.0, 0.292, 0.165), rot=(-18, 0, 0), poil=False)
-
-    # ----- la tête : une petite boule noire sous le thorax, deux gros boutons, les longues antennes -----
-    H = Vector((0.0, -0.120, 0.100))
-    tete = A.boule(1.0, 28, 14).etire(0.062, 0.056, 0.052)                      # une vraie tête, plus une petite boule
-    a.piece("tete", O.teinte(tete, np.array(M.hexa("#8a6a54"))), None, pos=tuple(H))
-    O.paire_yeux(a, "tete", H, (0.50, -0.86, 0.10), 0.0260, decolle=0.003)
-    for nom, c in (("G", 1), ("D", -1)):
-        ant = O.tube_r([(c * 0.026, -0.130, 0.150), (c * 0.056, -0.175, 0.190), (c * 0.082, -0.215, 0.200)], [0.0070, 0.0058, 0.0042], 8)
+    # ----- la tête : une grosse boule ronde, le visage plus clair ; deux gros yeux en avant -----
+    H = v(0.0, -0.175, 0.235)
+    tete = A.boule(1.0, 36, 18).etire(0.135 * E, 0.105 * E, 0.115 * E)
+    tete.teinte = np.tile(BRUN, (len(tete.v), 1))
+    tete.teinte[(tete.v[:, 1] < -0.45 * 0.105 * E) & (tete.v[:, 2] < 0.35 * 0.115 * E)] = VISAGE      # le visage, devant et en bas
+    a.piece("tete", tete, None, pos=tuple(H))
+    O.paire_yeux(a, "tete", H, (0.42, -0.86, 0.12), 0.034 * E, decolle=0.003)
+    for nom, c in (("G", 1), ("D", -1)):                          # les antennes : de longues tiges qui partent du front
+        ant = O.tube_r([(c * 0.035 * E, -0.235 * E, 0.330 * E), (c * 0.075 * E, -0.300 * E, 0.400 * E), (c * 0.125 * E, -0.345 * E, 0.420 * E)],
+                       [0.0075, 0.0060, 0.0050], 8)
         a.piece("antenne_" + nom, O.teinte(ant, BRUN * 0.8), None, poil=False)
-    a.tete = H + Vector((0.0, -0.06, 0.0))
+        a.piece("bout_antenne_" + nom, A.boule(1.0, 12, 6).etire(0.009, 0.009, 0.009), tuple(BRUN * 0.8),
+                pos=tuple(v(c * 0.125, -0.345, 0.420)), poil=False)
+    a.tete = H + v(0.0, -0.10, 0.0)
 
-    # ----- les six pattes : fines, repliées en genou, posées de chaque côté -----
-    for k, y in enumerate((-0.040, 0.010, 0.060)):
+    # ----- le thorax : court, sous les ailes, à liseré rouge -----
+    T = v(0.0, -0.040, 0.215)
+    thorax = A.boule(1.0, 32, 16).etire(0.115 * E, 0.085 * E, 0.100 * E)
+    thorax.teinte = np.tile(BRUN, (len(thorax.v), 1))
+    thorax.teinte[thorax.v[:, 2] > 0.55 * 0.100 * E] = LISERE                              # le bouclier rouge sur le dessus
+    a.piece("thorax", thorax, None, pos=tuple(T))
+
+    # ----- la lanterne : une grosse boule jaune lumineuse derrière, aussi grosse que la tête et le thorax ensemble -----
+    B = v(0.0, 0.165, 0.185)
+    boule = A.boule(1.0, 40, 20).etire(0.160 * E, 0.170 * E, 0.170 * E)
+    boule.teinte = np.tile(np.array(LANTERNE), (len(boule.v), 1))
+    boule.teinte[boule.v[:, 1] < -0.70 * 0.170 * E] = BRUN                                 # le premier anneau, brun, contre le thorax
+    a.piece("lanterne", boule, None, pos=tuple(B))
+
+    # ----- les ailes : deux grandes palettes ouvertes en V au-dessus du dos, vers l'arrière ; plates, en feutrine -----
+    for nom, c in (("G", 1), ("D", -1)):
+        depart = v(c * 0.040, 0.000, 0.300)
+        vers = Vector((c * 0.80, 0.42, 0.42)).normalized()
+        W = A.cadre(depart, vers, Vector((0.0, 0.0, 1.0)))
+        aile = A.boule(1.0, 36, 12).etire(0.085 * E, 0.012 * E, 0.250 * E).pose((0, 0, 0.235 * E))
+        aile.teinte = np.tile(AILE, (len(aile.v), 1))
+        aile.teinte[np.hypot(aile.v[:, 0] / (0.085 * E), (aile.v[:, 2] - 0.235 * E) / (0.250 * E)) > 0.82] = AILE_BORD
+        a.piece("aile_" + nom, aile, None, mat=W, poil=False)
+    a.fusion_a_part = ("aile", "antenne", "bout_antenne")
+
+    # ----- les six pattes : courtes, sous le thorax et la tête, posées au sol -----
+    for k, y in enumerate((-0.120, -0.045, 0.030)):
         for nom, c in (("G", 1), ("D", -1)):
-            genou = (c * (0.115 + 0.012 * k), y - 0.020 + 0.010 * k, 0.095)
-            patte = O.tube_r([(c * 0.050, y, 0.108), genou, (c * (0.150 + 0.010 * k), y + 0.040, 0.007)], [0.0085, 0.0075, 0.0060], 8)
+            patte = O.tube_r([tuple(v(c * 0.060, y, 0.150)), tuple(v(c * 0.130, y + 0.010, 0.095)), tuple(v(c * 0.160, y + 0.025, 0.012))],
+                             [0.0090, 0.0080, 0.0070], 8)
             a.piece("patte_%s%d" % (nom, k), O.teinte(patte, PATTE), None, poil=False)
     return a
 

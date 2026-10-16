@@ -21,12 +21,16 @@ import peluche as K
 # le style B adoucit les couleurs (vers leur gris) : on les donne plus vives que l'effet voulu
 ENCRE = M.hexa("#5d463c")                     # la dominante : brun encre (le poil le fonce presque jusqu'au noir : on le prend plus clair)
 SOUS = M.hexa("#3a2b26")                      # le dessous de la jupe, les mèches du bas
-CREME = M.hexa("#fff0d2")                     # la selle, les chaussettes
-IVOIRE = M.hexa("#fff6e0")                    # l'accent : les cornes
+CREME = M.hexa("#fff0d2")                     # les chaussettes
+SELLE = M.hexa("#d6bd96")                     # la selle : un beige pâle, comme la référence (crème, elle faisait une tache)
+IVOIRE = M.hexa("#efe2c4")                    # l'accent : les cornes, un ivoire chaud (la référence : corne claire)
 CORNE = M.hexa("#cdb78c")                     # le bout des cornes, les sabots
 NEZ = M.hexa("#a08a78")                       # le museau : pâle, comme le vrai (le visage se lit enfin)
-CORPS = Vector((0.0, 0.050, 0.400))
-TETE = Vector((0.0, -0.440, 0.350))
+# (16/10, planche 27 : l'auteur veut les proportions d'un vrai modèle) : relevées sur la référence (references_3d/boeuf_musque,
+# CC-BY, la (3) importée en pose de repos : mesurée, rien d'importé) : un long corps, la bosse haute sur les épaules, la
+# croupe à peine plus basse, la jupe jusqu'à mi-jambe, la tête basse devant les épaules
+CORPS = Vector((0.0, 0.060, 0.370))
+TETE = Vector((0.0, -0.400, 0.340))
 LACET, PIQUE = 24.0, -6.0                    # la tête tournée vers nous, le nez baissé
 
 
@@ -58,13 +62,13 @@ def construire():
 
     # ----- le corps : une masse ronde, la bosse haute sur les épaules, la croupe basse -----
     def masse(v):
-        v = K.bosse(v, (0, -0.50, 0.80), 0.30, 0.45)                  # la grosse bosse des épaules
-        s = v * [0.255, 0.400, 0.178]
-        s[:, 2] *= 1 - 0.34 * K.lisse((v[:, 1] - 0.0) / 1.0)           # la croupe bien plus basse
+        v = K.bosse(v, (0, -0.50, 0.80), 0.40, 0.42)                  # la grosse bosse des épaules
+        s = v * [0.205, 0.420, 0.200]
+        s[:, 2] *= 1 - 0.16 * K.lisse((v[:, 1] - 0.0) / 1.0)           # la croupe un peu plus basse (le modèle : 0,55 contre 0,65)
         return s
     a.piece("corps", A.boule(1.0, 56, 28).sculpte(masse), ENCRE, pos=CORPS)
     # la selle crème : un large pan sur le dos, derrière la bosse
-    a.rustine("selle", "corps", CORPS + Vector((0, 0.00, 0.0)), (0, 0.25, 1.0), lambda th: 0.46 - 0.10 * math.cos(2 * th), CREME, 0.004, 0)
+    a.rustine("selle", "corps", CORPS + Vector((0, 0.00, 0.0)), (0, 0.25, 1.0), lambda th: 0.46 - 0.10 * math.cos(2 * th), SELLE, 0.004, 0)
 
     # ----- la jupe de poils : une trentaine de longues mèches plates, nées du flanc, qui tombent en s'évasant jusqu'à
     #       mi-jambe, une sur deux plus sombre (le geste des fanons du cheval) -----
@@ -72,15 +76,15 @@ def construire():
     claires, sombres = None, None
     for i in range(36):
         t = 2 * math.pi * (i + rng.uniform(-0.25, 0.25)) / 36
-        base = np.array([0.246 * math.cos(t), CORPS.y + 0.384 * math.sin(t)])
+        base = np.array([0.197 * math.cos(t), CORPS.y + 0.403 * math.sin(t)])
         radial = np.array([math.cos(t) * 1.0, math.sin(t) * 0.62])
         radial /= np.linalg.norm(radial)
         k = 0.85 + 0.40 * rng.random() + 0.18 * max(0.0, -math.sin(t))                # plus longues devant, là où il est plus laineux
         z0 = CORPS.z - 0.03
         chemin = [(base[0] * 0.94, base[1] * 0.94 + CORPS.y * 0.06, z0 + 0.04),
                   (base[0] + radial[0] * 0.010, base[1] + radial[1] * 0.010, z0 - 0.07),
-                  (base[0] + radial[0] * 0.040, base[1] + radial[1] * 0.040, z0 - 0.145 * k),
-                  (base[0] + radial[0] * 0.062, base[1] + radial[1] * 0.062, z0 - 0.225 * k)]
+                  (base[0] + radial[0] * 0.040, base[1] + radial[1] * 0.040, z0 - 0.135 * k),
+                  (base[0] + radial[0] * 0.062, base[1] + radial[1] * 0.062, z0 - 0.200 * k)]
         m = meche(chemin, 0.054 + 0.010 * rng.random(), (radial[0], radial[1], 0.0), 0.40)
         if i % 2:
             sombres = m if sombres is None else sombres + m
@@ -90,7 +94,7 @@ def construire():
     a.piece("meches_b", sombres, SOUS)
 
     # ----- les chaussettes crème : quatre jambes courtes qui dépassent de la jupe, les sabots corne -----
-    for nom, x, y in (("av_G", 0.120, -0.250), ("av_D", -0.120, -0.250), ("ar_G", 0.130, 0.320), ("ar_D", -0.130, 0.320)):
+    for nom, x, y in (("av_G", 0.110, -0.170), ("av_D", -0.110, -0.170), ("ar_G", 0.115, 0.300), ("ar_D", -0.115, 0.300)):
         a.piece("jambe_" + nom, A.tube(A.courbe([(x, y, 0.300), (x, y - 0.004, 0.150), (x, y - 0.010, 0.040)], 5), 0.058, 16), CREME)
         a.piece("sabot_" + nom, A.boule(1.0, 24, 12).etire(0.056, 0.066, 0.036), CORNE, pos=(x, y - 0.014, 0.026), poil=False)
 
@@ -119,7 +123,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         chemin = [H @ Vector(q) for q in ((c * 0.100, -0.030, 0.110), (c * 0.170, -0.020, 0.085), (c * 0.205, -0.030, 0.000),
                                          (c * 0.205, -0.085, -0.075), (c * 0.180, -0.140, -0.060), (c * 0.165, -0.175, 0.010))]
-        corne = K.tube_peint(A.courbe(chemin, 6), lambda t: 0.002 + 0.034 * (1 - t) ** 0.8, [(0.70, IVOIRE), (1, CORNE)], 18)   # la pointe fine (coupée net, elle faisait tube : 16/10)
+        corne = K.tube_peint(A.courbe(chemin, 6), lambda t: 0.002 + 0.029 * (1 - t) ** 0.8, [(0.62, IVOIRE), (1, CORNE)], 18)   # la pointe fine (coupée net, elle faisait tube : 16/10)
         a.piece("corne_" + nom, corne, None, poil=False)
 
     return a

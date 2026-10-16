@@ -81,7 +81,7 @@ def construire():
 
     # ----- le cou et la tête : un cou épais, la tête basse tournée vers nous ; une face longue et noire, la barbe ; les cornes -----
     a.piece("cou", A.tube(A.courbe([(0.0, -0.250, 0.920), (0.0, -0.380, 0.880), (0.0, -0.470, 0.800)], 5), lambda t: 0.170 - 0.045 * t, 22), tuple(ARGENT))
-    H = A.cadre(Vector((0.0, -0.560, 0.700)), Vector((0.62, -1.0, -0.24)).normalized(), Vector((0, 0, 1)))   # tournée vers la caméra : l'autre œil n'est plus caché par la corne
+    H = A.cadre(Vector((0.0, -0.560, 0.700)), Vector((0.85, -1.0, -0.02)).normalized(), Vector((0, 0, 1)))   # tournée vers la caméra : l'autre œil n'est plus caché par la corne
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.100), (0.22, 0.130), (0.46, 0.112), (0.70, 0.100), (0.92, 0.104), (1.0, 0.0)], 0.520, 56, 0.007)
     tete.teinte = np.tile(NOIR, (len(tete.v), 1))
@@ -93,7 +93,7 @@ def construire():
         regard = H3 @ Vector((c * 0.48, 0.30, 0.60))     # plus en avant : de face, les deux yeux (16/10)
         a.rustine("iris_" + nom, "tete", H @ Vector((0, 0.020, 0.060)), regard, 0.17, OEIL, 0.003, 0)
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.060)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0225)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0300)
         # la corne : part sur le côté, descend, puis se relève en crochet
         ch = [H @ Vector(q) for q in ((c * 0.060, 0.080, 0.080), (c * 0.130, 0.085, 0.078), (c * 0.200, 0.055, 0.070), (c * 0.236, -0.005, 0.064), (c * 0.226, -0.062, 0.058), (c * 0.196, -0.040, 0.050), (c * 0.170, 0.050, 0.044))]
         a.piece("corne_" + nom, A.tube(A.courbe(propres(ch), 6), lambda t: 0.034 - 0.026 * t, 14), CORNE, poil=False)
