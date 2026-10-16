@@ -454,10 +454,27 @@ def _planche(construire, titre=None):
     centre = Vector(((bas[0] + haut[0]) * 0.5, (bas[1] + haut[1]) * 0.5, haut[2] * 0.45))
     recul = 2.45 * taille + 0.25
     tete = Vector(a.tete) if a.tete is not None else centre + Vector((0, -(haut[1] - bas[1]) * 0.3, haut[2] * 0.2))
+    recul_pres = 0.38 + 0.8 * min(haut[2], 0.8 * (haut[0] - bas[0]) + 0.2)
+    vise_pres = tete
+    try:                                                     # la tête entière dans le cadre, museau compris (Cohérence, 16/10 : zèbre, girafe…)
+        morceaux = [p["monde"] for p in a._toutes() if str(p.get("nom", "")).lower().startswith(
+            ("tete", "museau", "nez", "truffe", "bec", "oreille", "machoire", "joue", "corne", "bois"))]
+        if not morceaux and a.tete is not None:              # la base fusionnée : une seule peau, on prend ce qui entoure la tête
+            T = np.vstack([p["monde"] for p in a._toutes()])
+            pres_ = np.linalg.norm(T - np.asarray(a.tete, float), axis=1) < 0.45 * taille
+            morceaux = [T[pres_]] if pres_.sum() > 50 else []
+        if morceaux:
+            V = np.vstack(morceaux)
+            tb, th = V.min(axis=0), V.max(axis=0)
+            diag = float(np.linalg.norm(th - tb))
+            recul_pres = max(recul_pres, 1.35 * diag + 0.15)
+            vise_pres = Vector(((tb + th) * 0.5).tolist())
+    except Exception:
+        pass
     os.makedirs(FICHES, exist_ok=True)
     vues = [("face", centre + Vector((0.55, -0.80, 0.38)).normalized() * recul, centre, (1280, 720), 110, tete, 2.8),
             ("dos", centre + Vector((0.55, 0.78, 0.42)).normalized() * recul, centre, (640, 360), 64, centre, 4.0),
-            ("pres", tete + Vector((0.40, -0.86, 0.22)).normalized() * (0.38 + 0.8 * min(haut[2], 0.8 * (haut[0] - bas[0]) + 0.2)), tete, (640, 360), 64, tete, 4.0)]
+            ("pres", vise_pres + Vector((0.40, -0.86, 0.22)).normalized() * recul_pres, vise_pres, (640, 360), 64, vise_pres, 4.0)]
     fichiers = []
     for nom, depuis, vers, dims, grains, net, ouverture in vues:
         chemin = os.path.join(FICHES, "_%s_%s.png" % (a.nom, nom))
