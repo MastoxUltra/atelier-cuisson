@@ -66,7 +66,7 @@ def construire():
     def tonneau(v):
         for cote in (1, -1):
             v = K.bosse(v, (cote * 0.55, 0.60, 0.58), 0.13, 0.07)         # les deux os des hanches
-        v = K.bosse(v, (0, -0.55, 0.80), 0.55, 0.46)                      # la BOSSE sur les épaules
+        v = K.bosse(v, (0, -0.55, 0.80), 0.36, 0.62)                      # la BOSSE sur les épaules
         y = np.clip(v[:, 1], -1.0, 1.0)
         rond = np.sqrt(np.maximum(1 - y * y, 1e-9))
         k = np.maximum(1 - np.abs(y) ** 3.0, 0.0) ** (1 / 3.0) / rond     # des flancs droits, deux bouts francs
@@ -141,6 +141,15 @@ def construire():
         b = A.boule(br, 18, 9).pose((bx, by, bz))
         toupet = b if toupet is None else toupet + b
     a.piece("toupet", toupet, LAINE, mat=T)
+    # la TOISON de la bosse et de l'avant : de nombreuses petites boucles rondes et serrées, posées sur la peau du corps
+    rng = np.random.default_rng(11)
+    toison = None
+    for k in range(44):
+        dx, dy = rng.uniform(-0.55, 0.55), rng.uniform(-0.95, 0.20)
+        pos_, nor_ = a.surface("corps", CORPS, Vector((dx, dy, 1.0)))
+        b = A.boule(0.030 + 0.012 * rng.random(), 14, 8).pose(tuple(pos_ + nor_ * 0.006))
+        toison = b if toison is None else toison + b
+    a.piece("toison", toison, LAINE)
 
     # ----- quatre pattes fines, le genou noueux, le sabot en feutrine charbon ; elles sont posées en quinconce
     #       (une vache au repos ne se tient jamais d'équerre, et vues de trois quarts elles ne se cachent pas l'une l'autre) -----
@@ -195,7 +204,7 @@ def _oreille(points, cote):
     return {"oreille_g" if cote == "_G" else "oreille_d": np.ones(len(points))}
 
 
-PORTEURS = [("barbe", "tete"), ("corps", "corps"), ("dos", "corps"), ("selle", "corps"), ("epaule", "corps"), ("cuisse", "corps"),
+PORTEURS = [('toison', 'corps'), ("barbe", "tete"), ("corps", "corps"), ("dos", "corps"), ("selle", "corps"), ("epaule", "corps"), ("cuisse", "corps"),
             ("croupe", "corps"), ("flanc", "corps"), ("pis", "corps"), ("cou", "cou"),
             ("tete", "tete"), ("chanfrein", "tete"), ("mufle", "tete"), ("naseau", "tete"), ("bouche", "tete"),
             ("bandeau", "tete"), ("oeil", "tete"), ("sourcil", "tete"), ("corne", "tete"), ("toupet", "tete"),

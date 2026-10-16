@@ -56,7 +56,7 @@ def construire():
     corps.teinte[(corps.v[:, 2] > 0.80) & (np.abs(corps.v[:, 0]) < 0.30)] = np.asarray(SOMBRE)        # la crinière PEINTE le long de l'échine : fondue dans le dos
     G.sillons(corps, [14], 0.005, 1.1)
     a.piece("corps", corps.sculpte(tonneau), None, pos=CORPS)
-    a.couture("dos", "corps", 14, 0.35, 0.95)
+    # (la couture du dos est retirée : elle se lisait comme un boudin gris posé sur le dos)
     rng = np.random.default_rng(6)
     for i, y in enumerate(np.linspace(-0.27, 0.30, 26)):
         h = 0.034 - 0.012 * abs(y) / 0.3

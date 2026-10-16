@@ -83,7 +83,7 @@ def construire():
             pts += propres(a.trace("corps", Vector(cen), [Vector(av * 0.10 + flanc * c + nq * haut)], 0.006))
         # (le sourire brodé est retiré : vu de face, ses deux traits bleus faisaient des moustaches)
         cen, av, nq = fil.cadre(0.905 * L)
-        p, n = a.surface("corps", Vector(cen), Vector(av * 0.16 + flanc * c * 0.95 + nq * 0.30))
+        p, n = a.surface("corps", Vector(cen), Vector(av * 0.55 + flanc * c * 0.70 + nq * 0.35))     # plus en avant : de face, les deux yeux (16/10)
         a.bouton("oeil_" + ("G" if c > 0 else "D"), p + n * 0.002, n, 0.022)
 
     # ----- les nageoires : deux petites pagaies rondes posées à plat, sous le cou, qui pointent vers l'arrière -----

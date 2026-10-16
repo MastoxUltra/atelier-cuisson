@@ -68,18 +68,18 @@ def construire():
 
     # ----- les deux grands ailerons : dorsal en haut, anal en bas (celui sur lequel il se tient), en larges faucilles -----
     haut = A.decoupe([(-0.10, 0), (-0.06, 0.16), (0.00, 0.30), (0.06, 0.44), (0.10, 0.50), (0.16, 0.42), (0.20, 0.26), (0.24, 0.10), (0.26, 0.0)],
-                     0.048, 0.016)                 # large à la base, épais (étroits, ils se lisaient comme des tiges : 16/10)
+                     0.085, 0.030)                 # large à la base, épais (étroits, ils se lisaient comme des tiges : 16/10)
     haut.teinte = np.tile(GRIS * 1.08, (len(haut.v), 1))
     a.piece("dorsale", couche(haut, A.cadre((0.0, 0.100, 1.120), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
     bas = A.decoupe([(-0.10, 0), (-0.06, -0.14), (0.00, -0.27), (0.06, -0.39), (0.10, -0.44), (0.16, -0.37), (0.20, -0.23), (0.24, -0.09), (0.26, 0.0)],
-                    0.048, 0.016)
+                    0.085, 0.030)
     bas.teinte = np.tile(GRIS * 1.08, (len(bas.v), 1))
     a.piece("anale", couche(bas, A.cadre((0.0, 0.100, 0.468), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
 
     # ----- le visage : deux yeux ronds ouverts, la petite bouche en « o » devant -----
     CENTRE = Vector((0.0, 0.0, 0.790))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("corps", CENTRE, Vector((c * 0.62, -0.78, 0.08)))
+        pos, n = a.surface("corps", CENTRE, Vector((c * 0.45, -0.88, 0.10)))     # plus en avant : de trois quarts, les deux yeux (16/10)
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0420)      # rond et noir, sans paupière : l'anneau argent faisait un hublot
     p, n = a.surface("corps", CENTRE, Vector((0.0, -0.98, -0.12)))
     lèvre = A.tore(0.022, 0.010, 32, 8)
