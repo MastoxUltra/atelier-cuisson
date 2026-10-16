@@ -116,7 +116,7 @@ def construire():
     for nom, c, chemin in (("G", 1, [(0.100, -0.015, 0.290), (0.150, -0.050, 0.350), (0.158, -0.080, 0.425), (0.150, -0.085, 0.470)]),
                            ("D", -1, [(-0.100, -0.015, 0.290), (-0.158, 0.005, 0.230), (-0.150, -0.025, 0.170), (-0.108, -0.055, 0.185)])):
         a.piece("bras_" + nom, A.tube(A.courbe(chemin, 6), lambda t: 0.034 - 0.008 * t, 14), CARAMEL)
-        a.piece("poing_" + nom, A.boule(1.0, 24, 12).etire(0.032, 0.034, 0.034), ROSE, pos=chemin[-1])
+        a.piece("poing_" + nom, A.boule(1.0, 24, 12).etire(0.030, 0.032, 0.030), CARAMEL, pos=chemin[-1])
 
     # ----- les jambes courtes, les grosses pattes roses plantées en canard ; la queue : un petit moignon -----
     for nom, c in (("G", 1), ("D", -1)):

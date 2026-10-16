@@ -90,11 +90,15 @@ def construire():
         brosse = A.boule(1.0, 12, 6).etire(0.009, 0.020, 0.040).pose((0, 0, 0.020), (-34, 0, ang))
         a.piece("brosse_%d" % k, brosse, TURQUOISE, mat=H @ A.repere((dx, 0.020, 0.032)), poil=False)
     a.tete = H @ Vector((0, -0.060, -0.005))
+    # le cou : un tube qui monte du haut de la poire et entre dans la tête (plus de tête détachée)
+    bas_cou = CORPS + Vector((0.0, -0.020, 0.150))
+    a.piece("cou", A.tube(A.courbe([tuple(bas_cou), tuple((bas_cou + Vector(TETE)) * 0.5 + Vector((0.0, -0.010, 0.0))), tuple(Vector(TETE) + Vector((0.0, 0.010, -0.020)))], 5),
+                           lambda t: 0.044 - 0.008 * t, 16), TURQUOISE)
     B = A.cadre(H @ Vector((0, -0.044, -0.008)), H3 @ Vector((0, -0.97, 0.10)), H3 @ Vector((0, 0, 1)))
     bec = A.tour(A.profil([(0, 0), (0.022, 0.006), (0.019, 0.026), (0.011, 0.046), (0.004, 0.060), (0, 0.066)], 5), 24)
     a.piece("bec", bec.etire(0.88, 0.78, 1.0), BEC, mat=B, poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.70, -0.62, 0.14)))
+        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.55, -0.75, 0.20)))
         a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0105)
 
     # ----- les ailes : deux galets bleus plaqués sur les flancs, le dessous plus clair -----
@@ -148,7 +152,7 @@ OS = [
     ('queue', 'corps', (0.000, 0.151, 0.244)),
 ]
 
-PORTEURS = [
+PORTEURS = [('brosse', 'tete'), ('cou', 'corps'), 
     ('oeil_reflet', 'tete'), ('doigts', 'patte_av', True), ('corps', 'corps'), ('plume', 'queue'), ('crete', 'tete'),
     ('patte', 'patte_av', True), ('aile', 'aile', True), ('tete', 'tete'), ('oeil', 'tete'), ('bec', 'tete'),
     ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),

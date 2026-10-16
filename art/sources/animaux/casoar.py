@@ -95,9 +95,9 @@ def construire():
     a.piece("casque", casque.etire(0.034, 0.100, 0.070), IVOIRE, mat=H @ A.repere((0, -0.004, 0.060), (-18, 0, 0)), poil=False)
     a.tete = H @ Vector((0, -0.100, -0.010))
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.82, -0.40, 0.18)))
-        a.rustine("iris_" + nom, "tete", H.to_translation(), H3 @ Vector((c * 0.82, -0.40, 0.18)), 0.30, OR, 0.003, 0)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0165)
+        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.60, -0.62, 0.20)))
+        a.rustine("iris_" + nom, "tete", H.to_translation(), H3 @ Vector((c * 0.60, -0.62, 0.20)), 0.30, OR, 0.003, 0)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0215)
     # les caroncules : deux gouttes écarlates qui pendent sous le menton
     for nom, c in (("G", 1), ("D", -1)):
         a.piece("caroncule_" + nom, A.boule(1.0, 20, 10).etire(0.016, 0.014, 0.060), ROUGE, mat=H @ A.repere((c * 0.022, -0.020, -0.100)), poil=False)

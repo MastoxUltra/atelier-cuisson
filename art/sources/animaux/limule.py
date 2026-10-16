@@ -73,7 +73,7 @@ def construire():
         a.piece("arete_%d" % k, O.teinte(O.tube_r(pts, [0.008, 0.011, 0.0125, 0.0125, 0.0120, 0.0115, 0.0105, 0.0095, 0.0080], 12), SOMBRE), None, poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         pos, n_ = a.surface("casque", RC @ Vector((0.0, -0.030, 0.030)), RC.to_3x3() @ Vector((c * 0.95, -0.12, 0.42)))
-        oeil = A.boule(1.0, 24, 12).etire(0.0115, 0.0270, 0.0095)
+        oeil = A.boule(1.0, 24, 12).etire(0.0200, 0.0400, 0.0140)
         a.piece("rivet_" + nom, O.teinte(oeil, CHARBON), None, mat=A.cadre(pos + n_ * 0.002, n_, RC.to_3x3() @ Vector((0.0, 1.0, 0.0))), poil=False)
     for nom, c in (("g", 1), ("d", -1)):
         pos, n_ = sur_casque(c * 0.020, -0.135)

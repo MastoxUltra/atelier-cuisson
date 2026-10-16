@@ -90,10 +90,10 @@ def construire():
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.060, 0.036, 0.030), tuple(NOIR * 0.7), mat=H @ A.repere((0, 0.028, 0.392)), poil=False)
     a.tete = H @ Vector((0, 0.020, 0.250))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.84, 0.30, 0.0))
+        regard = H3 @ Vector((c * 0.62, 0.30, 0.45))
         a.rustine("iris_" + nom, "tete", H @ Vector((0, 0.020, 0.060)), regard, 0.17, OEIL, 0.003, 0)
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.060)), regard)
-        a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0170)
+        a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0225)
         # la corne : part sur le côté, descend, puis se relève en crochet
         ch = [H @ Vector(q) for q in ((c * 0.060, 0.080, 0.080), (c * 0.130, 0.085, 0.078), (c * 0.200, 0.055, 0.070), (c * 0.236, -0.005, 0.064), (c * 0.226, -0.062, 0.058), (c * 0.196, -0.040, 0.050), (c * 0.170, 0.050, 0.044))]
         a.piece("corne_" + nom, A.tube(A.courbe(propres(ch), 6), lambda t: 0.034 - 0.026 * t, 14), CORNE, poil=False)

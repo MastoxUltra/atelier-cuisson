@@ -110,8 +110,8 @@ def construire():
 
     # ----- les yeux : ronds et vivants, au regard calme, sous la corne (plus de paupière lourde) -----
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.78, -0.52, 0.14)))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0270)
+        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.55, -0.80, 0.20)))
+        a.oeil("oeil_" + nom, p + n * 0.008, n, 0.0340)
 
     # ----- le casque de cornes : le bouclier ivoire sur le front, puis la corne qui descend le long de la joue et
     #       remonte, la pointe corne tournée vers l'avant -----

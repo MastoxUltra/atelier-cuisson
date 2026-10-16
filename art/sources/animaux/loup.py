@@ -74,7 +74,7 @@ def construire():
         dent = O.pointe(0.022, 0.0065, 8)
         a.piece("croc_%d" % k, O.couche(O.teinte(dent, np.array(DENT)), RT @ A.cadre(Vector((dx, -0.150, -0.010)), (0.0, 0.20, -1.0), (0, 1, 0))), None, poil=False)
     # les yeux : ouverts (ils ne se ferment que dans « dort »), deux petits yeux vifs sous le front
-    O.paire_yeux(a, "tete", H, (0.84, -0.46, 0.30), 0.0150, decolle=0.003, R=RT)
+    O.paire_yeux(a, "tete", H, (0.60, -0.74, 0.30), 0.0150, decolle=0.003, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.tour(A.profil([(0.036, 0), (0.030, 0.034), (0.016, 0.068), (0.005, 0.088), (0, 0.094)], 4), 20).etire(1.0, 0.45, 1.0)
         ore.teinte = np.where((ore.v[:, 2] > 0.060)[:, None], SOMBRE, FUMEE)

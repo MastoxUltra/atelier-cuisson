@@ -81,7 +81,7 @@ def construire():
 
     # ----- les bras : minuscules, les mains serrées sur la poitrine ; les cuisses énormes, les longs pieds ; la queue -----
     for nom, c in (("G", 1), ("D", -1)):
-        ch = [(c * 0.056, -0.016, 0.246), (c * 0.066, -0.060, 0.214), (c * 0.032, -0.082, 0.218)]
+        ch = [(c * 0.056, -0.010, 0.226), (c * 0.068, -0.036, 0.172), (c * 0.040, -0.050, 0.160)]
         a.piece("bras_" + nom, A.tube(A.courbe(propres(ch), 5), 0.014, 10), tuple(SABLE))
         a.piece("main_" + nom, A.boule(1.0, 14, 8).etire(0.014, 0.014, 0.012), tuple(CLAIR), pos=ch[-1])
         a.piece("cuisse_" + nom, A.boule(1.0, 28, 14).etire(0.046, 0.066, 0.084), tuple(SABLE), pos=(c * 0.062, 0.040, 0.120), rot=(-12, 0, c * 4))

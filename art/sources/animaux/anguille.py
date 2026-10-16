@@ -59,7 +59,7 @@ def construire():
 
     # ----- le visage : un petit œil doré de chaque côté de la tête, la bouche fendue en un trait, deux narines -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.962 * L, 0.35, c * 0.95, 0.20)
+        centre, direction = fil.vise(0.965 * L, 0.60, c * 0.55, 0.30)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0175)                       # un vrai œil vivant, plus de pièce de monnaie
     pts = []

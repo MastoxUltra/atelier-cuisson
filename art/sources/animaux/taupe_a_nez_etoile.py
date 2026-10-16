@@ -30,7 +30,7 @@ H = Vector((0.0, -0.480, 0.200))              # le centre de la tête
 
 def construire():
     a = K.Animal("taupe_a_nez_etoile")
-    a.taille = 0.40
+    a.taille = 0.58                                # plus gros : il se noyait dans l'herbe (« flou »)
 
     # ----- le corps : un rouleau trapu, les épaules fortes, le dos rond ; un cou presque nul -----
     def peint(m, L):

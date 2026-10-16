@@ -30,7 +30,7 @@ FIL = M.hexa("#241a16")
 
 def construire():
     a = K.Animal("luciole")
-    a.taille = 0.30
+    a.taille = 0.45                                # plus gros : il se noyait dans l'herbe (« flou »)
 
     # ----- le thorax : un bouclier bombé à liseré rouge, la tête cachée dessous ; les élytres : deux lames brunes écartées -----
     thorax = A.boule(1.0, 36, 18).etire(0.070, 0.062, 0.050)

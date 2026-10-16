@@ -66,7 +66,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         centre, direction = fil.vise(0.950 * L, 0.55, c * 0.50, 0.45)               # devant : les deux yeux se voient de la caméra à 25°
         pos, n = a.surface("corps", centre, direction)
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0130)                           # des yeux lisibles : la tête se voit
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0260)                           # des yeux lisibles : la tête se voit
         pts_b = []
         for u_ in np.linspace(0.0, 1.0, 9):
             cc, dd = fil.vise((0.998 - 0.060 * u_) * L, 0.0, c * 1.0, -0.30 + 0.06 * u_)

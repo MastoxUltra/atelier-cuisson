@@ -46,7 +46,7 @@ def construire():
         a.piece("bord_" + nom, O.teinte(bord, ROUX), None, mat=mat_tete @ A.repere((c * 0.040, -0.082, 0.008), (0, 0, c * 8)), poil=False)
         disque = A.boule(1.0, 28, 14).etire(0.048, 0.014, 0.054)
         a.piece("disque_" + nom, O.teinte(disque, BLANC), None, mat=mat_tete @ A.repere((c * 0.040, -0.088, 0.008), (0, 0, c * 8)), poil=False)
-        a.oeil("oeil_" + nom, Vector(mat_tete @ Vector((c * 0.040, -0.100, 0.004))), Vector((c * 0.10, -1.0, 0.0)), 0.0225)
+        a.oeil("oeil_" + nom, Vector(mat_tete @ Vector((c * 0.040, -0.112, 0.004))), Vector((c * 0.10, -1.0, 0.0)), 0.0265)      # DEVANT le disque : plus coupés en D
     a.tete = Vector(mat_tete @ Vector((0.0, -0.12, 0.0)))
 
     # ----- les mouchetures grises sur le dos ; le bec crochu sous l'angle de la face ; les ailes un peu serrées -----

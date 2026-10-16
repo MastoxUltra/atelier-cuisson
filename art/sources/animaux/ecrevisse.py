@@ -29,7 +29,7 @@ FIL = M.hexa("#3a1710")
 
 def construire():
     a = K.Animal("ecrevisse")
-    a.taille = 0.40
+    a.taille = 0.60                                # plus gros : il se noyait dans l'herbe (« flou »)
 
     # ----- le thorax : un bouclier allongé, pointu devant (le rostre), bombé derrière -----
     def bouclier(v):

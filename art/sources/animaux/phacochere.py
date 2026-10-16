@@ -77,7 +77,7 @@ def construire():
     # les verrues : trois paires sur la face (sous l'œil, sur la joue, au-dessus du groin), des bosses de peau pâle
     for k, (dx, dy, dz) in enumerate(((0.118, -0.150, 0.026), (0.108, -0.082, -0.052), (0.062, -0.215, 0.050))):
         for c in (1, -1):
-            a.piece("verrue_%d%s" % (k, "G" if c > 0 else "D"), A.boule(1.0, 14, 8).etire(0.028, 0.030, 0.022), CLAIR,
+            a.piece("verrue_%d%s" % (k, "G" if c > 0 else "D"), A.boule(1.0, 14, 8).etire(0.040, 0.016, 0.010), CLAIR,
                     mat=H @ A.repere((c * dx, dy, dz)), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         # les défenses : elles sortent au coin de la gueule, juste à côté du groin, et montent en se recourbant

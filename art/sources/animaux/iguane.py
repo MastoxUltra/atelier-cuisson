@@ -91,7 +91,7 @@ def construire():
 
     # ----- le visage : un œil lourd sous sa paupière, la grosse écaille ronde sur la joue, la bouche, deux narines -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.945 * L, 0.20, c * 0.92, 0.32)
+        centre, direction = fil.vise(0.950 * L, 0.55, c * 0.50, 0.40)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0155)
         h = (Vector((0.0, 0.0, 1.0)) - n * n.z).normalized()

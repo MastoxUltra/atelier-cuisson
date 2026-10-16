@@ -86,8 +86,8 @@ def construire():
         a.piece("narine_" + nom, A.boule(1.0, 12, 6).etire(0.010, 0.008, 0.010), CHARBON,
                 pos=tuple(np.array(c1) + np.array(av1) * 0.026 + np.array([c * 0.016, 0.0, 0.0])), poil=False)
         c2, av2, nq2 = fil.cadre(0.700 * L)
-        p, n = a.surface("corps", Vector(c2), Vector(np.array([c * 0.88, 0.0, 0.0]) + np.array(nq2) * 0.30 - np.array(av2) * 0.20))
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0150)
+        p, n = a.surface("corps", Vector(c2), Vector(np.array([c * 0.60, 0.0, 0.0]) + np.array(nq2) * 0.30 + np.array(av2) * 0.40))
+        a.oeil("oeil_" + nom, p + n * 0.005, n, 0.0220)
         c3, av3, nq3 = fil.cadre(0.640 * L)
         po = A.profil([(0, 0), (0.036, 0.010), (0.044, 0.060), (0.040, 0.130), (0.030, 0.200), (0.014, 0.248), (0, 0.268)], 6)
         vers = (Vector(nq3) * 0.90 + Vector((c * 0.40, 0.0, 0.0)) - Vector(av3) * 0.10).normalized()

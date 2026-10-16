@@ -192,7 +192,7 @@ def construire():
     # ----- les yeux : vivants, haut sur les côtés, grands ouverts (mi-clos, l'auteur y lit de la tristesse) -----
     centre = T @ Vector((0, 0, 0.090))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.80, 0.50, 0.22)))
+        pos, n = a.surface("tete", centre, T3 @ Vector((c * 0.66, 0.46, 0.45)))     # plus en avant : de côté, un seul œil se voyait sur la fiche
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0215)       # visibles de profil et de face
         a.piece("lourde_" + nom, K.paupiere(0.0215, 0.60), SOMBRE, mat=A.cadre(pos + n * 0.003, n, T3 @ Vector((0, 1, -0.25))), poil=False)
 

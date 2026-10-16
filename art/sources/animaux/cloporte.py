@@ -28,7 +28,7 @@ FIL = M.hexa("#4a5668")
 
 def construire():
     a = K.Animal("cloporte")
-    a.taille = 0.34                                # plus gros : il se perdait dans l'herbe
+    a.taille = 0.48                                # plus gros : il se noyait dans l'herbe (« flou »)                                # plus gros : il se perdait dans l'herbe
 
     # ----- le corps : sept plaques qui se chevauchent, chacune un peu plus large vers le milieu, un anneau sombre au bord ;
     #       la tête arrondie devant, le dernier segment pointu -----

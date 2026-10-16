@@ -37,7 +37,7 @@ def construire():
     r = O.oiseau(a, dos=GREGE, ventre=BLANC * 0.98, tete=GREGE * 0.97, aile=GREGE * 0.96, queue=NOIR, bec=BEC, patte=BLANC, long=0.40, ray=0.152,
                  incline=38.0, z0=0.150, tete_r=(0.058, 0.062, 0.056), tete_pos=(0.0, -0.062, 0.050), bec_long=0.036, bec_ray=0.0165,
                  bec_baisse=-0.12, aile_dim=(0.024, 0.088, 0.135), aile_pos=(-0.004, 0.030, -0.012), queue_dim=(0.046, 0.115, 0.014),
-                 queue_haut=-30.0, patte_long=0.110, patte_ray=0.030, oeil_r=0.0135, oeil_dir=(0.76, -0.50, 0.22), bout_aile=BLANC,
+                 queue_haut=-30.0, patte_long=0.110, patte_ray=0.030, oeil_r=0.0135, oeil_dir=(0.58, -0.80, 0.22), bout_aile=BLANC,
                  coupe_dos=1.35)
     H, T, haut = r["H"], r["T"], r["haut"]
 

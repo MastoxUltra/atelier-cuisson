@@ -40,7 +40,7 @@ def rayon(f):
 
 def construire():
     a = K.Animal("poisson_aveugle")
-    a.taille = 0.50
+    a.taille = 0.70                                # plus gros : il se noyait dans l'herbe (« flou »)
 
     def peint(m, L):
         ang = np.abs(np.arctan2(m.v[:, 0], m.v[:, 1]))
@@ -78,10 +78,9 @@ def construire():
 
     # ----- le visage : pas d'œil, deux creux lisses ; la bouche ; la ligne latérale brodée de chaque côté du flanc -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.095 * L, 0.25, c * 0.90, 0.30)
+        centre, direction = fil.vise(0.100 * L, 0.45, c * 0.60, 0.35)
         pos, n = a.surface("corps", centre, direction)
-        creux = A.boule(1.0, 14, 8).etire(0.0185, 0.0185, 0.0050)
-        a.piece("creux_" + nom, O.couche(O.teinte(creux, CREUX), A.cadre(pos + n * 0.0006, n, (0, 0, 1))), None, poil=False)
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0280)               # deux yeux ronds et ouverts, même pour un poisson aveugle (règle d'l'auteur)
         pts = []
         for u_ in np.linspace(0.0, 1.0, 14):
             cc, dd = fil.vise((0.27 + 0.58 * u_) * L, 0.0, c * 1.0, 0.18 - 0.10 * u_)

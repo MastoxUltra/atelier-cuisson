@@ -78,7 +78,7 @@ def construire():
     # ----- le sourire : un trait brodé qui court le long du museau et remonte à la joue ; les yeux : de petites billes -----
     for c in (1, -1):
         pts = []
-        for f, haut in ((0.992, -0.50), (0.972, -0.52), (0.950, -0.50), (0.928, -0.42), (0.908, -0.26), (0.894, -0.06)):
+        for f, haut in ((0.992, -0.50), (0.975, -0.52), (0.955, -0.50), (0.935, -0.44)):
             cen, av, nq = fil.cadre(f * L)
             pts += propres(a.trace("corps", Vector(cen), [Vector(av * 0.10 + flanc * c + nq * haut)], 0.006))
         a.broderie("sourire_" + ("G" if c > 0 else "D"), A.courbe(pts, 4), 0.0030, MARINE)

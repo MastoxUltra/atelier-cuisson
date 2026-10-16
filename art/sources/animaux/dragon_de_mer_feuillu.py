@@ -59,7 +59,7 @@ def feuille(long, large, plan_pos, direction, haut, couleur, epaisseur=0.006):
 
 def construire():
     a = K.Animal("dragon_de_mer_feuillu")
-    a.taille = 0.62
+    a.taille = 0.90                                # plus gros : il se noyait dans l'herbe (« flou »)
 
     # ----- le corps : un tronc annelé de bandes brunes, la queue qui s'enroule, le cou en arc, la tête de cheval au museau en tube -----
     def peint(m, L):
