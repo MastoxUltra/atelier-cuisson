@@ -75,12 +75,11 @@ def construire():
     L = fil.long
     corps = A.tour(A.profil([(r, f * L) for r, f in GALBE], 8), 48)
     corps.teinte = np.tile(np.asarray(TABAC, float), (len(corps.v), 1))
+    corps.teinte[(np.floor(corps.v[:, 2] / 0.032) % 2 == 0)] *= 0.86                       # de fines bandes sombres : le poil hirsute
     corps = corps.sculpte(fil.couche)
     a.piece("corps", corps, None)
-    # des touffes de plumes-poils : cônes épais couchés vers l'arrière (plus de cartes plates)
-    franges = touffes(corps, 300, 0.044, 0.0165, 5, lambda t: tuple(np.asarray(TABAC) * (0.82 + 0.40 * t) + np.asarray(FONCE) * 0.12),
-                      dos_seul=False, sens=(0.0, 0.55, -0.20))
-    a.piece("franges", franges, None, poil=False)
+    # (plus de touffes en cônes : elles faisaient un cône de pin ; le kiwi est un doux manteau de poils hirsutes, rendu par le
+    # velours lui-même, avec de fines bandes sombres couchées sur le corps)
     centre, avant, nuque = fil.cadre(0.93 * L)
     C = Vector(centre)
 

@@ -58,9 +58,11 @@ def construire():
     bec = bec.etire(1.0, 0.46, 1.0).sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.14 * (v[:, 2] / 0.396) ** 3, v[:, 2]], axis=1))
     a.piece("bec", O.couche(O.teinte(bec, BEC), A.cadre(H + Vector((0.0, -0.075, -0.030)), (0.0, -1.0, -0.38), (0, 1.0, 0))), None, poil=False)
     # la poche : une besace qui pend, large en haut contre le bec, ronde et lourde en bas (plus un bloc plat)
-    poche = A.tour(A.profil([(0, 0), (0.030, 0.012), (0.062, 0.070), (0.082, 0.140), (0.074, 0.215), (0.044, 0.272), (0, 0.300)], 5), 32).etire(1.0, 0.80, 1.0)
+    # une besace allongée sous le bec : elle épouse la mandibule du bout du bec jusqu'à la gorge, et se creuse en pendant
+    sens_bec = Vector((0.0, -1.0, -0.38)).normalized()
+    poche = A.tour(A.profil([(0, 0), (0.040, 0.020), (0.070, 0.090), (0.076, 0.200), (0.062, 0.300), (0.032, 0.360), (0, 0.390)], 5), 32).etire(1.0, 0.82, 1.0)
     poche.teinte = np.tile(np.asarray(POCHE, float), (len(poche.v), 1))
-    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.215, -0.085)), (0.0, -0.10, -1.0), (0, 1.0, 0)))       # pendue SOUS le bec
+    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.075, -0.030)) + sens_bec * 0.010 + Vector((0.0, 0.0, -0.050)), sens_bec, (0, 1.0, 0)))       # pendue SOUS le bec
     O.paire_yeux(a, "tete", H, (0.88, -0.30, 0.30), 0.0175, decolle=0.002)
 
     # ----- les ailes repliées en toit, le bout sombre ; la queue courte ; les pattes courtes, orange -----
