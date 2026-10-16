@@ -84,7 +84,7 @@ def construire():
     a.tete = T @ Vector((0.0, 0.0, 0.080))
     for nom, c in (("G", 1), ("D", -1)):
         a.piece("favori_" + nom, A.boule(1.0, 20, 10).etire(0.046, 0.034, 0.040), tuple(CLAIR), mat=T @ A.repere((c * 0.092, -0.026, 0.020), (0, 0, c * 18)))
-        regard = T3 @ Vector((c * 0.72, 0.10, 0.52))
+        regard = T3 @ Vector((c * 0.50, 0.12, 0.70))     # rapprochés, à la même hauteur dans le repère de la tête (l'auteur, 16/10 : « replace les yeux »)
         a.rustine("iris_" + nom, "tete", T.to_translation(), regard, 0.17, OR, 0.003, 0)
         p, n = a.surface("tete", T.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0170)
