@@ -665,8 +665,9 @@ def fusionner(a, gonfle=None, reglages=None):
     t1 = time.time()
     _dire("union en voxels : %d points, %d faces (%.1f s)" % (len(P), len(Q), t1 - t0))
 
-    # les congés, le lissage
-    paires = _paires(M, h, L)
+    # les congés, le lissage (une bête découpée dans UN maillage, a.sans_conges : ses parties se rejoignent à plat, un congé y
+    # ferait un bourrelet à chaque coupe ; l'union en voxels suffit)
+    paires = [] if getattr(a, "sans_conges", False) else _paires(M, h, L)
     P, pousses = _conges(P, M, paires, h, L)
     aretes = _aretes(Q)
     P = _taubin(P, aretes, LISSAGE)
@@ -1482,7 +1483,8 @@ def _paupieres_ouvertes(a):
     milieu de l'œil, fines (EPAISSEUR_PAUPIERE rayon), le bord horizontal. l'auteur (15/10) : jamais d'œil mi-clos ni grognon ;
     une paupière épaisse cache l'œil vu de trois quarts. Rend la liste « nom : coupe avant -> après »."""
     sourcils = ["%s retiré" % nm for nm in _retirer(a, lambda p: p.get("fusion") or not p["nom"].lower().startswith(SOURCILS))]
-    if PAUPIERES_LOURDES == "retirer":                               # l'œil ouvert, sans trait au-dessus (Principal, 15/10)
+    mode = getattr(a, "paupieres_lourdes", PAUPIERES_LOURDES)        # une bête peut garder ses paupières, fines (l'hippopotame, 16/10)
+    if mode == "retirer":                                            # l'œil ouvert, sans trait au-dessus (Principal, 15/10)
         return sourcils + ["%s retirée" % nm for nm in _retirer(a, lambda p: p.get("fusion") or not p["nom"].lower().startswith("lourde"))]
     import atelier as A
     e = float(a.echelle)
