@@ -46,7 +46,7 @@ def construire():
     a.taille = 0.78
 
     # ----- le corps : assis bas, le dos rond, les épaules rentrées ; le ventre plus clair ; des mèches sur le dos et les flancs -----
-    pc = A.profil([(0, 0.0), (0.100, 0.012), (0.158, 0.080), (0.176, 0.190), (0.164, 0.290), (0.130, 0.360), (0.080, 0.410), (0, 0.430)], 6)      # un tronc trapu mais petit : plus de grand singe
+    pc = A.profil([(0, 0.0), (0.100, 0.012), (0.160, 0.080), (0.172, 0.170), (0.140, 0.260), (0.100, 0.330), (0.068, 0.380), (0, 0.405)], 6)      # un tronc trapu mais petit : plus de grand singe
     corps = A.tour(pc, 56)
     ang = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))
     z = corps.v[:, 2]
@@ -67,7 +67,7 @@ def construire():
     for k in range(110):
         an = rng.uniform(-math.pi * 0.95, math.pi * 0.95)                                 # autour du corps (0 : sur le dos)
         zz = rng.uniform(0.07, 0.40)
-        r = float(np.interp(zz, [0.0, 0.08, 0.19, 0.29, 0.36, 0.41], [0.100, 0.158, 0.176, 0.164, 0.130, 0.08]))
+        r = float(np.interp(zz, [0.0, 0.08, 0.17, 0.26, 0.33, 0.38], [0.100, 0.160, 0.172, 0.140, 0.100, 0.068]))
         x, y = r * math.sin(an), r * math.cos(an)
         if abs(an) > 2.0:                                                                 # pas sur le ventre
             continue
@@ -116,6 +116,17 @@ def construire():
         m = meche(p, RT.to_3x3() @ d, 0.040, 0.0190, BRUME * 0.96)
         front = m if front is None else front + m
     a.piece("front", front, None, poil=False)
+    # le cimier : des mèches grises sur le haut du crâne (plus un dôme rond et lisse)
+    cime = None
+    rngc = np.random.default_rng(5)
+    for k in range(26):
+        ux, uy = rngc.uniform(-0.9, 0.9), rngc.uniform(-0.4, 0.9)
+        uz = math.sqrt(max(1.0 - ux * ux * 0.5 - uy * uy * 0.5, 0.05))
+        p = RT @ Vector((0.17 * ux * 0.95, 0.145 * uy * 0.95, 0.15 * uz))
+        d = RT.to_3x3() @ Vector((ux * 0.5, uy * 0.5, uz + 0.5))
+        m = meche(p, d, rngc.uniform(0.040, 0.062), 0.022, BRUME if k % 3 else PALE * 0.96)
+        cime = m if cime is None else cime + m
+    a.piece("cimier", cime, None, poil=False)
     neige = A.boule(1.0, 28, 14).etire(0.108, 0.098, 0.044)
     a.piece("neige", O.teinte(neige, NEIGE), None, mat=RT @ A.repere((0.0, 0.005, 0.120), (-8, 0, 0)))
     bouche = [tuple(RT @ Vector((0.064 * u_, -0.120 - 0.012 * (1 - u_ * u_), -0.075 + 0.026 * u_ * u_))) for u_ in np.linspace(-1, 1, 7)]
@@ -124,9 +135,9 @@ def construire():
 
     # ----- les bras : tombent des épaules rentrées, les mains posées sur les genoux ; les jambes pliées, les genoux remontés -----
     for nom, c in (("G", 1), ("D", -1)):
-        epaule = A.boule(1.0, 24, 12).etire(0.070, 0.070, 0.075)
-        a.piece("epaule_" + nom, O.teinte(epaule, BRUME), None, pos=(c * 0.140, 0.020, 0.340))
-        bras = O.tube_r([(c * 0.140, 0.020, 0.330), (c * 0.190, -0.070, 0.250), (c * 0.165, -0.190, 0.210)], [0.060, 0.046, 0.036], 20)
+        epaule = A.boule(1.0, 24, 12).etire(0.052, 0.052, 0.056)
+        a.piece("epaule_" + nom, O.teinte(epaule, BRUME), None, pos=(c * 0.112, 0.020, 0.318))
+        bras = O.tube_r([(c * 0.112, 0.020, 0.310), (c * 0.170, -0.070, 0.240), (c * 0.150, -0.190, 0.205)], [0.060, 0.046, 0.036], 20)
         bras = bras + A.boule(1.0, 16, 8).etire(0.036, 0.036, 0.036).pose((c * 0.165, -0.190, 0.210))
         a.piece("bras_" + nom, O.teinte(bras, BRUME), None)
         main = A.boule(1.0, 24, 12).etire(0.038, 0.046, 0.022)

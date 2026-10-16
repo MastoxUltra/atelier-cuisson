@@ -71,9 +71,7 @@ def construire():
         # (plus de tubes à tiges : les yeux sont posés directement sur la tête)
         pupille = A.boule(1.0, 14, 8).etire(0.016, 0.016, 0.010)
         a.oeil("oeil_" + nom, Vector((c * 0.036, -0.100, 0.292)), Vector((c * 0.40, -0.86, 0.32)).normalized(), 0.022)      # sur le front, regardant vers l'avant : les deux se voient de face
-    bouche = A.tour(A.profil([(0.014, 0.0), (0.011, 0.014), (0.006, 0.026), (0.0, 0.030)], 3), 18).etire(1.0, 0.6, 1.0)
-    bouche.teinte = np.tile(ARGENT * 0.92, (len(bouche.v), 1))
-    a.piece("bouche", O.couche(bouche, A.cadre(Vector((0.0, -0.110, 0.285)), Vector((0.0, -1.0, 0.70)), (0, 0, 1))), None, poil=False)      # lisse : plus de boule grise sur la face
+    # (plus de pièce de bouche en boule entre les yeux : elle se lisait comme un nez)
 
     # ----- les photophores : un rang de points bleu pâle le long de la quille, de chaque côté -----
     pts = []
