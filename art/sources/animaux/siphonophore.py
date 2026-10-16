@@ -99,6 +99,7 @@ def construire():
         pos, n = a.surface("flotteur", centre, Vector((c * 0.58, -0.80, 0.22)))
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.046)
     a.tete = centre + Vector((0.0, -0.28, 0.0))
+    a.cap_tete = (0.0, -1.0, 0.0)                         # l'avant de la tête : la vue de près se place devant elle (peluche.py, 16/10)
     return a
 
 
