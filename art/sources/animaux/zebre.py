@@ -105,10 +105,10 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.050, 0.110)), T3 @ Vector((c * 0.62, 0.34, 0.55)))
         # (le cerne noir est retiré : il se lisait comme d'énormes yeux autour du museau)
-        # l'œil reste SUR LE CÔTÉ de la tête (même place) mais bombe vers l'extérieur et son disque se tourne de ~40° vers l'avant :
+        # l'œil reste SUR LE CÔTÉ de la tête (même place) et son disque se tourne de ~25° vers l'avant :
         # vu de face il reste rond, il ne fait plus une fente
-        vers_ = (n * 0.65 + T3 @ Vector((0.0, 0.0, 0.76))).normalized()
-        a.oeil("oeil_" + nom, pos + n * 0.012, vers_, 0.0300)
+        vers_ = (n * 0.80 + T3 @ Vector((0.0, 0.0, 0.60))).normalized()
+        a.oeil("oeil_" + nom, pos + n * 0.004, vers_, 0.0300)
         po = A.profil([(0, 0), (0.026, 0.012), (0.036, 0.050), (0.028, 0.092), (0.010, 0.120), (0, 0.130)], 6)
         vers = Vector((c * 0.22, 0.22, 0.95)).normalized()
         E = A.cadre(T @ Vector((c * 0.052, 0.098, -0.026)) - vers * 0.012, vers, Vector((c * 0.5, -0.9, 0.0)))
