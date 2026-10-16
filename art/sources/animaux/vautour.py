@@ -85,29 +85,32 @@ def construire():
     a.piece("queue", A.boule(1.0, 24, 12).etire(0.070, 0.030, 0.150), tuple(BRUN), pos=(0.0, 0.290, 0.150), rot=(38, 0, 0))
 
     # ----- le cou nu et ridé, qui s'étire hors de la collerette ; la tête chauve ; le bec crochu -----
-    chemin = [(0.0, -0.090, 0.540), (0.0, -0.170, 0.640), (0.0, -0.160, 0.740), (0.0, -0.230, 0.820)]
-    cou = A.tube(A.courbe(propres(chemin), 6), lambda t: 0.052 - 0.020 * t, 20)
+    # (16/10, planche 21 : « pas sûr, faut affiner ») : un cou de vautour au repos, court et épais, qui sort d'une
+    # collerette pleine (plus le long cou d'oie) ; une tête plus grosse, à l'échelle d'une peluche ; un bec plus fort
+    chemin = [(0.0, -0.095, 0.545), (0.0, -0.150, 0.615), (0.0, -0.168, 0.672), (0.0, -0.198, 0.712)]
+    cou = A.tube(A.courbe(propres(chemin), 6), lambda t: 0.060 - 0.016 * t, 20)
     cou.teinte = np.tile(PEAU, (len(cou.v), 1))
     a.piece("cou", cou, None, poil=False)
-    a.piece("collerette", A.boule(1.0, 36, 18).etire(0.115, 0.095, 0.060), tuple(DUVET), pos=(0.0, -0.090, 0.560), rot=(-22, 0, 0))
-    H = A.repere(Vector((0.0, -0.250, 0.850)), (0, 0, LACET))
+    a.piece("collerette", A.boule(1.0, 40, 20).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.140, 0.120, 0.078), tuple(DUVET),
+            pos=(0.0, -0.085, 0.552), rot=(-18, 0, 0))
+    H = A.repere(Vector((0.0, -0.220, 0.738)), (0, 0, LACET))
     H3 = H.to_3x3()
     tete = A.boule(1.0, 40, 20)
     tete.teinte = np.tile(PEAU, (len(tete.v), 1))
-    a.piece("tete", tete.etire(0.046, 0.062, 0.048), None, mat=H, poil=False)
-    a.tete = H @ Vector((0, -0.090, -0.010))
-    haut = A.tour(A.profil([(0, 0), (0.034, 0.006), (0.030, 0.034), (0.018, 0.064), (0.006, 0.084), (0, 0.092)], 5), 28)
+    a.piece("tete", tete.etire(0.058, 0.074, 0.060), None, mat=H, poil=False)
+    a.tete = H @ Vector((0, -0.105, -0.010))
+    haut = A.tour(A.profil([(0, 0), (0.041, 0.006), (0.037, 0.038), (0.024, 0.072), (0.009, 0.096), (0, 0.106)], 5), 28)
 
     def crochu(v):
         s = v.copy()
         s[:, 1] *= 1.10
-        s[:, 1] -= 0.040 * np.clip(v[:, 2] / 0.092, 0, 1) ** 2.2
+        s[:, 1] -= 0.050 * np.clip(v[:, 2] / 0.106, 0, 1) ** 2.4                     # le crochet, franc
         return s
-    a.piece("bec", haut.sculpte(crochu), BEC, mat=A.cadre(H @ Vector((0, -0.050, -0.010)), H3 @ Vector((0, -1.0, -0.24)), Vector((0, 0, 1))), poil=False)
+    a.piece("bec", haut.sculpte(crochu), BEC, mat=A.cadre(H @ Vector((0, -0.060, -0.012)), H3 @ Vector((0, -1.0, -0.20)), Vector((0, 0, 1))), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.70, -0.55, 0.30))
+        regard = H3 @ Vector((c * 0.72, -0.52, 0.32))
         p, n = a.surface("tete", H.to_translation(), regard)
-        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0135)
+        a.oeil("oeil_" + nom, p + n * 0.003, n, 0.0165)
         # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
 
     # ----- les pattes : des culottes de plumes, de grosses pattes grises, trois serres devant et une derrière -----
@@ -142,7 +145,7 @@ OS = [
     ('racine', None, (0, 0, 0)),
     ('corps', 'racine', (0.000, 0.178, 0.370)),
     ('cou', 'corps', (-0.002, -0.074, 0.559)),
-    ('tete', 'cou', (-0.004, -0.225, 0.808)),
+    ('tete', 'cou', (-0.004, -0.200, 0.706)),                    # 16/10 : le cou raccourci, la tête plus bas
     ('patte_av_G', 'corps', (0.080, -0.004, 0.167)),
     ('aile_G', 'corps', (0.151, 0.003, 0.486)),
     ('queue', 'corps', (-0.000, 0.169, 0.318)),

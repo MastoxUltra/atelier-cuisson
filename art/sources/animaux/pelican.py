@@ -53,16 +53,40 @@ def construire():
     a.piece("tete", O.teinte(tete, BLANC), None, pos=tuple(H), rot=(20, 0, 0))
     a.tete = H + Vector((0.0, -0.20, -0.04))
 
-    # le bec : un long fer plat, légèrement courbé vers le bas au bout, qui part du front en s'abaissant vers la poitrine
-    bec = A.tour(A.profil([(0.058, 0), (0.060, 0.080), (0.054, 0.200), (0.040, 0.300), (0.026, 0.360), (0.010, 0.388), (0, 0.396)], 4), 28)
-    bec = bec.etire(1.0, 0.46, 1.0).sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.14 * (v[:, 2] / 0.396) ** 3, v[:, 2]], axis=1))
-    a.piece("bec", O.couche(O.teinte(bec, BEC), A.cadre(H + Vector((0.0, -0.075, -0.030)), (0.0, -1.0, -0.38), (0, 1.0, 0))), None, poil=False)
-    # la poche : une besace qui pend, large en haut contre le bec, ronde et lourde en bas (plus un bloc plat)
-    # une besace allongée sous le bec : elle épouse la mandibule du bout du bec jusqu'à la gorge, et se creuse en pendant
-    sens_bec = Vector((0.0, -1.0, -0.38)).normalized()
-    poche = A.tour(A.profil([(0, 0), (0.040, 0.020), (0.070, 0.090), (0.076, 0.200), (0.062, 0.300), (0.032, 0.360), (0, 0.390)], 5), 32).etire(1.0, 0.82, 1.0)
+    # le bec (refait le 16/10, planche 21 : « le bec bizarre ») : un long fer PLAT et droit, un peu bombé sur le dessus,
+    # qui finit par un petit crochet vers le BAS (l'onglet) ; l'ancien remontait en spatule (son repère avait l'axe y vers
+    # le bas). Le repère a maintenant y vers le haut : z le long du bec, x sur le côté.
+    LB = 0.400
+    sens_bec = Vector((0.0, -1.0, -0.42)).normalized()
+    B = A.cadre(H + Vector((0.0, -0.068, -0.024)), sens_bec, (0, 0, 1))
+    prof_bec = [(0.050, 0.0), (0.049, 0.060), (0.045, 0.160), (0.040, 0.260), (0.035, 0.335), (0.029, 0.372), (0.017, 0.392), (0, LB)]
+    bec = A.tour(A.profil(prof_bec, 4), 28)
+
+    def fer(v):
+        s = v.copy()
+        t = np.clip(v[:, 2] / LB, 0.0, 1.0)
+        s[:, 1] = v[:, 1] * 0.32 + 0.006 * np.sin(np.pi * t)                 # plat, le dessus à peine bombé
+        s[:, 1] -= 0.034 * np.clip((t - 0.86) / 0.14, 0.0, 1.0) ** 2          # l'onglet : le bout crochu vers le bas
+        return s
+    bec.sculpte(fer)
+    tb = np.tile(BEC, (len(bec.v), 1))
+    tb[bec.v[:, 2] > 0.90 * LB] = BEC * 0.80 + np.asarray(POCHE, float) * 0.20                # l'onglet plus soutenu
+    bec.teinte = tb
+    a.piece("bec", O.couche(bec, B), None, poil=False)
+    # la poche : la peau orange sous la mandibule, qui l'épouse sur presque toute sa longueur (sa ligne du haut colle au
+    # dessous du bec), la plus profonde au premier tiers, et qui rejoint la gorge (fondue avec elle par la base gonflée)
+    prof_poche = [(0.040, 0.0), (0.056, 0.070), (0.060, 0.140), (0.050, 0.220), (0.033, 0.290), (0.015, 0.334), (0, 0.350)]
+    poche = A.tour(A.profil(prof_poche, 5), 32)
+
+    def pendre(v):
+        s = v.copy()
+        r = np.interp(v[:, 2], [p[1] for p in prof_poche], [p[0] for p in prof_poche])
+        s[:, 0] = v[:, 0] * 0.80                                             # un peu moins large que le bec
+        s[:, 1] = v[:, 1] - r - 0.010                                        # pendue : le haut sous la mandibule
+        return s
+    poche.sculpte(pendre)
     poche.teinte = np.tile(np.asarray(POCHE, float), (len(poche.v), 1))
-    a.piece("poche", poche, None, mat=A.cadre(H + Vector((0.0, -0.075, -0.030)) + sens_bec * 0.010 + Vector((0.0, 0.0, -0.050)), sens_bec, (0, 1.0, 0)))       # pendue SOUS le bec
+    a.piece("poche", poche, None, mat=B)
     O.paire_yeux(a, "tete", H, (0.88, -0.30, 0.30), 0.0175, decolle=0.002)
 
     # ----- les ailes repliées en toit, le bout sombre ; la queue courte ; les pattes courtes, orange -----

@@ -133,33 +133,54 @@ class Fil:
     """Un chemin lissé : de quoi coucher une pièce tournée le long d'un cou en S, d'une queue, d'un corps de serpent.
         fil = K.Fil([(0, 0, 0.2), (0, -0.1, 0.4), (0, -0.05, 0.6)], flanc=(1, 0, 0))
         cou = A.tour(profil, 32).sculpte(fil.couche)       # la pièce garde ses anneaux : coutures et rustines marchent dessus
-    flanc : la direction du côté gauche de la pièce (d'équerre avec le plan où le chemin se tient)."""
+    flanc : la direction du côté gauche de la pièce (d'équerre avec le plan où le chemin se tient).
+    haut : pour un corps couché au sol qui tourne dans tous les sens (un serpent, une anguille en boucles), la direction du
+    dessus : le repère est refait en chaque point, la nuque toujours vers « haut », le flanc d'équerre (16/10 : avec un flanc
+    fixe, là où le chemin passait par le flanc, la nuque tombait à zéro et le tube s'écrasait en ruban tordu, le ventre
+    clair tournant autour du corps). Sans « haut », rien ne change ; là où le chemin monte droit vers « haut », le flanc
+    fixe reprend la main."""
 
-    def __init__(self, points, flanc=(1, 0, 0), pas=8):
+    def __init__(self, points, flanc=(1, 0, 0), pas=8, haut=None):
         self.p = A.courbe(points, pas)
         self.fait = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(self.p, axis=0), axis=1))])
         self.sens = np.gradient(self.p, self.fait, axis=0)
         self.long = float(self.fait[-1])
         self.flanc = np.asarray(flanc, float) / np.linalg.norm(flanc)
+        self.haut = None if haut is None else np.asarray(haut, float) / np.linalg.norm(haut)
 
-    def cadre(self, s):
-        """À s mètres de la base : le centre du fil, la direction où il va, et sa nuque (le dessus)."""
+    def _repere(self, s):
+        """(centre, avant, nuque, flanc) à s mètres de la base."""
         centre = np.stack([np.interp(s, self.fait, self.p[:, k]) for k in range(3)], axis=-1)
         avant = np.stack([np.interp(s, self.fait, self.sens[:, k]) for k in range(3)], axis=-1)
         avant = avant / np.linalg.norm(avant, axis=-1, keepdims=True)
-        return centre, avant, np.cross(avant, self.flanc)
+        nuque = np.cross(avant, self.flanc)
+        flanc = np.broadcast_to(self.flanc, np.shape(avant)).copy()
+        if self.haut is not None:
+            proj = self.haut - (avant @ self.haut)[..., None] * avant          # le haut, d'équerre avec le fil
+            lg = np.linalg.norm(proj, axis=-1, keepdims=True)
+            ok = (lg > 0.30)[..., 0]
+            n2 = proj / np.maximum(lg, 1e-12)
+            f2 = np.cross(n2, avant)
+            nuque = np.where(ok[..., None], n2, nuque)
+            flanc = np.where(ok[..., None], f2, flanc)
+        return centre, avant, nuque, flanc
+
+    def cadre(self, s):
+        """À s mètres de la base : le centre du fil, la direction où il va, et sa nuque (le dessus)."""
+        centre, avant, nuque, _f = self._repere(s)
+        return centre, avant, nuque
 
     def couche(self, v):
         """Pour sculpte() : couche une pièce tournée toute droite (son axe Z) le long du fil. Son +X devient le flanc, son +Y la nuque."""
         s = np.clip(v[:, 2], 0.0, self.long)
-        centre, avant, nuque = self.cadre(s)
-        return centre + avant * (v[:, 2] - s)[:, None] + v[:, 0:1] * self.flanc + v[:, 1:2] * nuque
+        centre, avant, nuque, flanc = self._repere(s)
+        return centre + avant * (v[:, 2] - s)[:, None] + v[:, 0:1] * flanc + v[:, 1:2] * nuque
 
     def vise(self, s, devant, cote, haut):
         """Depuis le centre du fil à la hauteur s : ce centre, et une direction (vers l'avant, vers le flanc, vers la nuque).
         Pour a.surface(), a.rustine(), a.oeil() sur une pièce couchée."""
-        centre, avant, nuque = self.cadre(s)
-        return Vector(centre), Vector(avant * devant + self.flanc * cote + nuque * haut)
+        centre, avant, nuque, flanc = self._repere(s)
+        return Vector(centre), Vector(avant * devant + flanc * cote + nuque * haut)
 
 
 def tube_peint(chemin, rayon, paliers, cotes=12):

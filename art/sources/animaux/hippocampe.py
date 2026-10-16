@@ -22,9 +22,9 @@ import matieres as M
 import peluche as K
 import outils_a as O
 
-SAFRAN = M.hexa("#f0a81a")                    # la dominante (registre : jaune safran)
-PALE = M.hexa("#ffd56a")                      # le plastron, les nageoires
-ANNEAU = M.hexa("#cf8512")                    # la couronne
+SAFRAN = M.hexa("#d8423a")                    # la dominante : ROUGE corail (l'auteur, 16/10 : « mets-le en rouge » ; était jaune safran)
+PALE = M.hexa("#f07a62")                      # le plastron, les nageoires : un ton plus clair (registre)
+ANNEAU = M.hexa("#ee6a52")                    # la couronne (la crête) : un ton plus clair (registre)
 CREME = K.CREME
 FIL = M.hexa("#7a3a14")
 

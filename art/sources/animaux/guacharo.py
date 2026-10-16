@@ -27,15 +27,18 @@ GOUTTE = np.array(M.hexa("#f6f0e4"))          # l'accent : les gouttes blanches
 BEC = M.hexa("#c7b79a")
 SOIE = M.hexa("#3a2a20")
 PATTE = np.array(M.hexa("#d28a8c"))
+LONG, RAY = 0.440, 0.116                      # le corps (16/10 : plus mince et plus long)
 
 
 def construire():
     a = K.Animal("guacharo")
     a.taille = 0.60
 
-    r = O.oiseau(a, dos=ROUX, ventre=VENTRE, tete=ROUX * 1.02, aile=ROUX * 0.96, queue=SOMBRE, bec=BEC, patte=PATTE, long=0.40, ray=0.130,
-                 incline=34.0, z0=0.140, tete_r=(0.066, 0.070, 0.064), tete_pos=(0.0, -0.105, 0.075), bec_long=0.058, bec_ray=0.0205,
-                 bec_baisse=-0.10, aile_dim=(0.030, 0.140, 0.230), aile_pos=(0.0, 0.040, 0.0), queue_dim=(0.050, 0.150, 0.014), queue_haut=-18.0,
+    # 16/10 (planche 21 : à refaire ; pas de modèle 3D trouvé) : un engoulevent perché, pas une boule : le corps plus
+    # mince et plus long, plus droit ; les ailes longues et ÉTROITES (plus des coquilles), la longue queue en éventail
+    r = O.oiseau(a, dos=ROUX, ventre=VENTRE, tete=ROUX * 1.02, aile=ROUX * 0.96, queue=SOMBRE, bec=BEC, patte=PATTE, long=LONG, ray=RAY,
+                 incline=26.0, z0=0.140, tete_r=(0.066, 0.070, 0.064), tete_pos=(0.0, -0.100, 0.070), bec_long=0.058, bec_ray=0.0205,
+                 bec_baisse=-0.10, aile_dim=(0.024, 0.098, 0.285), aile_pos=(0.0, 0.040, 0.0), queue_dim=(0.058, 0.200, 0.014), queue_haut=-14.0,
                  patte_long=0.100, patte_ray=0.0115, oeil_r=0.0215, oeil_dir=(0.42, -0.88, 0.26), bout_aile=SOMBRE, coupe_dos=1.40, cou_ray=0.064)
     H, T, haut = r["H"], r["T"], r["haut"]
 
@@ -59,8 +62,8 @@ def construire():
     gouttes = None
     for k in range(70):
         th = rng.uniform(-1.30, 1.30)                                            # autour du dos (0 : sur la crête)
-        zz = rng.uniform(0.04, 0.34) * 0.40 / 0.34
-        ray_loc = 0.130 * float(np.interp(zz / (0.40 / 0.34), [0.0, 0.09, 0.20, 0.30, 0.34], [0.0, 0.9, 1.0, 0.62, 0.0]))
+        zz = rng.uniform(0.04, 0.34) * LONG / 0.34
+        ray_loc = RAY * float(np.interp(zz / (LONG / 0.34), [0.0, 0.09, 0.20, 0.30, 0.34], [0.0, 0.9, 1.0, 0.62, 0.0]))
         if ray_loc < 0.03:
             continue
         pos = T @ Vector((ray_loc * math.sin(th) * 1.00, ray_loc * math.cos(th) * 1.00 + 0.002, zz))
@@ -73,7 +76,7 @@ def construire():
         for k in range(6):
             zz = 0.050 + 0.052 * k
             dz = (zz - 0.194) / 0.230
-            tt = Vector((c * (0.126 + 0.030 * math.sqrt(max(1.0 - dz * dz, 0.0)) + 0.003), 0.015 + 0.020 * (k % 3), zz))
+            tt = Vector((c * (RAY - 0.004 + 0.024 * math.sqrt(max(1.0 - dz * dz, 0.0)) + 0.003), 0.015 + 0.020 * (k % 3), zz))
             n = (T.to_3x3() @ Vector((c * 1.0, 0.0, 0.0))).normalized()
             g = O.couche(O.teinte(A.boule(1.0, 10, 6).etire(0.0105, 0.0105, 0.0035), GOUTTE), A.cadre(T @ tt, n, (0, 0, 1)))
             a.piece("goutte_aile_%d_%d" % (c, k), g, None, poil=False)

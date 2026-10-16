@@ -28,17 +28,21 @@ BLANC = np.array(M.hexa("#fbf9f4"))           # les ailes, le ventre, les chauss
 NOIR = np.array(M.hexa("#26211f"))            # la queue
 VERMILLON = M.hexa("#ee3b22")                 # l'accent : le sourcil
 BEC = M.hexa("#241e1c")
+LONG, RAY = 0.420, 0.140                      # le corps (16/10 : moins rond, plus long)
 
 
 def construire():
     a = K.Animal("lagopede")
     a.taille = 0.52
 
-    r = O.oiseau(a, dos=GREGE, ventre=BLANC * 0.98, tete=GREGE * 0.97, aile=GREGE * 0.96, queue=NOIR, bec=BEC, patte=BLANC, long=0.40, ray=0.152,
-                 incline=38.0, z0=0.150, tete_r=(0.058, 0.062, 0.056), tete_pos=(0.0, -0.062, 0.050), bec_long=0.036, bec_ray=0.0165,
-                 bec_baisse=-0.12, aile_dim=(0.024, 0.088, 0.135), aile_pos=(-0.004, 0.030, -0.012), queue_dim=(0.046, 0.115, 0.014),
-                 queue_haut=-30.0, patte_long=0.110, patte_ray=0.030, oeil_r=0.0135, oeil_dir=(0.42, -0.88, 0.22), bout_aile=BLANC,
-                 coupe_dos=1.35)
+    # 16/10 (planche 21 : à refaire ; pas de modèle 3D trouvé) : moins de boule, plus d'oiseau. Le corps penché plus bas
+    # (un gallinacé tapi, pas un œuf debout), un peu plus long et moins rond ; la tête plus grosse, emmanchée sur un cou
+    # court ; posé plus près du sol, sur de gros chaussons de plumes.
+    r = O.oiseau(a, dos=GREGE, ventre=BLANC * 0.98, tete=GREGE * 0.97, aile=GREGE * 0.96, queue=NOIR, bec=BEC, patte=BLANC, long=LONG, ray=RAY,
+                 incline=54.0, z0=0.125, tete_r=(0.066, 0.070, 0.063), tete_pos=(0.0, -0.070, 0.040), bec_long=0.036, bec_ray=0.0170,
+                 bec_baisse=-0.12, aile_dim=(0.026, 0.092, 0.150), aile_pos=(-0.004, 0.030, -0.012), queue_dim=(0.046, 0.115, 0.014),
+                 queue_haut=-22.0, patte_long=0.080, patte_ray=0.030, oeil_r=0.0150, oeil_dir=(0.50, -0.82, 0.24), bout_aile=BLANC,
+                 coupe_dos=1.35, cou_ray=0.042, bec_suit=True)
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # ----- les mouchetures : de petites taches brunes semées sur le dos, la poitrine et le cou, posées à plat sur le corps -----
@@ -48,8 +52,8 @@ def construire():
     prof_r = [0.0, 0.55, 0.90, 1.0, 0.88, 0.62, 0.34, 0.0]
     for k in range(95):
         th = rng.uniform(-2.2, 2.2)                                                  # 0 : le dos ; ±π : le ventre
-        zz = rng.uniform(0.06, 0.34) * 0.40 / 0.34
-        rr = 0.152 * float(np.interp(zz / (0.40 / 0.34), prof_z, prof_r))
+        zz = rng.uniform(0.06, 0.34) * LONG / 0.34
+        rr = RAY * float(np.interp(zz / (LONG / 0.34), prof_z, prof_r))
         if rr < 0.04 or abs(th) > 2.0 and zz < 0.16:
             continue
         n = (T.to_3x3() @ Vector((math.sin(th), math.cos(th), 0.0))).normalized()
@@ -67,8 +71,8 @@ def construire():
 
     # ----- les chaussons : deux gros pieds emplumés de blanc, les orteils à peine visibles dessous ; le dessous de la queue blanc -----
     for nom, c in (("G", 1), ("D", -1)):
-        chausson = A.boule(1.0, 28, 14).sculpte(lambda v: K.emousse(v, 0.8)).etire(0.040, 0.082, 0.034)
-        a.piece("chausson_" + nom, O.teinte(chausson, BLANC), None, pos=(c * 0.052, -0.040, 0.034))
+        chausson = A.boule(1.0, 28, 14).sculpte(lambda v: K.emousse(v, 0.8)).etire(0.050, 0.090, 0.040)      # gros, sous le ventre
+        a.piece("chausson_" + nom, O.teinte(chausson, BLANC), None, pos=(c * 0.055, -0.048, 0.040))
     sous = A.boule(1.0, 20, 10).etire(0.034, 0.060, 0.026)
     a.piece("sous_queue", O.teinte(sous, BLANC), None, mat=T @ A.repere((0.0, 0.055, 0.020), (-10, 0, 0)))
     return a
