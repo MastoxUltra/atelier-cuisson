@@ -22,6 +22,7 @@ from mathutils import Matrix, Vector
 import atelier as A
 import garnitures as G
 import matieres as M
+import outils_a as O
 import peluche as K
 
 CHARBON = M.hexa("#3b3c43")                 # les taches, les oreilles, le toupet, les sabots
@@ -110,10 +111,8 @@ def construire():
     a.broderie("bouche", a.trace("mufle", mufle, bouche, 0.004), 0.0026, CHARBON)
 
     # ----- les yeux : deux yeux vivants, grands ouverts, sur l'avant de la tête (visibles de face) -----
-    for nom, c in (("G", 1), ("D", -1)):
-        pos, vers = a.surface("tete", T @ Vector((0, 0, 0.080)), T3 @ Vector((c * 0.52, 0.55, 0.58)))
-        if c == 1:
-            a.oeil("oeil", pos + vers * 0.010, vers, 0.030, paire=True)      # une paire : le reflet du même côté pour les deux (plus un terne, un brillant)
+    # posés dans le repère de la TÊTE (tournée de 24°) : le miroir se fait dans la tête, plus d'œil qui flotte hors du crâne
+    O.paire_yeux(a, "tete", T @ Vector((0, 0, 0.080)), (0.52, 0.55, 0.58), 0.030, decolle=0.010, R=T)
 
     # ----- les petites cornes crème, les oreilles charbon doublées de rose, et le toupet qui retombe sur le front -----
     def feuille(v):                                       # une oreille : ronde à l'attache, plus étroite au bout

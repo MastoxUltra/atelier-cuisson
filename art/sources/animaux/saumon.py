@@ -75,7 +75,7 @@ def construire():
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0300)
         h = Vector(fil.cadre(0.09 * L)[2])
-        a.piece("lourde_" + nom, K.paupiere(0.0300, 0.12), tuple(ARDOISE), mat=A.cadre(pos + n * 0.002, n, (h - n * n.dot(h)).normalized()), poil=False)
+        a.piece("lourde_" + nom, K.paupiere(0.0300, 0.60), tuple(ARDOISE), mat=A.cadre(pos + n * 0.002, n, (h - n * n.dot(h)).normalized()), poil=False)
     pts = []
     for u_ in np.linspace(0.0, 1.0, 7):
         cc, dd = fil.vise((0.012 + 0.085 * u_) * L, 0.0, 1.0, -0.34 + 0.12 * u_)

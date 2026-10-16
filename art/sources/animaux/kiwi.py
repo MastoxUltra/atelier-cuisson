@@ -84,13 +84,17 @@ def construire():
     C = Vector(centre)
 
     # ----- la tête : une vraie petite tête ronde, en vue au bout du cou (plus noyée dans les touffes) -----
+    # la tête tournée de 26° vers la caméra (les deux yeux visibles sur les trois vues)
+    lat_ = np.cross(np.array(avant), np.array(nuque))
+    av2 = np.array(avant) * math.cos(math.radians(26)) - lat_ * math.sin(math.radians(26))
+    lat2 = np.cross(av2, np.array(nuque))
     Hc = Vector(np.array(centre) + np.array(avant) * 0.040 + np.array(nuque) * 0.012)
     tete_ = A.boule(1.0, 36, 18)
     tete_.teinte = np.tile(np.asarray(TABAC, float) * 1.08, (len(tete_.v), 1))
-    a.piece("tete", tete_.etire(0.056, 0.062, 0.058), None, mat=A.cadre(Hc, Vector(avant), Vector(nuque)))
+    a.piece("tete", tete_.etire(0.056, 0.062, 0.058), None, mat=A.cadre(Hc, Vector(av2), Vector(nuque)))
 
     # ----- le bec : long, fin, d'ivoire, légèrement recourbé, qui descend et fouille le sol ; les narines au bout -----
-    dirige = Vector(avant * 0.78 + np.array([0.0, 0.0, -0.62]))
+    dirige = Vector(av2 * 0.78 + np.array([0.0, 0.0, -0.62]))
     dirige.normalize()
     B = A.cadre(Hc + dirige * 0.040, dirige, Vector((0, 0, 1)))
 
@@ -102,7 +106,7 @@ def construire():
     a.piece("bec", bec.sculpte(canne), IVOIRE, mat=B, poil=False)
     a.tete = Hc + dirige * 0.100
     for c in (1, -1):
-        p, n = a.surface("tete", Hc, Vector(np.array(avant) * 0.60 + np.array(nuque) * 0.30 + np.cross(np.array(avant), np.array(nuque)) * c * 0.75))
+        p, n = a.surface("tete", Hc, Vector(av2 * 0.60 + np.array(nuque) * 0.30 + lat2 * c * 0.75))
         a.oeil("oeil_" + ("G" if c > 0 else "D"), p + n * 0.004, n, 0.0155)
 
     # ----- les cuisses : d'énormes jambons, hauts sur la croupe ; les pattes : minces, les gros pieds à trois orteils -----

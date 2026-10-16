@@ -94,10 +94,12 @@ def construire():
     t[(u[:, 2] > 0.38) & (u[:, 1] < -0.10) & (np.abs(u[:, 0]) < 0.8)] = BRUME * 0.94                              # le front bas, sous les mèches
     tete.teinte = t
     a.piece("tete", tete.etire(0.124, 0.106, 0.110), None, mat=RT)
+    masque = A.boule(1.0, 28, 14).etire(0.074, 0.018, 0.062)                       # la face nue : un masque rouge LISSE, sans poil par-dessus
+    a.piece("masque", O.teinte(masque, ROSE), None, mat=RT @ A.repere((0.0, -0.086, -0.010)), poil=False)
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.007, 0.009), tuple(CHAIR * 0.70), mat=RT @ A.repere((0.0, -0.103, -0.026)), poil=False)
     for c in (1, -1):
         a.piece("narine_%d" % c, A.boule(1.0, 10, 6).etire(0.0065, 0.004, 0.006), NEZ, mat=RT @ A.repere((c * 0.0105, -0.1105, -0.027)), poil=False)
-    O.paire_yeux(a, "tete", H, (0.34, -0.90, 0.10), 0.0135, couleur_lourde=tuple(ROSE * 0.93), coupe=0.60, decolle=0.002, R=RT)
+    O.paire_yeux(a, "tete", H, (0.34, -0.90, 0.10), 0.0135, couleur_lourde=tuple(ROSE * 0.93), coupe=0.60, decolle=0.016, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.boule(1.0, 22, 12).etire(0.034, 0.014, 0.032)
         a.piece("oreille_" + nom, O.teinte(ore, CHAIR), None, mat=RT @ A.repere((c * 0.122, 0.018, 0.006)), poil=False)
