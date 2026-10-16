@@ -86,7 +86,7 @@ def construire():
     tour_ = np.abs(np.arctan2(corps.v[:, 0], corps.v[:, 1]))           # 0 sur la ligne du dos, pi sous le ventre
     limite = table([(0.0, 1.55), (0.25, 1.90), (0.60, 1.95), (0.85, 1.70), (1.0, 1.30)], long)(corps.v[:, 2])
     f_ = corps.v[:, 2] / long
-    barre = (tour_ > 1.75) & (np.abs(f_ - 0.86) < 0.045 + 0.02 * (tour_ - 1.75))   # la barre blanche en travers du poitrail
+    barre = (tour_ > 1.45) & (np.abs(f_ - 0.80) < 0.055 + 0.02 * (tour_ - 1.45))   # la barre blanche en travers du poitrail
     corps.teinte = np.where(barre[:, None], np.asarray(NEIGE), np.where((tour_ < limite)[:, None], np.asarray(ARGENT), np.asarray(CHARBON)))
 
     def trapu(v):                                         # les hanches et les épaules larges, le ventre plat, la bosse

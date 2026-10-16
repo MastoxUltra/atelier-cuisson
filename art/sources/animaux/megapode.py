@@ -35,7 +35,7 @@ def construire():
 
     r = O.oiseau(a, dos=CENDRE, ventre=VENTRE, tete=ROUGE, aile=CENDRE * 0.96, queue=NOIR, bec=BEC, patte=PATTE, long=0.40, ray=0.140,
                  incline=26.0, z0=0.185, tete_r=(0.070, 0.078, 0.068), tete_pos=(0.0, -0.100, 0.070), bec_long=0.050, bec_ray=0.016,
-                 aile_dim=(0.030, 0.118, 0.215), aile_pos=(0.0, 0.020, 0.0), queue_dim=(0.016, 0.130, 0.150), queue_haut=14.0,
+                 aile_dim=(0.024, 0.098, 0.190), aile_pos=(0.0, 0.020, 0.0), queue_dim=(0.016, 0.130, 0.150), queue_haut=14.0,
                  patte_long=0.140, patte_ray=0.024, oeil_r=0.0140, oeil_dir=(0.42, -0.88, 0.20), bout_aile=NOIR)
     H, T, haut = r["H"], r["T"], r["haut"]
 
@@ -48,11 +48,12 @@ def construire():
     col = A.tore(0.062, 0.020, 28, 8)
     a.piece("collerette", O.teinte(col, VENTRE), None, pos=tuple(haut + Vector((0.0, -0.018, -0.030))), rot=(70, 0, 0))
 
-    # ----- l'éventail de la queue : une grande lame verticale à sept lobes, dressée derrière le dos -----
+    # ----- l'éventail de la queue : une lame verticale ronde, au bord à peine festonné, dressée derrière le dos -----
+    # (16/10, planche 21 : les sept lobes pointus faisaient une queue à pointes ; les ailes en plateaux sont amincies)
     pts = [(0.0, 0.0)]
-    for k in range(15):
-        th = math.radians(-78 + 156 * k / 14)
-        r = 0.250 if k % 2 == 0 else 0.208
+    for k in range(29):
+        th = math.radians(-74 + 148 * k / 28)
+        r = 0.226 + 0.008 * math.cos(math.pi * k / 2.0)
         pts.append((r * math.sin(th), r * math.cos(th)))
     eventail = A.decoupe(pts, 0.014, 0.005)
     eventail.teinte = np.tile(NOIR * 1.15, (len(eventail.v), 1))
