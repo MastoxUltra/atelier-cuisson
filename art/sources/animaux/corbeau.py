@@ -36,6 +36,9 @@ def construire():
                  queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0185, oeil_dir=(0.42, -0.88, 0.20), coupe_dos=1.30, cou_ray=0.066, aile_pointue=True,
                  tete_rot=(-6, 0, 0))
     H, T, haut = r["H"], r["T"], r["haut"]
+    for nom, c in (("G", 1), ("D", -1)):                    # un cerne clair autour de chaque œil : noir sur noir, il disparaissait
+        pos_c, n_c = a.surface("tete", H, Vector((c * 0.42, -0.88, 0.20)))
+        a.piece("cerne_" + nom, A.tore(0.0250, 0.0055, 28, 8), M.hexa("#a09cb4"), mat=A.cadre(pos_c + n_c * 0.001, n_c), poil=False)
 
     # ----- le sourcil lourd : un bourrelet noir au-dessus de chaque œil, qui donne l'air sévère -----
     for nom, c in (("G", 1), ("D", -1)):
