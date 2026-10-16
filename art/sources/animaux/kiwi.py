@@ -104,7 +104,7 @@ def construire():
         return s
     bec = A.tour(A.profil([(0, 0), (0.020, 0.006), (0.016, 0.040), (0.011, 0.130), (0.008, 0.200), (0.005, 0.240), (0, 0.256)], 5), 24)
     a.piece("bec", bec.sculpte(canne), IVOIRE, mat=B, poil=False)
-    a.tete = Hc + dirige * 0.100
+    a.tete = Hc + Vector(nuque) * 0.020 + dirige * 0.025                       # le CENTRE de la tête (le bec pointe vers le bas : le viser le sortait du cadre, en haut)
     for c in (1, -1):
         p, n = a.surface("tete", Hc, Vector(av2 * 0.60 + np.array(nuque) * 0.30 + lat2 * c * 0.75))
         a.oeil("oeil_" + ("G" if c > 0 else "D"), p + n * 0.004, n, 0.0155)

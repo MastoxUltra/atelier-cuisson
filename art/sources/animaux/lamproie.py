@@ -76,7 +76,7 @@ def construire():
 
     # ----- l'œil de chaque côté, et la rangée de sept trous branchiaux -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.930 * L, 0.55, -c * 0.45, 0.70)
+        centre, direction = Vector((0.08, -0.22, 0.385)), Vector((c * 0.62, -0.78, 0.18))        # sur l'AVANT du cou, côté caméra : les deux yeux se voient
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0400)                  # un vrai œil, gros, sur le dessus de la tête
         trous = None

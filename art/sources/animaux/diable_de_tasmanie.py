@@ -75,7 +75,7 @@ def construire():
     # la barre blanche : une large bande en croissant en travers de la poitrine (devant, de flanc à flanc)
 
     # ----- le cou fort et la TÊTE : large, lourde, portée bas ; le museau court, la gueule fermée -----
-    a.piece("cou", A.tube(A.courbe([(0.0, -0.200, 0.235), (0.0, -0.290, 0.225), (0.0, -0.350, 0.205)], 5), lambda t: 0.125 - 0.012 * t, 24), tuple(CHARBON))
+    a.piece("cou", A.tube(A.courbe([(0.0, -0.200, 0.235), (0.0, -0.290, 0.225), (0.0, -0.350, 0.205)], 5), lambda t: 0.108 - 0.012 * t, 24), tuple(CHARBON))
     T = A.cadre(Vector((0.0, -0.400, 0.215)), Vector((0.50, -1.0, -0.22)).normalized(), Vector((0, 0, 1)))
     T3 = T.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.082), (0.22, 0.118), (0.46, 0.114), (0.70, 0.094), (0.90, 0.074), (0.98, 0.048), (1.0, 0.0)], 0.290, 64, 0.005)
@@ -85,6 +85,9 @@ def construire():
     tt[(np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3) & (tete.v[:, 2] > 0.12)] = CENDRE
     tete.teinte = tt
     a.piece("tete", tete, None, mat=T @ A.repere((0, 0, -0.100)))
+    # le museau large et le nez rose qui sortent de la tête (sans eux, une boule de hamster noir : 16/10)
+    a.piece("museau", A.boule(1.0, 36, 18).etire(0.074, 0.060, 0.080), M.hexa("#5a5054"), mat=T @ A.repere((0, -0.030, 0.170)))
+    a.piece("nez", A.boule(1.0, 20, 10).etire(0.026, 0.018, 0.018), M.hexa("#d8788a"), mat=T @ A.repere((0, -0.010, 0.248)), poil=False)
     a.piece("nez", A.boule(1.0, 24, 12).etire(0.034, 0.024, 0.022), NEZ, mat=T @ A.repere((0.0, 0.010, 0.182)), poil=False)
     a.tete = T @ Vector((0, 0.0, 0.140))
     for nom, c in (("G", 1), ("D", -1)):
@@ -95,8 +98,8 @@ def construire():
         po, no = a.surface("tete", T @ Vector((0, 0.0, 0.0)), T3 @ Vector((c * 0.66, 0.72, -0.28)))
         face, dresse = T3 @ Vector((c * 0.55, 0.45, 0.70)), no + T3 @ Vector((0, 0.2, -0.9))
         E = A.cadre(po + no * 0.010, face, dresse)
-        a.piece("oreille_" + nom, A.boule(1.0, 28, 14).etire(0.046, 0.052, 0.016), tuple(CHARBON), mat=E)
-        a.piece("dedans_" + nom, A.boule(1.0, 24, 12).etire(0.030, 0.036, 0.008), OREILLE, mat=E @ A.repere((0, -0.002, 0.011)), poil=False)
+        a.piece("oreille_" + nom, A.boule(1.0, 28, 14).etire(0.058, 0.064, 0.018), tuple(CHARBON), mat=E)
+        a.piece("dedans_" + nom, A.boule(1.0, 24, 12).etire(0.040, 0.046, 0.009), OREILLE, mat=E @ A.repere((0, -0.002, 0.011)), poil=False)
     bouche = a.trace("tete", T @ Vector((0, 0.0, 0.110)), [T3 @ Vector(d) for d in ((0.30, -0.90, 0.30), (0.62, -0.72, 0.10), (0.84, -0.40, -0.02))], 0.004)
     a.broderie("bouche", A.courbe(propres(bouche), 4), 0.0028, tuple(CENDRE))
 
@@ -149,7 +152,7 @@ OS = [
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True), ('poitrine', 'corps'),
     ('oreille', 'oreille', True), ('pied_av', 'patte_av', True), ('pied_ar', 'patte_ar', True), ('amande', 'tete'),
-    ('dedans', 'oreille', True), ('bouche', 'tete'), ('corps', 'corps'), ('queue', 'queue'), ('tete', 'tete'),
+    ('dedans', 'oreille', True), ('bouche', 'tete'), ('corps', 'corps'), ('queue', 'queue'), ('tete', 'tete'), ('museau', 'tete'), ('nez', 'tete'),
     ('oeil', 'tete'), ('cou', 'cou'), ('nez', 'tete'), ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'),
     ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]

@@ -69,11 +69,11 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         joue = A.boule(1.0, 24, 12).etire(0.050, 0.030, 0.052)                       # des favoris doux, en bourrelet de poil : plus de pointes blanches
         a.piece("favori_" + nom, O.teinte(joue, CREME * 0.95), None, mat=RT @ A.repere((c * 0.082, -0.030, -0.036), (0, 0, c * 14)))
-        ore = A.tour(A.profil([(0.056, 0), (0.048, 0.034), (0.028, 0.082), (0.010, 0.120), (0, 0.134)], 4), 20).etire(1.0, 0.40, 1.0)
-        ore.teinte = np.where((ore.v[:, 2] > 0.088)[:, None], np.asarray(NOIR), np.asarray(BEIGE * 0.96))      # le bout de l'oreille noir      # des oreilles triangulaires, plus des oreilles de lapin
-        a.piece("oreille_" + nom, O.couche(ore, RT @ A.cadre(Vector((c * 0.074, 0.016, 0.078)), (c * 0.15, 0.10, 1.0), (0, 1, 0))), None)
-        pinc = O.tube_r([(0, 0, 0), (c * 0.006, 0.002, 0.070), (c * 0.014, 0.002, 0.140)], [0.016, 0.026, 0.008], 12)               # de vrais pinceaux, bien longs
-        a.piece("pinceau_" + nom, O.couche(O.teinte(pinc, NOIR), RT @ A.cadre(Vector((c * 0.080, 0.016, 0.204)), (c * 0.10, 0.05, 1.0), (0, 1, 0))), None, poil=False)
+        tri = A.decoupe([(-0.062, 0.0), (0.062, 0.0), (0.030, 0.090), (0.0, 0.150), (-0.030, 0.090)], 0.026, 0.010)      # une oreille en TRIANGLE (plus de lapin)
+        tri.teinte = np.where((tri.v[:, 1] > 0.100)[:, None], np.asarray(NOIR), np.asarray(BEIGE * 0.96))
+        a.piece("oreille_" + nom, O.couche(tri, O.plan(RT @ Vector((c * 0.074, 0.016, 0.070)), RT.to_3x3() @ Vector((1.0, 0.0, 0.0)), RT.to_3x3() @ Vector((c * 0.25, 0.10, 1.0)))), None)
+        pinc = O.tube_r([(0, 0, 0), (c * 0.006, 0.002, 0.060), (c * 0.014, 0.002, 0.120)], [0.014, 0.024, 0.006], 12)               # de vrais pinceaux, bien longs
+        a.piece("pinceau_" + nom, O.couche(O.teinte(pinc, NOIR), RT @ A.cadre(Vector((c * 0.086, 0.016, 0.208)), (c * 0.20, 0.05, 1.0), (0, 1, 0))), None, poil=False)
     O.broder(a, "bouche", "museau", RT @ Vector((0, -0.088, -0.030)), [(0.50 * u_, -0.82, -0.36 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0021, FIL, R=RT)
     a.tete = H + Vector((0.0, -0.14, 0.0))
 

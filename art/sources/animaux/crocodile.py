@@ -112,7 +112,7 @@ def construire():
 
     # ----- les dents : une rangée de petites dents blanches inégales qui dépassent le long de la mâchoire fermée -----
     dents = None
-    for f_ in np.linspace(0.04, 0.34, 24):
+    for f_ in np.linspace(0.04, 0.20, 16):           # le long de la gueule seulement (jusqu'à 0,34, elles couraient sur le flanc : 16/10)
         c_, av, nq = fil.cadre(f_ * L)
         r = float(np.interp(f_, [p[1] for p in pts], [p[0] for p in pts]))
         lat = np.cross(np.array(av), np.array(nq))

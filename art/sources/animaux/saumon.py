@@ -56,7 +56,7 @@ def construire():
     c0, av0, nq0 = (Vector(q) for q in fil.cadre(0.012 * L))
     kype = A.tour(A.profil([(0.030, 0), (0.022, 0.030), (0.012, 0.062), (0.004, 0.082), (0, 0.090)], 3), 14).sculpte(
         lambda v: np.stack([v[:, 0], v[:, 1] + 0.55 * v[:, 2] ** 1.4 * 3.0, v[:, 2]], axis=1))
-    a.piece("crochet", O.couche(O.teinte(kype, CREME), A.cadre(c0 - nq0 * 0.020 - av0 * 0.012, av0, nq0)), None, poil=False)
+    # (plus de crochet : de face il se lisait comme un anneau posé sur la tête)
 
     # ----- les nageoires -----
     c1, av1, nq1 = (Vector(q) for q in fil.cadre(L))
@@ -74,9 +74,9 @@ def construire():
 
     # ----- le visage : l'œil rond, la bouche tendue ; il serre les dents -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.090 * L, 0.35, -c * 0.95, 0.18)
+        centre, direction = fil.vise(0.090 * L, 0.55, -c * 0.60, 0.40)
         pos, n = a.surface("corps", centre, direction)
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0300)
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0380)
         # (plus de paupière lourde : l'anneau posé sur l'œil ; l'œil est nu, rond et ouvert)
     pts = []
     for u_ in np.linspace(0.0, 1.0, 7):
