@@ -1486,6 +1486,8 @@ def _paupieres_ouvertes(a):
     une paupière épaisse cache l'œil vu de trois quarts. Rend la liste « nom : coupe avant -> après »."""
     sourcils = ["%s retiré" % nm for nm in _retirer(a, lambda p: p.get("fusion") or not p["nom"].lower().startswith(SOURCILS))]
     mode = getattr(a, "paupieres_lourdes", PAUPIERES_LOURDES)        # une bête peut garder ses paupières, fines (l'hippopotame, 16/10)
+    if mode == "garder":                                             # déjà ouvertes, une peau qui épouse le globe (modele_reel)
+        return sourcils + ["paupières gardées telles quelles"]
     if mode == "retirer":                                            # l'œil ouvert, sans trait au-dessus (Principal, 15/10)
         return sourcils + ["%s retirée" % nm for nm in _retirer(a, lambda p: p.get("fusion") or not p["nom"].lower().startswith("lourde"))]
     import atelier as A
@@ -1642,7 +1644,8 @@ def _suivre(a, liens, P, X, Q, h, L):
             for p in a._toutes():
                 if p.get("fusion") or id(p) in deja:
                     continue
-                if np.linalg.norm(p["monde"].mean(axis=0) - c) < 1.8 * r * e and np.ptp(p["monde"], axis=0).max() < 4.5 * r * e:
+                pres_ = 2.5 if p["nom"].lower().startswith("lourde") else 1.8      # une paupière de peau (modele_reel)
+                if np.linalg.norm(p["monde"].mean(axis=0) - c) < pres_ * r * e and np.ptp(p["monde"], axis=0).max() < 4.5 * r * e:
                     p["monde"] = p["monde"] + d
                     deja.add(id(p))
         yeux.append("%s %.1f mm" % (nom, 1000 * np.linalg.norm(ds[0])))

@@ -35,6 +35,9 @@ def rayon(f):
                      (0.91, 0.056), (0.955, 0.044), (0.985, 0.028), (0.997, 0.012), (1.0, 0.0)])(f)      # la tête s'effile en museau, plus un tube coupé
 
 
+TOURNE = 25                                   # la fiche tourne la bête vers la caméra (25° devant) : on compte les DEUX yeux ; 0 pour le jeu
+
+
 def construire():
     a = K.Animal("saumon")
     a.taille = 0.95
@@ -74,8 +77,7 @@ def construire():
         centre, direction = fil.vise(0.090 * L, 0.35, -c * 0.95, 0.18)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0300)
-        h = Vector(fil.cadre(0.09 * L)[2])
-        a.piece("lourde_" + nom, K.paupiere(0.0300, 0.60), tuple(ARDOISE), mat=A.cadre(pos + n * 0.002, n, (h - n * n.dot(h)).normalized()), poil=False)
+        # (plus de paupière lourde : l'anneau posé sur l'œil ; l'œil est nu, rond et ouvert)
     pts = []
     for u_ in np.linspace(0.0, 1.0, 7):
         cc, dd = fil.vise((0.012 + 0.085 * u_) * L, 0.0, 1.0, -0.34 + 0.12 * u_)
@@ -85,6 +87,8 @@ def construire():
     if len(pts) > 1:
         a.broderie("bouche", A.courbe(pts, 4), 0.0026, FIL)
     a.tete = Vector(fil.cadre(0.07 * L)[0]) + Vector((0.0, -0.05, 0.03))
+    if TOURNE:
+        O.tourner(a, TOURNE)
     return a
 
 

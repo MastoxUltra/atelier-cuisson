@@ -24,7 +24,8 @@ import peluche as K
 
 PRUNE = M.hexa("#8a6070")                     # la dominante : brun prune (le poil la fonce)
 CREME = M.hexa("#fff2d0")                     # les piquants
-POINTE = M.hexa("#5a4048")                    # le bout des piquants, le manteau, le museau
+POINTE = M.hexa("#5a4048")                    # le manteau, le bout du museau
+BRUN_POINTE = M.hexa("#5c3a24")               # la pointe brune des piquants (16/10)
 
 CORPS = Vector((0.0, 0.03, 0.072))
 DOS = Vector((0.0, 0.45, 0.90)).normalized()        # l'axe du manteau de piquants : vers le haut, un peu vers l'arrière
@@ -92,11 +93,16 @@ def construire():
     a.rustine("pavillon", "oreille", oreille, O.to_3x3() @ Vector((0, 1, 0)), 1.0, PRUNE, 0.002, 0, paire=True)
 
     # ----- les piquants : des cônes de feutrine, le bout plus clair, tous réunis en une seule pièce -----
-    cone = A.tour(A.profil([(0.011, 0.0), (0.0088, 0.013), (0.0045, 0.031), (0, 0.043)], 2), 8)
-    sombre_ = np.array(POINTE)
-    cone.teinte = np.array([np.array(CREME) * (1 - t) + sombre_ * t for t in (cone.v[:, 2] / 0.043) ** 2])
+    # (16/10, 6e essai : « des cartes blanches plates en couronne », refusé par l'auteur) : des cônes ÉPAIS en obus, ronds (16
+    # côtés), arrondis au bout, crème à pointe brune, serrés sur tout le dos, qui sortent du poil
+    LP = 0.040
+    cone = A.tour(A.profil([(0.0105, 0.0), (0.0104, 0.008), (0.0096, 0.018), (0.0078, 0.027), (0.0052, 0.034),
+                            (0.0024, 0.0385), (0, LP)], 3), 16)
+    t_ = np.clip((cone.v[:, 2] / LP - 0.52) / 0.22, 0.0, 1.0)
+    t_ = t_ * t_ * (3 - 2 * t_)
+    cone.teinte = np.array(CREME)[None, :] * (1 - t_[:, None]) + np.array(BRUN_POINTE)[None, :] * t_[:, None]
     hasard = np.random.default_rng(7)
-    piquants, nombre = None, 520
+    piquants, nombre = None, 980                         # (520 : clairsemés ; serrés sur tout le dos)
     for i in range(nombre):                               # des directions bien réparties sur toute la boule ; on garde celles du manteau
         angle, tour = math.acos(1 - 2 * (i + 0.5) / nombre), i * 2.399963
         if angle > capuche(tour) - 0.09:
@@ -104,12 +110,12 @@ def construire():
         p, n = sur(a, "corps", CORPS, vers(angle, tour))
         if (Vector((abs(p.x), p.y, p.z)) - oreille).length < 0.026:
             continue                                      # pas de piquant dans une oreille
-        pique = cone.copie().etire(1.0, 1.0, hasard.uniform(0.85, 1.2))
-        pique.teinte = cone.teinte * hasard.uniform(0.85, 1.12)
-        couche = (n + Vector((0, 0.45, 0.10)) + Vector(hasard.normal(0, 0.08, 3))).normalized()     # peignés vers l'arrière
+        pique = cone.copie().etire(1.0, 1.0, hasard.uniform(0.90, 1.15))
+        pique.teinte = cone.teinte * hasard.uniform(0.93, 1.05)
+        couche = (n + Vector((0, 0.32, 0.08)) + Vector(hasard.normal(0, 0.07, 3))).normalized()     # peignés vers l'arrière
         if p.z + couche.z * 0.05 < 0.008:
             continue                                      # celui-là piquerait le sol
-        pique.pose(p - n * 0.002, A.viser(couche))
+        pique.pose(p - n * 0.004, A.viser(couche))       # le pied dans le poil
         piquants = pique if piquants is None else piquants + pique
     a.piece("piquants", piquants, None, poil=False)
 

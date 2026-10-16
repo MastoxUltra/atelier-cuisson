@@ -65,7 +65,10 @@ def construire():
     museau.etire(1.0, 0.86, 1.0)
     a.piece("museau", O.teinte(museau, CLAIR), None, mat=RT @ A.cadre(Vector((0.0, -0.080, -0.040)), (0.0, -1.0, -0.16), (0, 0, 1)))
     bout = RT @ Vector((0.0, -0.080 - 0.155, -0.040 - 0.025))
-    a.piece("nez", A.boule(1.0, 20, 10).etire(0.034, 0.024, 0.026), NEZ, mat=A.repere(bout + R3 @ Vector((0.0, -0.004, 0.012))), poil=False)
+    # la truffe (16/10, 4e passage : elle se lisait comme un trou, noyée dans le museau gonflé) : en relief, ronde et
+    # brillante (une pièce dure, vernie comme un bouton), qui avance de 3 cm au bout du museau
+    nez = A.boule(1.0, 24, 12).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.038, 0.026, 0.028)
+    a._poser(a._jouet(a._durs, NEZ, "d"), "nez", nez, "bouton", A.repere(bout + R3 @ Vector((0.0, -0.016, 0.012))), False, "volume", "dur")
     O.broder(a, "bouche", "museau", RT @ Vector((0.0, -0.140, -0.040)), [(0.55 * u_, -0.55, -0.80 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 7)],
              0.0030, FIL, R=RT)
     # les yeux : petits, rapprochés, à la racine du museau ; les oreilles rondes sur les coins du crâne
@@ -82,20 +85,22 @@ def construire():
     #       à moitié cachées dans le poil, au bord de chaque patte -----
     for sgn, nom in ((1, "G"), (-1, "D")):
         for sorte, haut_, pied_, R_, dim, bf, pl in (
-                ("avant", (sgn * 0.135, -0.290, 0.440), (sgn * 0.145, -0.345 - 0.030 * sgn, 0.056), 0.108, (0.086, 0.104, 0.050), 0.34, 0.025),
-                ("arriere", (sgn * 0.140, 0.260, 0.420), (sgn * 0.150, 0.300 + 0.030 * sgn, 0.056), 0.122, (0.090, 0.112, 0.050), 0.40, 0.050)):
+                ("avant", (sgn * 0.135, -0.290, 0.440), (sgn * 0.145, -0.345 - 0.030 * sgn, 0.050), 0.108, (0.094, 0.118, 0.030), 0.34, 0.025),
+                ("arriere", (sgn * 0.140, 0.260, 0.420), (sgn * 0.150, 0.300 + 0.030 * sgn, 0.050), 0.122, (0.098, 0.128, 0.030), 0.40, 0.050)):
             pts = O.jambe(a, sorte + "_" + nom, haut_, pied_, R_, NOISETTE, bas=SOMBRE, bas_frac=bf, sorte="av" if sorte == "avant" else "ar",
                           plie=pl, pied_dim=dim, griffes=0)
             fin = pts[-1]
             centre = Vector((fin[0], fin[1] - dim[1] * 0.35, dim[2] * 0.95))
             for k in range(5):
                 dx = (k - 2) * 0.30 * dim[0]
-                g = O.couche(O.teinte(O.griffe(0.034, 0.0105), np.array(GRIFFE)),
-                             A.cadre(centre + Vector((dx, -dim[1] * 0.86 + 0.004 * abs(k - 2), -dim[2] * 0.45)), (0.0, -1.0, -0.40), (0, 0, 1)))
+                g = O.couche(O.teinte(O.griffe(0.026, 0.0090), np.array(GRIFFE)),          # courtes (16/10)
+                             A.cadre(centre + Vector((dx, -dim[1] * 0.90 + 0.004 * abs(k - 2), -dim[2] * 0.30)), (0.0, -1.0, -0.35), (0, 0, 1)))
                 a.piece("griffe_%s_%s%d" % (sorte, nom, k), g, None, poil=False)
     for p in a._toutes():                                             # les pattes en poil, comme les jambes
         if p["nom"].startswith("pied_"):
             p["poil"], p["zone"] = "teinte", "poil"
+    # (16/10, 4e passage : fondus et gonflés, les pieds plats devenaient des boules) : posés à part, larges et plats
+    a.fusion_a_part = ("pied",)
 
     # ----- la queue : un moignon rond derrière -----
     queue = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.9)).etire(0.050, 0.052, 0.048)

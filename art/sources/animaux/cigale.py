@@ -22,8 +22,8 @@ import outils_a as O
 
 BRONZE = np.array(M.hexa("#d6b068"))          # la dominante (registre : bronze doré clair)
 RAIE = np.array(M.hexa("#8a6a30"))            # les rayures du ventre
-FUMEE = M.hexa("#a89f8e")                     # les ailes fumées
-NERVURE = M.hexa("#6a5a44")
+FUMEE = M.hexa("#8f8670")                     # les ailes fumées
+NERVURE = M.hexa("#3e3322")
 OEIL = M.hexa("#8a2a22")
 PATTE = np.array(M.hexa("#a88848"))
 FIL = M.hexa("#4a3a20")
@@ -66,7 +66,7 @@ def construire():
         rep = A.repere((c * 0.034, -0.062, 0.210), (0, c * 34, 0))
         a.piece("aile_" + nom, m, None, mat=rep, poil=False)
         # les nervures : trois fils brodés d'un bout à l'autre de l'aile
-        for k, off in enumerate((0.03, 0.07, 0.115)):
+        for k, off in enumerate((0.02, 0.045, 0.07, 0.095, 0.120, 0.145)):
             nerv = [(c * off, 0.01), (c * (off + 0.02), 0.10), (c * (off + 0.025), 0.20), (c * (off + 0.005), 0.30)]
             pts = []
             for x, y in nerv:

@@ -73,7 +73,7 @@ def construire():
                 d = A.boule(1.0, 20, 8).etire(r, r, 0.004)
                 px, py = (0.195, 0.045) if j == 0 else (0.150, 0.130)
                 a.piece("ocelle_%d%s%d" % (j, nom, int(r * 1000)), O.teinte(d, col), None,
-                        mat=rep @ A.repere((c * px, py, dz)), poil=False)
+                        mat=rep @ A.repere((c * px, py, dz + 3.2 * px ** 2 + 0.9 * py ** 2)), poil=False)      # l'ocelle suit la cambrure de l'aile (elle traînait au sol)
     # ----- les pattes : deux de chaque côté, sous le thorax -----
     for nom, c in (("G", 1), ("D", -1)):
         for k, y in enumerate((-0.040, 0.020)):

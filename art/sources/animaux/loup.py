@@ -31,6 +31,9 @@ DENT = M.hexa("#f8f4ea")
 FIL = M.hexa("#2a2724")
 
 
+TOURNE = 25                                   # la fiche tourne la bête vers la caméra (25° devant) : on compte les DEUX yeux ; 0 pour le jeu
+
+
 def construire():
     a = K.Animal("loup")
     a.taille = 1.55
@@ -95,6 +98,8 @@ def construire():
     a.piece("queue", queue, None)
     bout = A.boule(1.0, 18, 9).etire(0.034, 0.034, 0.038)
     a.piece("queue_bout", O.teinte(bout, SOMBRE), None, pos=(0.0, 0.640, 0.190))
+    if TOURNE:
+        O.tourner(a, TOURNE)
     return a
 
 
