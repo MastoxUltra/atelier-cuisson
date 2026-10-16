@@ -48,7 +48,7 @@ def rayon(f):
     return float(np.interp(f, x, r))
 
 
-TOURNE = 25                                   # la fiche tourne la bête vers la caméra (25° devant) : on compte les DEUX yeux ; 0 pour le jeu
+TOURNE = 34                                   # la fiche tourne la bête vers la caméra (25° devant) : on compte les DEUX yeux ; 0 pour le jeu
 
 
 def construire():
@@ -108,8 +108,8 @@ def construire():
 
     # ----- les yeux : de petites billes sombres, bas sur la tête, derrière le bec ; le trait rose du sourire -----
     for nom, c in (("G", 1), ("D", -1)):
-        s = 0.185 * L
-        centre, direction = FIL.vise(s, 0.85, -c * 0.45, 0.40)
+        s = 0.165 * L
+        centre, direction = FIL.vise(s, 1.00, -c * 0.60, 0.30)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0340)                       # un vrai œil, plus gros
         bouche = []

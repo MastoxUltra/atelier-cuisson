@@ -58,10 +58,10 @@ def construire():
     a.piece("corps", corps.sculpte(tonneau), None, pos=CORPS)
     # (la couture du dos est retirée : elle se lisait comme un boudin gris posé sur le dos)
     rng = np.random.default_rng(6)
-    for i, y in enumerate(np.linspace(-0.27, 0.30, 26)):
-        h = 0.034 - 0.012 * abs(y) / 0.3
+    for i, y in enumerate(np.linspace(-0.27, 0.30, 14)):
+        h = 0.040 - 0.014 * abs(y) / 0.3
         # des mèches PLATES et COURTES (minces en travers, couchées un peu vers l'arrière), plantées dans l'échine : plus de boudin
-        a.piece("soie_%02d" % i, A.boule(1.0, 10, 6).etire(0.010, 0.032, h + 0.008 * rng.random()), SOMBRE,
+        a.piece("soie_%02d" % i, A.boule(1.0, 10, 6).etire(0.009, 0.015, h + 0.010 * rng.random()), SOMBRE,
                 pos=(0.0, CORPS.y + y, CORPS.z + 0.215 * (1 - 0.12 * ((y / 0.32 + 0.0) / 1.0)) + 0.004), rot=(rng.uniform(-24, -6), 0, rng.uniform(-9, 9)), poil=False)
 
     # ----- la tête : large, plate sur le dessus, le museau carré ; quatre verrues ; les défenses recourbées ; de côté vers nous -----
