@@ -120,6 +120,9 @@ def construire():
             d = A.boule(1.0, 14, 8).etire(0.013, 0.060, 0.011).pose((0, -0.044, 0.0)).pose((0, 0, 0), (0, 0, ang))
             doigts = d if doigts is None else doigts + d
         a.piece("doigts_" + nom, doigts, PATTE, pos=(c * 0.108, 0.020, 0.012), poil=False)
+    # les proportions du kiwi réel (silhouettes.py contre references_3d/kiwi : un corps rond, plus large que haut)
+    import deformer_b as DF
+    DF.etirer(a, sy=1.18, sz=0.86)
     return a
 
 
@@ -134,18 +137,18 @@ if __name__ == "__main__":
 
 from poses import Pose, borne, cloche, onde
 
-JAMBE = 0.307                                        # de l'épaule (ou de la hanche) au sol
+JAMBE = 0.212                                        # de l'épaule (ou de la hanche) au sol
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.060, 0.369)),
-    ('tete', 'corps', (-0.001, -0.134, 0.317)),
-    ('patte_ar_G', 'corps', (0.100, 0.124, 0.307)),
+    ('corps', 'racine', (0.000, 0.079, 0.313)),
+    ('tete', 'corps', (-0.004, -0.128, 0.241)),
+    ('patte_ar_G', 'corps', (0.103, 0.141, 0.212)),
 ]
 
-PORTEURS = [('tete', 'corps'), 
-    ('oeil_reflet', 'tete'), ('franges', 'corps'), ('cuisse', 'patte_ar', True), ('doigts', 'patte_ar', True),
-    ('corps', 'corps'), ('patte', 'patte_ar', True), ('oeil', 'tete'), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'),
+PORTEURS = [
+    ('oeil_reflet', 'tete'), ('cuisse', 'patte_ar', True), ('doigts', 'patte_ar', True), ('corps', 'corps'),
+    ('patte', 'patte_ar', True), ('tete', 'tete'), ('oeil', 'tete'), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'),
     ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
@@ -192,7 +195,7 @@ def joie(t):
     vol = math.sin(math.pi * borne((t - 0.18) / 0.42))
     salut = cloche(t, 0.72, 0.16, False)
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
-    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.092 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
+    p.add('corps', pos=(0, 0, -0.03 * tasse + 0.064 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_ar', rot=(18 * vol, 0, 0))
     p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
     return p
@@ -203,7 +206,7 @@ def dort(t):
     p = Pose()
     r = onde(t, 1)
     p.ouvert = 0.0
-    p.add('corps', pos=(0, 0, -0.169), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
+    p.add('corps', pos=(0, 0, -0.117), ech=(1 + 0.012 * r, 1, 1 + 0.024 * r))
     p.paire('patte_ar', rot=(66, 0, 10))
     p.add('tete', rot=(32, 4, 40))
     return p

@@ -60,26 +60,25 @@ def construire():
     def vers(angle, tour):                                # une direction à « angle » de l'axe du dos, en tournant autour
         return DOS * math.cos(angle) + (e1 * math.cos(tour) + e2 * math.sin(tour)) * math.sin(angle)
     a.rustine("manteau", "corps", CORPS, DOS, capuche, POINTE, 0.004, feston=0)
-    for k in range(20):
-        tour = math.tau * (k + 0.5) / 20
-        a.broderie("ourlet%d" % k, [a.trace("corps", CORPS, [vers(capuche(tour) + ecart, tour)], haut)[0]
-                                    for ecart, haut in ((0.02, 0.002), (-0.04, 0.008), (-0.10, 0.005))], 0.0014, CREME)
+    # (les vingt points blancs de l'ourlet du manteau sont retirés : entre les piquants, ils faisaient des bâtonnets, 16/10)
 
     # ----- le museau : un cône qui pointe le nez en l'air, la truffe en feutrine noire -----
     # (16/10, planche 21 : « je sais pas si c'est fait exprès ») : le museau faisait 0,32, plus long que le corps (0,26) ;
     # celui de l'échidné fait à peu près le tiers du corps, un tube court qui s'affine
-    LM = 0.170                                            # 0,125 : il ne se voyait plus (16/10, 2e essai)
+    LM = 0.190                                            # (5e essai) un TUBE fin, 1,5 fois la tête, à peine courbé vers le bas
     # (3e essai : fondu et gonflé avec le corps, il faisait une trompe épaisse : il reste à part, en feutrine lisse et nue comme
     # chez le vrai, et plus fin)
-    museau = A.tour(A.profil([(0.036, 0.0), (0.029, 0.25 * LM), (0.022, 0.55 * LM), (0.016, 0.80 * LM), (0.010, 0.94 * LM), (0, LM)], 6), 32)
-    a.fusion_a_part = ("museau", "narine")
+    museau = A.tour(A.profil([(0.026, 0.0), (0.018, 0.020), (0.0135, 0.050), (0.0125, 0.100), (0.0115, 0.150), (0.0095, 0.178), (0, LM)], 6), 32)
+    COURBE = 0.028                                        # le bout descend de 2,8 cm (gonflé, le tube s'épaissit : on le part fin)
+    museau.sculpte(lambda v: v - np.outer(COURBE * np.clip(v[:, 2] / LM, 0.0, 1.0) ** 2, [0.0, 1.0, 0.0]))
+    a.fusion_a_part = ("narine",)                         # le museau est fondu à la face (sans bord net) ; fin, il ne fait plus trompe
     NEZ = A.repere(CORPS + Vector((0, -0.062, 0.000)), (96, 0, 0))      # dans ce repère : X la gauche, Y le haut, Z vers la truffe
     museau.teinte = np.where((museau.v[:, 2] > 0.80 * LM)[:, None], np.array(POINTE), np.array(PRUNE) * 0.88)   # le bout plus sombre
     a.piece("museau", museau, None, mat=NEZ, poil=False)
     # (la couture du museau est retirée : le museau gardé à part, le fil flotterait)
     # (2e essai : plus de truffe en boule noire, « un nez de clown » : deux petites narines au bout du tube)
     for nom_n, c in (("G", 1), ("D", -1)):
-        a.piece("narine_" + nom_n, A.boule(1.0, 12, 6).etire(0.0036, 0.0030, 0.0022), K.NOIR, mat=NEZ @ A.repere((c * 0.0034, 0.0010, LM - 0.0025)), poil=False)
+        a.piece("narine_" + nom_n, A.boule(1.0, 12, 6).etire(0.0036, 0.0030, 0.0022), K.NOIR, mat=NEZ @ A.repere((c * 0.0034, 0.0010 - COURBE * 0.97, LM - 0.0025)), poil=False)
     # (la couture de bouche est retirée : le museau gardé à part, elle flottait dessous ; la bouche d'un échidné est une fente au bout)
 
     # ----- le visage : deux boutons sous le bord du manteau, deux joues pêche, deux petites oreilles -----
