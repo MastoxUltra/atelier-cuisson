@@ -69,13 +69,13 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         joue = A.boule(1.0, 24, 12).etire(0.050, 0.030, 0.052)                       # des favoris doux, en bourrelet de poil : plus de pointes blanches
         a.piece("favori_" + nom, O.teinte(joue, CREME * 0.95), None, mat=RT @ A.repere((c * 0.082, -0.030, -0.036), (0, 0, c * 14)))
-        tri = A.decoupe([(-0.062, 0.0), (0.062, 0.0), (0.026, 0.080), (0.0, 0.176), (-0.026, 0.080)], 0.026, 0.010)      # une oreille en TRIANGLE (plus de lapin)
-        tri.teinte = np.where((tri.v[:, 1] > 0.120)[:, None], np.asarray(NOIR), np.asarray(BEIGE * 0.96))
+        tri = A.decoupe([(-0.070, 0.0), (0.070, 0.0), (0.034, 0.060), (0.0, 0.122), (-0.034, 0.060)], 0.026, 0.010)      # une oreille en TRIANGLE (plus de lapin)
+        tri.teinte = np.where((tri.v[:, 1] > 0.082)[:, None], np.asarray(NOIR), np.asarray(BEIGE * 0.96))
         a.piece("oreille_" + nom, O.couche(tri, O.plan(RT @ Vector((c * 0.076, 0.012, 0.086)), RT.to_3x3() @ Vector((1.0, 0.0, 0.0)), RT.to_3x3() @ Vector((c * 0.10, 0.02, 1.0)))), None, poil=False)      # feutre lisse : le poil arrondissait le triangle
-        pinc = O.tube_r([(0, 0, 0), (c * 0.004, 0.002, 0.060), (c * 0.008, 0.002, 0.118)], [0.010, 0.013, 0.003], 12)               # de vrais pinceaux, bien longs
-        a.piece("pinceau_" + nom, O.couche(O.teinte(pinc, NOIR), RT @ A.cadre(Vector((c * 0.082, 0.014, 0.254)), (c * 0.10, 0.02, 1.0), (0, 1, 0))), None, poil=False)
+        pinc = O.tube_r([(0, 0, 0), (c * 0.004, 0.002, 0.040), (c * 0.008, 0.002, 0.082)], [0.010, 0.013, 0.003], 12)               # de vrais pinceaux, bien longs
+        a.piece("pinceau_" + nom, O.couche(O.teinte(pinc, NOIR), RT @ A.cadre(Vector((c * 0.080, 0.014, 0.196)), (c * 0.10, 0.02, 1.0), (0, 1, 0))), None, poil=False)
     O.broder(a, "bouche", "museau", RT @ Vector((0, -0.088, -0.030)), [(0.50 * u_, -0.82, -0.36 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0021, FIL, R=RT)
-    a.tete = H + Vector((0.0, -0.14, 0.0))
+    a.tete = H + Vector((0.0, -0.14, 0.06))      # la vue de près cadre les oreilles aussi
 
     # ----- les pattes : l'antérieur droit planté, genou marqué ; le gauche levé, le coude plié, la patte en l'air ; les cuisses
     #       de derrière, grosses, posées ; la queue-moignon -----

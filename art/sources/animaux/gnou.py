@@ -81,16 +81,21 @@ def construire():
 
     # ----- le cou et la tête : un cou épais, la tête basse tournée vers nous ; une face longue et noire, la barbe ; les cornes -----
     a.piece("cou", A.tube(A.courbe([(0.0, -0.250, 0.920), (0.0, -0.380, 0.880), (0.0, -0.470, 0.800)], 5), lambda t: 0.170 - 0.045 * t, 22), tuple(ARGENT))
-    H = A.cadre(Vector((0.0, -0.560, 0.700)), Vector((0.85, -1.0, -0.02)).normalized(), Vector((0, 0, 1)))   # tournée vers la caméra : l'autre œil n'est plus caché par la corne
+    # (16/10, repris par Art : en gros plan, le museau rond, pointé sur nous, cachait les yeux) : la tête longue PENDUE vers
+    # l'avant et le bas, comme la référence (references_3d/gnou, CC-BY : vues seulement) ; un peu tournée vers nous. Les yeux,
+    # en haut de la face près des cornes, restent au-dessus du museau de face comme de trois quarts
+    AVANT_T = Vector((0.38, -0.72, -0.58)).normalized()
+    H = A.cadre(Vector((0.0, -0.560, 0.720)), AVANT_T, Vector((0, 0, 1)))
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.100), (0.22, 0.130), (0.46, 0.112), (0.70, 0.100), (0.92, 0.104), (1.0, 0.0)], 0.520, 56, 0.007)
     tete.teinte = np.tile(NOIR, (len(tete.v), 1))
     a.piece("tete", tete, None, mat=H @ A.repere((0, 0.020, -0.130)))
     a.piece("barbe", A.boule(1.0, 24, 12).etire(0.060, 0.050, 0.130), tuple(NOIR), mat=H @ A.repere((0, -0.060, -0.180), (-14, 0, 0)))
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.060, 0.036, 0.030), tuple(NOIR * 0.7), mat=H @ A.repere((0, 0.010, 0.362)), poil=False)     # dans le bout du museau (à 0,392, il flottait devant)
-    a.tete = H @ Vector((0, 0.020, 0.250))
+    a.tete = H @ Vector((0, 0.020, 0.200))
+    a.cap_tete = Vector((AVANT_T.x, AVANT_T.y, 0.0)).normalized()     # la vue de près, de trois quarts devant la tête
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.48, 0.30, 0.60))     # plus en avant : de face, les deux yeux (16/10)
+        regard = H3 @ Vector((c * 0.62, 0.48, 0.30))     # sur le haut des côtés de la face : au-dessus du museau, vus de face
         a.rustine("iris_" + nom, "tete", H @ Vector((0, 0.020, 0.060)), regard, 0.17, OEIL, 0.003, 0)
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.060)), regard)
         a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0300)
@@ -99,7 +104,7 @@ def construire():
         a.piece("corne_" + nom, A.tube(A.courbe(propres(ch), 6), lambda t: 0.034 - 0.026 * t, 14), CORNE, poil=False)
         po = A.profil([(0, 0), (0.034, 0.008), (0.042, 0.034), (0.032, 0.062), (0.012, 0.078), (0, 0.084)], 5)
         a.piece("oreille_" + nom, A.tour(po, 24).etire(1.0, 0.38, 1.0), tuple(ARGENT),
-                mat=A.cadre(H @ Vector((c * 0.120, 0.150, -0.140)), H3 @ Vector((c * 0.90, 0.30, 0.10)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
+                mat=A.cadre(H @ Vector((c * 0.095, 0.085, -0.060)), H3 @ Vector((c * 0.90, 0.30, 0.10)), H3 @ Vector((c * 0.3, -0.9, 0.0))))   # plantée dans le crâne (elle flottait au-dessus)
 
     # ----- les jambes : fines et longues, le genou marqué, les sabots noirs ; l'antérieur gauche avancé -----
     def jambe(pts, r0):
