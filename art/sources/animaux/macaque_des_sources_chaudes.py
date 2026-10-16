@@ -90,11 +90,11 @@ def construire():
     u = tete.v / np.maximum(np.linalg.norm(tete.v, axis=1, keepdims=True), 1e-9)
     t = np.tile(BRUME, (len(u), 1))
     t[(u[:, 1] < -0.10) & ((u[:, 0] / 0.92) ** 2 + ((u[:, 2] + 0.04) / 0.78) ** 2 < 1.0)] = PALE                 # le cadre de poils clairs
-    t[(u[:, 1] < -0.36) & ((u[:, 0] / 0.66) ** 2 + ((u[:, 2] + 0.06) / 0.56) ** 2 < 1.0)] = ROSE                  # la face nue : un disque
+    t[(u[:, 1] < -0.36) & ((u[:, 0] / 0.82) ** 2 + ((u[:, 2] + 0.06) / 0.72) ** 2 < 1.0)] = ROSE                  # la face nue : un disque
     t[(u[:, 2] > 0.38) & (u[:, 1] < -0.10) & (np.abs(u[:, 0]) < 0.8)] = BRUME * 0.94                              # le front bas, sous les mèches
     tete.teinte = t
     a.piece("tete", tete.etire(0.124, 0.106, 0.110), None, mat=RT)
-    a.piece("nez", A.boule(1.0, 14, 8).etire(0.024, 0.010, 0.014), tuple(CHAIR * 0.80), mat=RT @ A.repere((0.0, -0.103, -0.026)), poil=False)
+    a.piece("nez", A.boule(1.0, 14, 8).etire(0.014, 0.007, 0.009), tuple(CHAIR * 0.70), mat=RT @ A.repere((0.0, -0.103, -0.026)), poil=False)
     for c in (1, -1):
         a.piece("narine_%d" % c, A.boule(1.0, 10, 6).etire(0.0065, 0.004, 0.006), NEZ, mat=RT @ A.repere((c * 0.0105, -0.1105, -0.027)), poil=False)
     O.paire_yeux(a, "tete", H, (0.34, -0.90, 0.10), 0.0135, couleur_lourde=tuple(ROSE * 0.93), coupe=0.60, decolle=0.002, R=RT)

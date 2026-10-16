@@ -116,11 +116,11 @@ def construire():
     a.piece("toupet", A.boule(1.0, 32, 16).sculpte(lambda v: boucles(v * [1, 1, 1], 0.10)).etire(0.046, 0.034, 0.040), CREME,
             mat=T @ A.repere((0, 0.052, 0.040)))
     # les lèvres : un vrai museau de lama — la lèvre du haut fendue en deux lobes, celle du bas plus avancée, les narines au-dessus
-    LEVRE = np.array(ROSE) * 0.80 + np.array(CHOCO) * 0.20
+    LEVRE = np.array(ROSE) * 0.92 + np.array(CHOCO) * 0.08
     for nom, c in (("G", 1), ("D", -1)):
-        lobe = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.0215, 0.0185, 0.026)
+        lobe = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.0165, 0.0150, 0.021)
         a.piece("levre_" + nom, O.teinte(lobe, LEVRE), None, mat=T @ A.repere((c * 0.0185, -0.010, 0.214)), poil=False)
-    bas_ = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.034, 0.017, 0.032)
+    bas_ = A.boule(1.0, 20, 10).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.026, 0.013, 0.025)
     a.piece("levre_bas", O.teinte(bas_, LEVRE * 0.92), None, mat=T @ A.repere((0.0, -0.036, 0.196)), poil=False)
     centre = T @ Vector((0, 0, 0.160))
     for nom, c in (("G", 1), ("D", -1)):

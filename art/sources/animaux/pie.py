@@ -61,8 +61,8 @@ def construire():
     tete.teinte = np.tile(NOIR, (len(tete.v), 1))
     RT = A.repere(H, (-4, 0, 20))
     a.piece("tete", tete.etire(0.082, 0.092, 0.078), None, mat=RT)
-    bec = A.tour(A.profil([(0.040, 0), (0.037, 0.036), (0.027, 0.080), (0.013, 0.115), (0, 0.136)], 4), 24).etire(0.92, 0.82, 1.0)
-    bec = bec.sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.014 * (v[:, 2] / 0.136) ** 2.4, v[:, 2]], axis=1))
+    bec = A.tour(A.profil([(0.031, 0), (0.029, 0.045), (0.021, 0.100), (0.010, 0.152), (0, 0.182)], 4), 24).etire(0.85, 0.78, 1.0)      # plus long et plus fin : plus une boule
+    bec = bec.sculpte(lambda v: np.stack([v[:, 0], v[:, 1] - 0.016 * (v[:, 2] / 0.182) ** 2.4, v[:, 2]], axis=1))
     a.piece("bec", bec, BEC, mat=RT @ A.cadre(Vector((0.0, -0.075, -0.006)), (0.0, -1.0, -0.05), (0, 1, 0)), poil=False)
     O.paire_yeux(a, "tete", H, (0.82, -0.52, 0.22), 0.0185, decolle=0.004, R=RT)
     for nom_, c_ in (("G", 1), ("D", -1)):

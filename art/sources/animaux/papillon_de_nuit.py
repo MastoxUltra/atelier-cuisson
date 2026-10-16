@@ -29,7 +29,7 @@ FIL = M.hexa("#3a3040")
 
 def aile(contour, miroir):
     m = A.decoupe(A.courbe(np.array(contour) * [miroir, 1], 5, fermee=True), 0.018, 0.007)
-    return m.sculpte(lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] + 0.55 * v[:, 0] ** 2 + 0.16 * v[:, 1] ** 2], axis=1))      # bombée, pas une assiette plate
+    return m.sculpte(lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] + 1.20 * v[:, 0] ** 2 + 0.35 * v[:, 1] ** 2], axis=1))      # bombée, pas une assiette plate
 
 
 def construire():

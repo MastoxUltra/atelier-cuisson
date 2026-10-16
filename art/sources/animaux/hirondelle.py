@@ -33,7 +33,7 @@ def construire():
 
     # ----- l'oiseau : fuselé, presque couché (55°), les ailes longues qui dépassent derrière -----
     r = O.oiseau(a, dos=NUIT, ventre=CREME, tete=NUIT, aile=NUIT, queue=NUIT * 0.9, bec=BEC, patte=PATTE, long=0.30, ray=0.082,
-                 incline=58.0, z0=0.085, tete_r=(0.052, 0.062, 0.050), tete_pos=(0.0, -0.075, 0.020), bec_long=0.028, bec_ray=0.0145, bec_suit=True,
+                 incline=58.0, z0=0.085, tete_r=(0.052, 0.062, 0.050), tete_pos=(0.0, -0.075, 0.020), bec_long=0.044, bec_ray=0.0155, bec_suit=True,
                  aile_dim=(0.018, 0.045, 0.215), aile_pos=(0.0, 0.040, -0.010), queue_dim=(0.020, 0.060, 0.010), queue_haut=-10.0,
                  patte_long=0.050, patte_ray=0.007, oeil_r=0.0135, oeil_dir=(0.76, -0.55, 0.20), bout_aile=NUIT * 0.7, coupe_dos=1.4)
     H = r["H"]

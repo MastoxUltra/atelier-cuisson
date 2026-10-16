@@ -55,7 +55,7 @@ def palette(L, large, droop=0.05):
     pts = [(0.00, 0.012), (0.18 * L, 0.020), (0.52 * L, 0.014), (0.86 * L, 0.004), (1.00 * L, 0.0),
            (0.92 * L, -0.30 * large), (0.74 * L, -0.74 * large), (0.50 * L, -1.00 * large), (0.26 * L, -0.92 * large),
            (0.08 * L, -0.66 * large), (0.00, -0.38 * large)]
-    m = A.decoupe(pts, 0.034, 0.012)
+    m = A.decoupe(pts, 0.066, 0.026)                      # épaisse et arrondie : une nageoire charnue, plus une lame
     m = m.sculpte(lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] - droop * (v[:, 0] / L) ** 2 * (1 / 0.034) * 0.034], axis=1))
     m.teinte = np.tile(SABLE, (len(m.v), 1))
     return m
@@ -106,12 +106,12 @@ def construire():
     # ----- les palettes avant : longues, étroites, en aile, balayées vers l'arrière et le dehors, le bout au sable ;
     #       les palettes arrière : petites, vers l'arrière ; le moignon de la queue -----
     for nom, c in (("G", 1), ("D", -1)):
-        av = palette(0.64, 0.090)
+        av = palette(0.64, 0.115)
         R = O.plan(Vector((c * 0.275, -0.130, 0.090)), Vector((c * 0.80, 0.58, -0.07)), Vector((c * 0.58, -0.80, 0.0)))
-        a.piece("palette_avant_" + nom, O.couche(av, R), None, poil=False)
-        ar = palette(0.27, 0.060)
+        a.piece("palette_avant_" + nom, O.couche(av, R), None)
+        ar = palette(0.27, 0.075)
         R2 = O.plan(Vector((c * 0.150, 0.420, 0.070)), Vector((c * 0.48, 0.87, -0.05)), Vector((c * 0.87, -0.48, 0.0)))
-        a.piece("palette_arriere_" + nom, O.couche(ar, R2), None, poil=False)
+        a.piece("palette_arriere_" + nom, O.couche(ar, R2), None)
     queue = A.tour(A.profil([(0.036, 0), (0.024, 0.046), (0.009, 0.088), (0, 0.100)], 4), 14)
     queue.teinte = np.tile(SABLE, (len(queue.v), 1))
     a.piece("queue", O.couche(queue, A.cadre((0.0, 0.50, 0.080), (0.0, 1.0, -0.10), (0, 0, 1))), None, poil=False)

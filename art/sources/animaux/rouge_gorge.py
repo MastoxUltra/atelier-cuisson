@@ -53,7 +53,7 @@ def construire():
     a.taille = 0.30
 
     r = O.oiseau(a, dos=BRUN, ventre=CLAIR, tete=BRUN, aile=BRUN * 0.92, queue=BRUN * 0.88, bec=BEC, patte=PATTE, long=0.27, ray=0.098,
-                 incline=22.0, z0=0.095, tete_r=(0.062, 0.066, 0.060), tete_pos=(0.0, -0.075, 0.046), bec_long=0.034, bec_ray=0.0135,
+                 incline=22.0, z0=0.095, tete_r=(0.062, 0.066, 0.060), tete_pos=(0.0, -0.075, 0.046), bec_long=0.046, bec_ray=0.0120,
                  aile_dim=(0.024, 0.070, 0.150), aile_pos=(0.0, 0.020, 0.0), queue_dim=(0.034, 0.070, 0.012), queue_haut=-36.0,
                  patte_long=0.075, patte_ray=0.0075, oeil_r=0.0170, oeil_dir=(0.74, -0.54, 0.18), coupe_dos=1.1, bec_suit=True, cou_ray=0.050,
                  peint_corps=peint_corps, peint_tete=peint_tete)

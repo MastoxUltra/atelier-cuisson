@@ -102,7 +102,7 @@ def construire():
         couleur = VENTRE * 1.02 if abs(th - math.pi) < 1.0 else GRIS * 1.03
         m = O.couche(O.teinte(O.pointe(0.036 + 0.014 * rng.random(), 0.016, 6), couleur), A.cadre(pos, d.normalized(), (0, 0, 1)))
         meches = m if meches is None else meches + m
-    a.piece("poils", meches, None, poil=False)
+    # (plus de pointes claires sur le ventre : « pointes blanches » au contrôle ; le poil du style suffit)
 
     # ----- la tête ronde, le museau en groin, la feuille nasale rose, deux dents, deux perles pour yeux, les oreilles immenses -----
     RT = A.repere(H, (10, 0, 0))

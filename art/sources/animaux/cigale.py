@@ -62,7 +62,7 @@ def construire():
     contour = [(0.0, 0.0), (0.05, -0.012), (0.11, -0.016), (0.16, 0.050), (0.18, 0.170), (0.150, 0.300), (0.07, 0.330), (0.00, 0.120)]
     for nom, c in (("G", 1), ("D", -1)):
         m = A.decoupe(A.courbe(np.array(contour) * [c, 1], 5, fermee=True), 0.011, 0.0045).sculpte(
-            lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] + 0.55 * v[:, 0] ** 2 + 0.10 * (v[:, 1] - 0.15) ** 2], axis=1)).peint(np.array(FUMEE))      # bombée, pas un carton plat
+            lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] + 1.30 * v[:, 0] ** 2 + 0.25 * (v[:, 1] - 0.15) ** 2], axis=1)).peint(np.array(FUMEE))      # bombée, pas un carton plat
         rep = A.repere((c * 0.034, -0.062, 0.210), (0, c * 34, 0))
         a.piece("aile_" + nom, m, None, mat=rep, poil=False)
         # les nervures : trois fils brodés d'un bout à l'autre de l'aile

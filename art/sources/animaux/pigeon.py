@@ -24,7 +24,7 @@ CLAIR = np.array(M.hexa("#bcc4cf"))           # le ventre
 VIOLET = np.array(M.hexa("#8a5fb0"))          # les reflets du cou
 VERT = np.array(M.hexa("#7a8fc2"))            # le reflet bleuté (jamais de vert franc)
 SOMBRE = np.array(M.hexa("#5a6272"))          # les bandes des ailes
-BEC = M.hexa("#6a6068")
+BEC = M.hexa("#403840")
 CIRE = M.hexa("#e8e2da")
 ROSE = M.hexa("#e58a98")                      # les pattes
 OEIL = M.hexa("#f08a2a")
@@ -35,7 +35,7 @@ def construire():
     a.taille = 0.44
 
     r = O.oiseau(a, dos=ARDOISE, ventre=CLAIR, tete=ARDOISE, aile=ARDOISE * 0.96, queue=SOMBRE, bec=BEC, patte=ROSE, long=0.36, ray=0.128,
-                 incline=34.0, z0=0.120, tete_r=(0.066, 0.072, 0.064), tete_pos=(0.0, -0.100, 0.052), bec_long=0.046, bec_ray=0.0150, bec_suit=True,
+                 incline=34.0, z0=0.120, tete_r=(0.066, 0.072, 0.064), tete_pos=(0.0, -0.100, 0.052), bec_long=0.062, bec_ray=0.0170, bec_suit=True, cou_ray=0.060,
                  aile_dim=(0.030, 0.100, 0.200), aile_pos=(0.0, 0.020, 0.0), queue_dim=(0.052, 0.100, 0.014), queue_haut=-18.0,
                  patte_long=0.090, patte_ray=0.0115, oeil_r=0.0150, oeil_dir=(0.76, -0.52, 0.18), coupe_dos=1.25)
     H, T, haut = r["H"], r["T"], r["haut"]

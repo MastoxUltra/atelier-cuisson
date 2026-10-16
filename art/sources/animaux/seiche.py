@@ -117,13 +117,7 @@ def construire():
         bras = K.tube_peint(A.courbe(pts, 5), lambda t_: 0.034 - 0.026 * t_, [(0.65, TAUPE), (1.0, OMBRE)], 12)
         a.piece("bras_%d" % k, bras, None)
 
-    # ----- les deux tentacules : minces, tendus droit devant, à hauteur des bras ; une palette plate crème au bout (pas une boule) -----
-    for nom, c in (("G", 1), ("D", -1)):
-        pts = [(c * 0.016, -0.345, 0.084), (c * 0.034, -0.470, 0.086), (c * 0.046, -0.600, 0.086), (c * 0.050, -0.700, 0.084)]
-        a.piece("tentacule_" + nom, K.tube_peint(A.courbe(pts, 5), lambda t_: 0.013 - 0.004 * t_, [(1.0, TAUPE)], 10), None)
-        massue = A.boule(1.0, 18, 10).etire(0.034, 0.062, 0.0075)
-        massue.teinte = np.tile(ZEBRE * 0.82 + TAUPE * 0.18, (len(massue.v), 1))
-        a.piece("massue_" + nom, massue, None, pos=(c * 0.052, -0.742, 0.082), poil=False)
+    # (les deux tentacules à palette sont rentrés dans le bouquet de bras : seiche au repos, plus de grosses palettes qui font « deux boules »)
     return a
 
 
