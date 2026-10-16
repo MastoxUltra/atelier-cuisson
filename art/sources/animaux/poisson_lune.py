@@ -24,7 +24,7 @@ ARGENT = np.array(M.hexa("#b3bfd0"))          # la dominante (registre : argent 
 NACRE = np.array(M.hexa("#e7ecf4"))           # le ventre, les reflets
 GRIS = np.array(M.hexa("#7f8a9e"))            # les nageoires, la frange
 FIL = M.hexa("#3a4256")
-TOURNE = -12                                  # trois quarts ouvert : les ailerons de biais et les deux yeux avancés (Principal, 16/10) ; 0 pour le jeu
+TOURNE = -20                                  # trois quarts ouvert : les ailerons de biais et les deux yeux avancés (Principal, 16/10) ; 0 pour le jeu
 
 
 def couche(m, mat):
@@ -37,13 +37,16 @@ def construire():
     a = K.Animal("poisson_lune")
     a.taille = 3.00
 
-    # ----- le disque : un large galet aplati sur les côtés, plus haut que long, le menton qui pointe en bas à l'avant ;
-    #       argenté dessus, nacré dessous, moucheté de gris -----
+    # (16/10, passé à la session Art après six essais : le disque se lisait comme une tranche mince, un seul œil, des
+    # ailerons en lames, pas de clavus) : un DISQUE de peluche, aussi haut que long, épais devant (le visage large, les deux
+    # yeux se voient de trois quarts) et plus mince derrière ; deux grandes nageoires épaisses, haute et basse, rejetées
+    # vers l'arrière comme chez la vraie môle ; et derrière, le CLAVUS : la queue tronquée, un bord ondulé en festons
+    ZC = 0.700                                     # debout sur sa nageoire du bas
     def galet(v):
         s = np.zeros_like(v)
-        s[:, 0] = 0.115 * v[:, 0] * (1 - 0.35 * np.abs(v[:, 2]))                          # épaisseur (X)
-        s[:, 1] = 0.300 * v[:, 1]                                                         # longueur (Y)
-        s[:, 2] = 0.360 * v[:, 2] * (1 - 0.16 * np.clip(-v[:, 1], 0, None) ** 1.5 * (v[:, 2] > 0))    # le front qui fuit vers la bouche
+        s[:, 0] = v[:, 0] * (0.165 - 0.060 * np.clip(v[:, 1], 0, 1)) * (1 - 0.30 * np.abs(v[:, 2]) ** 2)   # épais devant
+        s[:, 1] = 0.320 * v[:, 1]
+        s[:, 2] = 0.320 * v[:, 2] * (1 - 0.10 * np.clip(-v[:, 1], 0, None) ** 1.5 * (v[:, 2] > 0))           # le front qui fuit
         return s
     corps = A.boule(1.0, 64, 32)
     u = corps.v / np.maximum(np.linalg.norm(corps.v, axis=1, keepdims=True), 1e-9)
@@ -55,32 +58,32 @@ def construire():
     proche = u @ graines.T > np.cos(0.13 * rng.uniform(0.7, 1.3, 60))[None, :]
     t[proche.any(axis=1)] = GRIS * 0.55 + ARGENT * 0.45
     corps.teinte = t
-    a.piece("corps", corps.sculpte(galet), None, pos=(0.0, 0.0, 0.790))
+    a.piece("corps", corps.sculpte(galet), None, pos=(0.0, 0.0, ZC))
 
-    # ----- la frange arrière : la « queue » qui n'en est pas une, une jupe ondulée qui borde le derrière du disque -----
-    def ondule(v):
-        s = v.copy()
-        s[:, 0] += 0.014 * np.sin(v[:, 2] * 38)
-        return s
-    frange = A.boule(1.0, 40, 16).sculpte(ondule).etire(0.050, 0.080, 0.300)
-    frange.teinte = np.tile(GRIS, (len(frange.v), 1))
-    a.piece("frange", frange, None, pos=(0.0, 0.265, 0.790), poil=False)
+    # ----- le clavus : la queue tronquée, un demi-ovale plat qui borde tout l'arrière du disque, au bord en festons -----
+    contour = [(-0.050, 0.300)]
+    for th in np.linspace(math.pi / 2, -math.pi / 2, 81):
+        feston = 1.0 + 0.10 * abs(math.cos(5.5 * (th + math.pi / 2)))
+        contour.append((0.135 * math.cos(th) * feston, 0.300 * math.sin(th)))
+    contour.append((-0.050, -0.300))
+    clavus = A.decoupe(contour, 0.070, 0.025)
+    clavus.teinte = np.tile(GRIS, (len(clavus.v), 1))
+    a.piece("clavus", couche(clavus, A.cadre((0.0, 0.285, ZC), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
 
-    # ----- les deux grands ailerons : dorsal en haut, anal en bas (celui sur lequel il se tient), en larges faucilles -----
-    GRAND = 1.35                                  # grandes nageoires de peluche (Principal, 16/10 : « pas des tiges »)
-    haut = A.decoupe([(x * GRAND, y * GRAND) for x, y in [(-0.10, 0), (-0.06, 0.16), (0.00, 0.30), (0.06, 0.44), (0.10, 0.50), (0.16, 0.42), (0.20, 0.26), (0.24, 0.10), (0.26, 0.0)]],
-                     0.110, 0.040)                 # large à la base, épais (étroits, ils se lisaient comme des tiges : 16/10)
+    # ----- les deux grandes nageoires : épaisses, larges à la base, rejetées vers l'arrière, à l'arrière du disque -----
+    aileron = [(-0.130, 0.0), (-0.090, 0.140), (-0.025, 0.280), (0.055, 0.385), (0.115, 0.425), (0.158, 0.400), (0.172, 0.300),
+               (0.162, 0.160), (0.140, 0.0)]
+    haut = A.decoupe(aileron, 0.090, 0.035)
     haut.teinte = np.tile(GRIS * 1.08, (len(haut.v), 1))
-    a.piece("dorsale", couche(haut, A.cadre((0.0, 0.100, 1.120), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
-    bas = A.decoupe([(x * GRAND, y * GRAND) for x, y in [(-0.10, 0), (-0.06, -0.14), (0.00, -0.27), (0.06, -0.39), (0.10, -0.44), (0.16, -0.37), (0.20, -0.23), (0.24, -0.09), (0.26, 0.0)]],
-                    0.110, 0.040)
+    a.piece("dorsale", couche(haut, A.cadre((0.0, 0.150, ZC + 0.250), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
+    bas = A.decoupe([(x, -y) for x, y in aileron], 0.090, 0.035)
     bas.teinte = np.tile(GRIS * 1.08, (len(bas.v), 1))
-    a.piece("anale", couche(bas, A.cadre((0.0, 0.100, 0.468), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
+    a.piece("anale", couche(bas, A.cadre((0.0, 0.150, ZC - 0.250), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
 
     # ----- le visage : deux yeux ronds ouverts, la petite bouche en « o » devant -----
-    CENTRE = Vector((0.0, 0.0, 0.790))
+    CENTRE = Vector((0.0, 0.0, ZC))
     for nom, c in (("G", 1), ("D", -1)):
-        pos, n = a.surface("corps", CENTRE, Vector((c * 0.30, -0.95, 0.10)))     # avancés sur le devant, comme un poisson en peluche (Principal, 16/10)     # plus en avant : de trois quarts, les deux yeux (16/10)
+        pos, n = a.surface("corps", CENTRE, Vector((c * 0.55, -0.82, 0.16)))     # avancés sur le devant, comme un poisson en peluche (Principal, 16/10)     # plus en avant : de trois quarts, les deux yeux (16/10)
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0420)      # rond et noir, sans paupière : l'anneau argent faisait un hublot
     p, n = a.surface("corps", CENTRE, Vector((0.0, -0.98, -0.12)))
     lèvre = A.tore(0.022, 0.010, 32, 8)
@@ -91,7 +94,7 @@ def construire():
     for nom, c in (("G", 1), ("D", -1)):
         pec = A.boule(1.0, 24, 12).etire(0.014, 0.078, 0.086)
         pec.teinte = np.tile(GRIS * 1.1, (len(pec.v), 1))
-        a.piece("pectorale_" + nom, pec, None, pos=(c * 0.108, 0.010, 0.760), rot=(0, 0, c * -22), poil=False)
+        a.piece("pectorale_" + nom, pec, None, pos=(c * 0.150, 0.000, ZC - 0.030), rot=(0, 0, c * -22), poil=False)
     # la fente des ouïes : un trait brodé derrière l'œil, de chaque côté
     for c in (1, -1):
         pts = []
@@ -103,6 +106,8 @@ def construire():
             a.broderie("ouie_" + ("G" if c > 0 else "D"), A.courbe(pts, 3), 0.0030, FIL)
     if TOURNE:
         O.tourner(a, TOURNE)
+    th = math.radians(TOURNE)
+    a.cap_tete = Vector((math.sin(th), -math.cos(th), 0.0))    # l'avant de la tête (tourné avec la bête) : la vue de près
     return a
 
 

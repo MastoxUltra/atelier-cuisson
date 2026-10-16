@@ -79,6 +79,7 @@ def construire():
     M_ = A.cadre(Vector(centre + nuque * 0.052 + avant * 0.015), Vector(avant), Vector(nuque))      # la tête du modèle : haute
     a.piece("melon", A.boule(1.0, 40, 20).etire(0.078, 0.058, 0.080), MELON, mat=M_)                  # devant, le museau court
     a.tete = Vector(centre + avant * 0.10 + nuque * 0.03)
+    a.cap_tete = Vector(avant)                                                         # couché : la vue de près suit la tête
 
     # ----- le sourire : un trait brodé qui court le long du museau et remonte à la joue ; les yeux : de petites billes -----
     for c in (1, -1):
