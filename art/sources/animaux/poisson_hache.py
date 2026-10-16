@@ -86,6 +86,8 @@ def construire():
     a.tete = Vector((0.0, -0.11, 0.30))
     if TOURNE:
         O.tourner(a, TOURNE)
+    th_ = math.radians(TOURNE)
+    a.cap_tete = (math.sin(th_), -math.cos(th_), 0.0)         # l'avant de la tête, en monde : la vue de près se place devant lui (peluche.py, 16/10)
     return a
 
 

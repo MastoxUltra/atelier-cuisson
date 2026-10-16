@@ -533,10 +533,19 @@ def _planche(construire, titre=None):
                 recul_pres = max(recul_pres, 2.5 * ecart + 0.15)
     except Exception:
         pass
+    dir_pres = Vector((0.40, -0.86, 0.22)).normalized()         # par défaut : de trois quarts avant, la bête regardant vers -Y
+    cap = getattr(a, "cap_tete", None)                          # a.cap_tete : l'avant de la tête (poissons couchés, têtes tournées), 16/10
+    if cap is not None:
+        c = Vector(tuple(float(v) for v in cap))
+        if c.length > 1e-6:
+            c.normalize()
+            ch = Vector((c.x, c.y, 0.0))
+            lat = Vector((-ch.y, ch.x, 0.0)).normalized() if ch.length > 1e-6 else Vector((1.0, 0.0, 0.0))
+            dir_pres = (0.40 * lat + 0.86 * c + Vector((0.0, 0.0, 0.22))).normalized()
     os.makedirs(FICHES, exist_ok=True)
     vues = [("face", centre + Vector((0.55, -0.80, 0.38)).normalized() * recul, centre, (1280, 720), 110, tete, 2.8),
             ("dos", centre + Vector((0.55, 0.78, 0.42)).normalized() * recul, centre, (640, 360), 64, centre, 4.0),
-            ("pres", vise_pres + Vector((0.40, -0.86, 0.22)).normalized() * recul_pres, vise_pres, (640, 360), 64, vise_pres, 4.0)]
+            ("pres", vise_pres + dir_pres * recul_pres, vise_pres, (640, 360), 64, vise_pres, 4.0)]
     fichiers = []
     for nom, depuis, vers, dims, grains, net, ouverture in vues:
         chemin = os.path.join(FICHES, "_%s_%s.png" % (a.nom, nom))
