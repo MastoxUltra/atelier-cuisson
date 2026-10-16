@@ -26,11 +26,11 @@ import outils_a as O
 import peluche as K
 
 CHARBON = M.hexa("#3b3c43")                 # les taches, les oreilles, le toupet, les sabots
-TAUPE = M.hexa("#9c8a86")                   # le mufle : un velours taupe, doux (plus de rose de bébé)
+TAUPE = M.hexa("#4a3d37")                   # le mufle : brun-gris sombre (plus de museau rose de vache)
 VIEUX_ROSE = M.hexa("#d6aaa4")              # le dedans des oreilles, le pis
 CORPS = Vector((0.0, 0.06, 0.365))
 TABAC = M.hexa("#9a6a48")                   # l'arrière-train : brun tabac roux
-LAINE = M.hexa("#5a3e30")                   # la masse de l'avant : laine brune sombre
+LAINE = M.hexa("#3e2a22")                   # la masse de l'avant : laine brune sombre
 NOIRBR = M.hexa("#2e2420")                  # la tête, la barbe
 CORNE = M.hexa("#2a2624")                   # les cornes
 LARGE, LONG, HAUT = 0.180, 0.280, 0.165     # les demi-mesures du tonneau
@@ -66,7 +66,7 @@ def construire():
     def tonneau(v):
         for cote in (1, -1):
             v = K.bosse(v, (cote * 0.55, 0.60, 0.58), 0.13, 0.07)         # les deux os des hanches
-        v = K.bosse(v, (0, -0.55, 0.80), 0.26, 0.36)                      # la BOSSE sur les épaules
+        v = K.bosse(v, (0, -0.55, 0.80), 0.55, 0.46)                      # la BOSSE sur les épaules
         y = np.clip(v[:, 1], -1.0, 1.0)
         rond = np.sqrt(np.maximum(1 - y * y, 1e-9))
         k = np.maximum(1 - np.abs(y) ** 3.0, 0.0) ** (1 / 3.0) / rond     # des flancs droits, deux bouts francs
@@ -103,7 +103,7 @@ def construire():
     a.piece("mufle", A.boule(1.0, 40, 20).sculpte(lambda v: K.emousse(v, 0.75)).etire(0.090, 0.060, 0.044), TAUPE,
             mat=T @ A.repere((0, -0.004, 0.203)))
     a.piece("machoire", A.boule(1.0, 32, 16).etire(0.070, 0.040, 0.058), NOIRBR, mat=T @ A.repere((0.050, -0.052, 0.200)))
-    a.piece("barbe", A.boule(1.0, 24, 12).etire(0.050, 0.040, 0.080), NOIRBR, mat=T @ A.repere((0, -0.070, 0.140)))
+    a.piece("barbe", A.boule(1.0, 24, 12).etire(0.075, 0.065, 0.120), NOIRBR, mat=T @ A.repere((0, -0.080, 0.135)))
     for nom, c in (("naseau_G", 1), ("naseau_D", -1)):
         a.rustine(nom, "mufle", mufle, T3 @ Vector((c * 0.40, 0.55, 0.73)), lambda th: 0.24 * (1 + 0.28 * math.cos(2 * th)),
                   CHARBON, 0.0025, 0)
@@ -129,7 +129,7 @@ def construire():
         a.piece("oreille_" + nom, A.boule(1.0, 32, 16).sculpte(feuille).etire(0.034, 0.011, 0.066), CHARBON, mat=E)
         a.piece("dedans_" + nom, A.boule(1.0, 24, 12).sculpte(feuille).etire(0.022, 0.006, 0.048).pose((0, 0.0075, 0.002)),
                 VIEUX_ROSE, mat=E, poil=False)
-    toupet = A.boule(0.060, 24, 12).pose((0, 0.046, 0.006)) + meche((0.002, 0.076, 0.046), 4) \
+    toupet = A.boule(0.085, 24, 12).pose((0, 0.046, 0.006)) + meche((0.002, 0.076, 0.046), 4) \
         + meche((0.030, 0.068, 0.036), 24) + meche((-0.028, 0.068, 0.036), -22)
     a.piece("toupet", toupet, LAINE, mat=T)
 

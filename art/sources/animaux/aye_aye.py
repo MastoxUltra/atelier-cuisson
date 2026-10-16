@@ -39,7 +39,7 @@ TAUPE = np.array(M.hexa("#6a5a56"))           # la dominante : taupe sombre (le 
 POIL = np.array(M.hexa("#c8b4a4"))            # le bout pâle des longs poils de garde
 FACE = np.array(M.hexa("#d8aca8"))            # la face, le nez : rose sale
 OREILLE = np.array(M.hexa("#8a7480"))         # les oreilles nues
-DOIGT = np.array(M.hexa("#efe0cc"))           # les doigts
+DOIGT = np.array(M.hexa("#8f7b6c"))           # les doigts : brun gris (pâles, le long doigt se lisait comme un bâton blanc)
 AMBRE = M.hexa("#f0a828")
 CHARBON = M.hexa("#2e2628")
 CORPS = Vector((0.0, 0.050, 0.140))
@@ -117,11 +117,11 @@ def construire():
         return m.pose(tuple(centre), (0, 0, cap))
     gauche = [(0.080, -0.070, 0.150), (0.115, -0.130, 0.090), (0.105, -0.205, 0.040)]
     a.piece("bras_G", A.tube(A.courbe(propres(gauche), 5), 0.030, 12), tuple(TAUPE))
-    a.piece("main_G", main(gauche[-1], 8, 0.085), tuple(DOIGT), poil=False)
+    a.piece("main_G", main(gauche[-1], 8, 0.060), tuple(DOIGT), poil=False)
     # la main droite posée sur le sol comme la gauche (plus de long doigt dressé qui sortait du dos comme un bâton)
     droite = [(-0.080, -0.060, 0.150), (-0.115, -0.130, 0.090), (-0.105, -0.205, 0.040)]
     a.piece("bras_D", A.tube(A.courbe(propres(droite), 5), 0.030, 12), tuple(TAUPE))
-    a.piece("main_D", main(droite[-1], -8, 0.085), tuple(DOIGT), poil=False)
+    a.piece("main_D", main(droite[-1], -8, 0.060), tuple(DOIGT), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         cu = A.boule(1.0, 24, 12).etire(0.060, 0.090, 0.060)
         cu.teinte = np.tile(TAUPE, (len(cu.v), 1))

@@ -118,10 +118,7 @@ def construire():
         a.piece("narine_" + nom, A.boule(1.0, 12, 6).etire(0.006, 0.005, 0.004), NOIR, mat=A.cadre(T @ Vector((c * 0.014, 0.022, 0.058)), T3 @ Vector((c * 0.2, 0.9, 0.3))), poil=False)
     bout = T @ Vector((0.0, -0.004, 0.062))
     base = [tuple(bout), tuple(bout + T3 @ Vector((0, -0.004, 0.040))), tuple(bout + T3 @ Vector((0, 0.0, 0.080)))]
-    a.piece("langue", A.tube(A.courbe(propres(base), 4), 0.0028, 8), ROSE, poil=False)
-    for c, nom in ((1, "G"), (-1, "D")):
-        fourche = [Vector(base[-1]), Vector(base[-1]) + T3 @ Vector((c * 0.014, 0.003, 0.026))]
-        a.piece("fourche_" + nom, A.tube([tuple(q) for q in fourche], 0.0022, 8), ROSE, poil=False)
+    # (la langue fourchue, qui se lisait comme une boule rose de près, est retirée : 16/10)
     return a
 
 

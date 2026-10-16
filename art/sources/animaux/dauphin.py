@@ -27,7 +27,7 @@ NAGEOIRE = np.array(M.hexa("#5d6b84"))        # les nageoires, la queue
 ROSE = M.hexa("#e2778a")                      # l'accent : le trait du sourire
 
 # le fil du corps, du bout du bec au bout de la queue : le bec haut, le ventre posé, la queue qui se redresse
-CHEMIN = [(0.34, -0.80, 0.66), (0.15, -0.57, 0.54), (0.04, -0.28, 0.36), (0.0, 0.05, 0.255), (0.0, 0.42, 0.235),
+CHEMIN = [(0.0, -0.84, 0.66), (0.0, -0.58, 0.54), (0.0, -0.28, 0.36), (0.0, 0.05, 0.255), (0.0, 0.42, 0.235),
           (0.0, 0.80, 0.265), (0.0, 1.08, 0.280), (0.0, 1.32, 0.290)]
 FIL = K.Fil(CHEMIN, flanc=(-1.0, 0.0, 0.0), pas=10)       # avec ce flanc, le dos de la pièce est en haut
 L = FIL.long
@@ -46,6 +46,9 @@ def rayon(f):
     x = np.array([p[1] for p in pts])
     r = np.array([p[0] for p in pts])
     return float(np.interp(f, x, r))
+
+
+TOURNE = 25                                   # la fiche tourne la bête vers la caméra (25° devant) : on compte les DEUX yeux ; 0 pour le jeu
 
 
 def construire():
@@ -105,8 +108,8 @@ def construire():
 
     # ----- les yeux : de petites billes sombres, bas sur la tête, derrière le bec ; le trait rose du sourire -----
     for nom, c in (("G", 1), ("D", -1)):
-        s = 0.205 * L
-        centre, direction = FIL.vise(s, 0.60, -c * 0.60, 0.35)
+        s = 0.185 * L
+        centre, direction = FIL.vise(s, 0.85, -c * 0.45, 0.40)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0340)                       # un vrai œil, plus gros
         bouche = []
@@ -118,6 +121,8 @@ def construire():
                 bouche.append(q[0])
         a.broderie("sourire_" + nom, A.courbe(bouche, 4), 0.0030, (0.30, 0.34, 0.42))      # un trait de la couleur du corps, plus de rose sur le bec
     a.tete = Vector(FIL.cadre(0.15 * L)[0]) + Vector((0.0, -0.05, 0.05))
+    if TOURNE:
+        O.tourner(a, TOURNE)
     return a
 
 

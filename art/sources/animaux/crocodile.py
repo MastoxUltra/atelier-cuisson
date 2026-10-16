@@ -99,15 +99,15 @@ def construire():
             ecailles = e if ecailles is None else ecailles + e
     a.piece("ecailles", ecailles, tuple(BOUE))
 
-    # ----- les yeux : deux bosses à fleur du dessus du crâne, un œil jaune à fente ; les narines au bout du museau -----
+    # ----- les yeux (pièces « tete_ » et « nez_ » : le gros plan de la fiche vise la tête) : deux bosses à fleur du dessus du crâne, un œil jaune à fente ; les narines au bout du museau -----
     c1, av1, nq1 = fil.cadre(0.255 * L)
     lat1 = np.cross(np.array(av1), np.array(nq1))
     for nom, c in (("G", 1), ("D", -1)):
         pos = np.array(c1) + np.array(nq1) * 0.100 + lat1 * c * 0.078
-        a.piece("bosse_" + nom, A.boule(1.0, 20, 10).etire(0.072, 0.080, 0.062), tuple(OCRE), pos=tuple(pos))
+        a.piece("tete_bosse_" + nom, A.boule(1.0, 20, 10).etire(0.072, 0.080, 0.062), tuple(OCRE), pos=tuple(pos))
         a.oeil("oeil_" + nom, Vector(pos) + Vector(nq1) * 0.050 + Vector(av1) * -0.010, Vector((c * 0.50, -0.55, 0.65)).normalized(), 0.0340)
         c2, av2, nq2 = fil.cadre(0.040 * L)
-        a.piece("narine_" + nom, A.boule(1.0, 14, 8).etire(0.014, 0.020, 0.011), CHARBON,
+        a.piece("nez_" + nom, A.boule(1.0, 14, 8).etire(0.014, 0.020, 0.011), CHARBON,
                 pos=tuple(np.array(c2) + np.array(nq2) * 0.030 + np.array([c * 0.020, 0.0, 0.0])), poil=False)
 
     # ----- les dents : une rangée de petites dents blanches inégales qui dépassent le long de la mâchoire fermée -----
@@ -161,8 +161,8 @@ OS = [
 
 PORTEURS = [
     ('oeil_reflet', 'tete'), ('orteils_av', 'patte_av', True), ('orteils_ar', 'patte_ar', True),
-    ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True), ('ecailles', 'corps'), ('narine', 'tete'),
-    ('corps', 'corps'), ('bosse', 'corps'), ('dents', 'tete'), ('oeil', 'tete'), ('paupiere_0', 'paupiere_0'),
+    ('patte_av', 'patte_av', True), ('patte_ar', 'patte_ar', True), ('ecailles', 'corps'), ('nez', 'tete'),
+    ('corps', 'corps'), ('tete_bosse', 'tete'), ('dents', 'tete'), ('oeil', 'tete'), ('paupiere_0', 'paupiere_0'),
     ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 

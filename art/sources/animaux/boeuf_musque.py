@@ -104,14 +104,14 @@ def construire():
         s = K.bosse(s, (0, -1, -0.2), 0.12, 0.35)
         return s * [0.172, 0.200, 0.150]
     a.piece("tete", A.boule(1.0, 48, 24).sculpte(tete_f), SOUS, mat=H)
-    a.piece("museau", A.boule(1.0, 36, 18).etire(0.078, 0.092, 0.068), NEZ, mat=H @ A.repere((0, -0.165, -0.050)))
+    a.piece("museau", A.boule(1.0, 36, 18).etire(0.068, 0.084, 0.060), NEZ, mat=H @ A.repere((0, -0.165, -0.050)))
     a.piece("nez", A.boule(1.0, 24, 12).etire(0.040, 0.026, 0.030), CORNE, mat=H @ A.repere((0, -0.245, -0.050)), poil=False)
     a.tete = H @ Vector((0, -0.200, -0.040))
 
     # ----- les yeux : ronds et vivants, au regard calme, sous la corne (plus de paupière lourde) -----
     for nom, c in (("G", 1), ("D", -1)):
-        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.55, -0.80, 0.20)))
-        a.oeil("oeil_" + nom, p + n * 0.008, n, 0.0340)
+        p, n = a.surface("tete", H.to_translation(), H3 @ Vector((c * 0.42, -0.88, 0.06)))     # devant, sous le casque : de côté, la corne les cachait
+        a.oeil("oeil_" + nom, p + n * 0.012, n, 0.0360)
 
     # ----- le casque de cornes : le bouclier ivoire sur le front, puis la corne qui descend le long de la joue et
     #       remonte, la pointe corne tournée vers l'avant -----
