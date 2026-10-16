@@ -76,17 +76,15 @@ def construire():
     bas.teinte = np.tile(GRIS * 1.08, (len(bas.v), 1))
     a.piece("anale", couche(bas, A.cadre((0.0, 0.100, 0.468), (1.0, 0.0, 0.0), (0, 0, 1))), None, poil=False)
 
-    # ----- le visage, sur le côté gauche : l'œil rond sous une paupière lourde, la petite bouche en « o » devant -----
+    # ----- le visage : deux yeux ronds ouverts, la petite bouche en « o » devant -----
     CENTRE = Vector((0.0, 0.0, 0.790))
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("corps", CENTRE, Vector((c * 0.62, -0.78, 0.08)))
-        a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0420)
-        haut_oeil = (Vector((0, 0, 1)) - n * n.z).normalized()
-        a.piece("lourde_" + nom, K.paupiere(0.0420, 0.60), tuple(ARGENT), mat=A.cadre(pos + n * 0.002, n, haut_oeil), poil=False)
+        a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0420)      # rond et noir, sans paupière : l'anneau argent faisait un hublot
     p, n = a.surface("corps", CENTRE, Vector((0.0, -0.98, -0.12)))
-    lèvre = A.tore(0.034, 0.012, 32, 8)
-    a.piece("bouche", lèvre, tuple(GRIS), mat=A.cadre(p + n * 0.004, n), poil=False)
-    a.tete = p + n * 0.05
+    lèvre = A.tore(0.022, 0.010, 32, 8)
+    a.piece("bouche", lèvre, tuple(GRIS * 0.62), mat=A.cadre(p + n * 0.004, n), poil=False)
+    a.tete = CENTRE + Vector((0.0, -0.10, 0.03))                # le gros plan vise le visage entier, pas le flanc
 
     # ----- deux petites pectorales, qui battent comme des mains ; la gauche pendante -----
     for nom, c in (("G", 1), ("D", -1)):

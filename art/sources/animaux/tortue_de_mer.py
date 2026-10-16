@@ -55,7 +55,7 @@ def palette(L, large, droop=0.05):
     pts = [(0.00, 0.012), (0.18 * L, 0.020), (0.52 * L, 0.014), (0.86 * L, 0.004), (1.00 * L, 0.0),
            (0.92 * L, -0.30 * large), (0.74 * L, -0.74 * large), (0.50 * L, -1.00 * large), (0.26 * L, -0.92 * large),
            (0.08 * L, -0.66 * large), (0.00, -0.38 * large)]
-    m = A.decoupe(pts, 0.066, 0.026)                      # épaisse et arrondie : une nageoire charnue, plus une lame
+    m = A.decoupe(pts, 0.092, 0.040)                      # épaisse et bombée : une nageoire charnue (à 0,066, une lame plate)
     m = m.sculpte(lambda v: np.stack([v[:, 0], v[:, 1], v[:, 2] - droop * (v[:, 0] / L) ** 2 * (1 / 0.034) * 0.034], axis=1))
     m.teinte = np.tile(SABLE, (len(m.v), 1))
     return m
@@ -91,7 +91,7 @@ def construire():
     cou.teinte = np.tile(SABLE, (len(cou.v), 1))
     a.piece("cou", cou, None)
     H = Vector((0.0, -0.585, 0.175))
-    RT = A.repere(H, (-8, 0, 0))
+    RT = A.repere(H, (-8, 0, 30))                        # tournée vers la caméra de la fiche : de face, les deux yeux se voient
     tete = A.boule(1.0, 48, 24)
     tete.teinte = np.tile(SABLE, (len(tete.v), 1))
     a.piece("tete", tete.etire(0.088, 0.108, 0.074), None, mat=RT)
