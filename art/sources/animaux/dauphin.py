@@ -106,7 +106,7 @@ def construire():
     # ----- les yeux : de petites billes sombres, bas sur la tête, derrière le bec ; le trait rose du sourire -----
     for nom, c in (("G", 1), ("D", -1)):
         s = 0.205 * L
-        centre, direction = FIL.vise(s, 0.35, -c * 0.92, 0.25)
+        centre, direction = FIL.vise(s, 0.60, -c * 0.60, 0.35)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0340)                       # un vrai œil, plus gros
         bouche = []
@@ -116,7 +116,7 @@ def construire():
             q = a.trace("corps", cc, [dd], 0.002)
             if q:
                 bouche.append(q[0])
-        a.broderie("sourire_" + nom, A.courbe(bouche, 4), 0.0040, ROSE)
+        a.broderie("sourire_" + nom, A.courbe(bouche, 4), 0.0030, (0.30, 0.34, 0.42))      # un trait de la couleur du corps, plus de rose sur le bec
     a.tete = Vector(FIL.cadre(0.15 * L)[0]) + Vector((0.0, -0.05, 0.05))
     return a
 
