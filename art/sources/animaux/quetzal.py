@@ -115,8 +115,9 @@ def construire():
     # ----- la queue : deux très longues plumes plates qui PENDENT à la verticale depuis le croupion, le dessus turquoise ;
     #       elles ne touchent pas le sol -----
     for nom, c in (("G", 1), ("D", -1)):
-        chemin = [(c * 0.016, 0.130, 0.280), (c * 0.026, 0.176, 0.200), (c * 0.036, 0.196, 0.110), (c * 0.044, 0.200, 0.040)]
-        a.piece("plume_" + nom, plume(chemin, 0.034, (1, 0, 0), [(0.40, TURQUOISE), (0.88, NUIT), (1.0, BLANC)]), None, poil=False)
+        # LA TRAÎNE : deux très longues plumes (plus de trois fois le corps) qui s'ouvrent en arrière, retombent et rampent au sol
+        chemin = [(c * 0.016, 0.130, 0.280), (c * 0.050, 0.250, 0.200), (c * 0.100, 0.420, 0.100), (c * 0.150, 0.640, 0.045), (c * 0.190, 0.880, 0.022)]
+        a.piece("plume_" + nom, plume(chemin, 0.050, (1, 0, 0), [(0.35, TURQUOISE), (0.80, NUIT), (1.0, BLANC)]), None, poil=False)
 
     # ----- les pattes : deux petits joncs, les doigts serrés en pince -----
     for nom, c in (("G", 1), ("D", -1)):
@@ -145,17 +146,20 @@ JAMBE = 0.163                                        # de l'épaule (ou de la ha
 
 OS = [
     ('racine', None, (0, 0, 0)),
-    ('corps', 'racine', (0.000, 0.083, 0.209)),
-    ('tete', 'corps', (0.001, -0.045, 0.505)),
+    ('corps', 'racine', (0.000, 0.086, 0.229)),
+    ('cou', 'corps', (0.004, -0.001, 0.445)),
+    ('tete', 'cou', (0.000, -0.037, 0.521)),
     ('patte_av_G', 'corps', (0.044, 0.027, 0.163)),
-    ('aile_G', 'corps', (0.091, 0.078, 0.455)),
-    ('queue', 'corps', (0.000, 0.151, 0.244)),
+    ('aile_G', 'corps', (0.094, 0.067, 0.456)),
+    ('queue', 'corps', (0.000, 0.129, 0.260)),
 ]
 
-PORTEURS = [('brosse', 'tete'), ('cou', 'corps'), 
-    ('oeil_reflet', 'tete'), ('doigts', 'patte_av', True), ('corps', 'corps'), ('plume', 'queue'), ('crete', 'tete'),
-    ('patte', 'patte_av', True), ('aile', 'aile', True), ('tete', 'tete'), ('oeil', 'tete'), ('bec', 'tete'),
-    ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'), ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
+PORTEURS = [
+    ('oeil_reflet', 'tete'), ('brosse_0', 'corps'), ('brosse_1', 'corps'), ('brosse_2', 'corps'),
+    ('brosse_3', 'corps'), ('brosse_4', 'corps'), ('doigts', 'patte_av', True), ('corps', 'corps'),
+    ('plume', 'queue'), ('patte', 'patte_av', True), ('aile', 'aile', True), ('tete', 'tete'), ('oeil', 'tete'),
+    ('cou', 'cou'), ('bec', 'tete'), ('paupiere_0', 'paupiere_0'), ('paupiere_1', 'paupiere_1'),
+    ('cil_0', 'paupiere_0'), ('cil_1', 'paupiere_1'),
 ]
 
 def repos(t):
@@ -164,6 +168,7 @@ def repos(t):
     r = onde(t, 2)
     g, d = cloche(t, 0.28, 0.16), cloche(t, 0.72, 0.13)
     p.add('corps', ech=(1 + 0.010 * r, 1, 1 + 0.018 * r))
+    p.add('cou', rot=(2 * r, 0, 8 * g - 6 * d))
     p.add('tete', rot=(3 * g - 2 * d, -4 * g + 3 * d, 16 * g - 12 * d))
     p.add('queue', rot=(0, 0, 10 * onde(t, 1)))
     p.paire('aile', rot=(0, -3 * cloche(t, 0.55, 0.06), 0))
@@ -180,7 +185,8 @@ def avance(t):
     p.add('corps', pos=(0, 0, -creux), rot=(1.0 * onde(t, 2, 0.1), 3 * c, 2.5 * s))
     for nom, sens in [('patte_av_G', 1), ('patte_av_D', -1)]:
         p.add(nom, rot=(pas * sens * s, 0, 0), pos=(0, 0, 0.03 * max(0.0, -sens * c)))
-    p.add('tete', rot=(-3 + 2 * onde(t, 2, -0.1), 0, -2 * s))
+    p.add('cou', rot=(-3 + 2 * onde(t, 2, -0.1), 0, -2 * s))
+    p.add('tete', rot=(3 - 2 * onde(t, 2, -0.2), -2 * c, -2 * s))
     p.add('queue', rot=(-6, 0, -10 * s))
     p.paire('aile', rot=(0, -2 + 2 * onde(t, 2), 0))
     return p
@@ -209,7 +215,7 @@ def joie(t):
     fouet = onde(t, 6) * cloche(t, 0.80, 0.18, False)
     p.add('corps', pos=(0, 0, -0.03 * tasse + 0.049 * vol), rot=(8 * tasse - 10 * vol + 8 * salut, 0, 0))
     p.paire('patte_av', rot=(-22 * vol, 0, 0))
-    p.add('tete', rot=(-8 * vol + 8 * tasse, 0, 0))
+    p.add('cou', rot=(-8 * vol + 8 * tasse, 0, 0))
     p.add('queue', rot=(-16 * vol, 0, -22 * fouet))
     p.paire('aile', rot=(0, -48 * vol, 0))
     return p
@@ -222,7 +228,8 @@ def dort(t):
     p.ouvert = 0.0
     p.add('corps', pos=(0, 0, -0.02), rot=(36, 0, 6), ech=(1 + 0.010 * r, 1, 1 + 0.020 * r))
     p.paire('patte_av', rot=(-30, 0, 0))
-    p.add('tete', rot=(32, 4, 40))
+    p.add('cou', rot=(30, 0, 44))
+    p.add('tete', rot=(14, 4, 28))
     p.add('queue', rot=(6, 0, 40))
     return p
 
