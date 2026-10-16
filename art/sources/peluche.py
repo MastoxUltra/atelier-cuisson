@@ -510,18 +510,24 @@ def _planche(construire, titre=None):
     recul_pres = 0.38 + 0.8 * min(haut[2], 0.8 * (haut[0] - bas[0]) + 0.2)
     vise_pres = tete
     try:                                                     # la tête entière dans le cadre, museau compris (Cohérence, 16/10 : zèbre, girafe…)
-        morceaux = [p["monde"] for p in a._toutes() if str(p.get("nom", "")).lower().startswith(
-            ("tete", "museau", "nez", "truffe", "bec", "oreille", "machoire", "joue", "corne", "bois"))]
+        ORNEMENTS = ("corne", "bois", "ramure", "panache")       # on vise la tête et le museau ; les bois et les cornes ne comptent que pour le recul (16/10 : cerf)
+        nom_ = lambda p: str(p.get("nom", "")).lower()
+        morceaux = [p["monde"] for p in a._toutes() if nom_(p).startswith(("tete", "museau", "nez", "truffe", "bec", "oreille", "machoire", "joue"))]
+        ornements = [p["monde"] for p in a._toutes() if nom_(p).startswith(ORNEMENTS)]
         if not morceaux and a.tete is not None:              # la base fusionnée : une seule peau, on prend ce qui entoure la tête
-            T = np.vstack([p["monde"] for p in a._toutes()])
+            T = np.vstack([p["monde"] for p in a._toutes() if not nom_(p).startswith(ORNEMENTS)])
             pres_ = np.linalg.norm(T - np.asarray(a.tete, float), axis=1) < 0.45 * taille
             morceaux = [T[pres_]] if pres_.sum() > 50 else []
         if morceaux:
             V = np.vstack(morceaux)
             tb, th = V.min(axis=0), V.max(axis=0)
-            diag = float(np.linalg.norm(th - tb))
-            recul_pres = max(recul_pres, 1.35 * diag + 0.15)
+            recul_pres = max(recul_pres, 1.35 * float(np.linalg.norm(th - tb)) + 0.15)
             vise_pres = Vector(((tb + th) * 0.5).tolist())
+            if ornements:                                    # le recul couvre aussi la ramure, vue autour de la tête
+                O = np.vstack([V] + ornements)
+                ob, oh = O.min(axis=0), O.max(axis=0)
+                ecart = max(float(np.linalg.norm(oh - (tb + th) * 0.5)), float(np.linalg.norm(ob - (tb + th) * 0.5)))
+                recul_pres = max(recul_pres, 2.5 * ecart + 0.15)
     except Exception:
         pass
     os.makedirs(FICHES, exist_ok=True)

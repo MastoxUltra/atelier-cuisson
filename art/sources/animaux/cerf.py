@@ -216,7 +216,7 @@ def construire():
             chemin = [tuple(q0 + (np.array(q) - q0) * ALLONGE * np.array([1.0, 1.45, 0.70])) for q in chemin]   # plus vers le ciel que vers nous : de face, ils faisaient des cônes
             bois = bois + K.tube_peint(A.courbe([monde(q) for q in chemin], 8), lambda t, r0=r0: 2.4 * r0 * (1 - 0.82 * t),
                                        [(0.78, MERRAIN_BRUN), (9, IVOIRE)], 14)    # pointus, la pointe ivoire
-        a.piece("bois_" + nom, bois, None, poil=False)
+        a.piece("ramure_" + nom, bois, None, poil=False)       # « ramure » et pas « bois » : la vue de près ne vise que la tête
 
     # ----- la queue : courte, brun noir, plaquée sur le miroir crème -----
     queue = A.tour(A.profil([(0, 0), (0.030, 0.010), (0.034, 0.045), (0.022, 0.085), (0, 0.100)], 5), 24).etire(1.0, 0.55, 1.0)
