@@ -32,8 +32,8 @@ def propres(points, eps=2e-4):
     return sortie
 
 
-ARGENT = np.array(M.hexa("#c4ccdc"))          # la dominante : gris argent bleuté (le poil le fonce : on le prend clair)
-BANDE = np.array(M.hexa("#6a7088"))           # les bandes du cou et des épaules
+ARGENT = np.array(M.hexa("#70747f"))          # la dominante : gris foncé ardoise (blanc-bleu, on ne lisait pas le gnou : 16/10)
+BANDE = np.array(M.hexa("#3e4250"))           # les bandes du cou et des épaules
 NOIR = np.array(M.hexa("#2e2c34"))            # le museau, la barbe, la crinière, la queue
 CORNE = M.hexa("#d0c4a4")
 OEIL = M.hexa("#c08a3a")
@@ -81,13 +81,13 @@ def construire():
 
     # ----- le cou et la tête : un cou épais, la tête basse tournée vers nous ; une face longue et noire, la barbe ; les cornes -----
     a.piece("cou", A.tube(A.courbe([(0.0, -0.250, 0.920), (0.0, -0.380, 0.880), (0.0, -0.470, 0.800)], 5), lambda t: 0.170 - 0.045 * t, 22), tuple(ARGENT))
-    H = A.cadre(Vector((0.0, -0.560, 0.700)), Vector((0.62, -1.0, -0.46)).normalized(), Vector((0, 0, 1)))   # tournée vers la caméra : l'autre œil n'est plus caché par la corne
+    H = A.cadre(Vector((0.0, -0.560, 0.700)), Vector((0.62, -1.0, -0.24)).normalized(), Vector((0, 0, 1)))   # tournée vers la caméra : l'autre œil n'est plus caché par la corne
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.100), (0.22, 0.130), (0.46, 0.112), (0.70, 0.100), (0.92, 0.104), (1.0, 0.0)], 0.520, 56, 0.007)
     tete.teinte = np.tile(NOIR, (len(tete.v), 1))
     a.piece("tete", tete, None, mat=H @ A.repere((0, 0.020, -0.130)))
     a.piece("barbe", A.boule(1.0, 24, 12).etire(0.060, 0.050, 0.130), tuple(NOIR), mat=H @ A.repere((0, -0.060, -0.180), (-14, 0, 0)))
-    a.piece("truffe", A.boule(1.0, 20, 10).etire(0.060, 0.036, 0.030), tuple(NOIR * 0.7), mat=H @ A.repere((0, 0.028, 0.392)), poil=False)
+    a.piece("truffe", A.boule(1.0, 20, 10).etire(0.060, 0.036, 0.030), tuple(NOIR * 0.7), mat=H @ A.repere((0, 0.010, 0.362)), poil=False)     # dans le bout du museau (à 0,392, il flottait devant)
     a.tete = H @ Vector((0, 0.020, 0.250))
     for nom, c in (("G", 1), ("D", -1)):
         regard = H3 @ Vector((c * 0.48, 0.30, 0.60))     # plus en avant : de face, les deux yeux (16/10)
