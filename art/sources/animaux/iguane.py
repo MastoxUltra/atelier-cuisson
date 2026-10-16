@@ -87,11 +87,11 @@ def construire():
     fanon = A.decoupe([(0.42 * x_, 0.50 * y_) for x_, y_ in pts], 0.010, 0.004)
     fanon.teinte = np.tile(FANON, (len(fanon.v), 1))
     # le plan du fanon : x vers l'avant, y vers le bas, l'épaisseur sur le côté
-    a.piece("fanon", O.couche(fanon, A.cadre(c0 + dessous * (CORPS(0.925) * 0.85), Vector(fil.flanc), dessous)), None, poil=False)
+    # (plus de fanon : en boule rose il se lisait comme une langue ; la gorge reste lisse)
 
     # ----- le visage : un œil lourd sous sa paupière, la grosse écaille ronde sur la joue, la bouche, deux narines -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.950 * L, 0.70, c * 0.34, 0.40)
+        centre, direction = fil.vise(0.950 * L, 0.55, c * 0.80, 0.20)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.002, n, 0.0155)
         h = (Vector((0.0, 0.0, 1.0)) - n * n.z).normalized()

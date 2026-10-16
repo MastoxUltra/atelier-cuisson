@@ -30,15 +30,12 @@ def construire():
     a = K.Animal("corbeau")
     a.taille = 0.66
 
-    r = O.oiseau(a, dos=NOIR, ventre=NOIR * 1.15, tete=NOIR, aile=REFLET, queue=NOIR * 0.9, bec=BEC, patte=GRIS, long=0.40, ray=0.120,
+    r = O.oiseau(a, dos=NOIR, ventre=NOIR * 1.15, tete=NOIR * 1.35, aile=REFLET, queue=NOIR * 0.9, bec=BEC, patte=GRIS, long=0.40, ray=0.120,
                  incline=40.0, z0=0.165, tete_r=(0.074, 0.088, 0.072), tete_pos=(0.0, -0.110, 0.050), bec_long=0.140, bec_ray=0.048,
                  bec_baisse=-0.10, aile_dim=(0.028, 0.100, 0.230), aile_pos=(0.0, 0.040, 0.0), queue_dim=(0.050, 0.130, 0.014),
-                 queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0185, oeil_dir=(0.42, -0.88, 0.20), coupe_dos=1.30, cou_ray=0.066, aile_pointue=True,
+                 queue_haut=-16.0, patte_long=0.160, patte_ray=0.014, oeil_r=0.0270, oeil_dir=(0.32, -0.93, 0.20), coupe_dos=1.30, cou_ray=0.066, aile_pointue=True,
                  tete_rot=(-6, 0, 0))
     H, T, haut = r["H"], r["T"], r["haut"]
-    for nom, c in (("G", 1), ("D", -1)):                    # un cerne clair autour de chaque œil : noir sur noir, il disparaissait
-        pos_c, n_c = a.surface("tete", H, Vector((c * 0.42, -0.88, 0.20)))
-        a.piece("cerne_" + nom, A.tore(0.0250, 0.0055, 28, 8), M.hexa("#a09cb4"), mat=A.cadre(pos_c + n_c * 0.001, n_c), poil=False)
 
     # ----- le sourcil lourd : un bourrelet noir au-dessus de chaque œil, qui donne l'air sévère -----
     for nom, c in (("G", 1), ("D", -1)):

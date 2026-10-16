@@ -58,7 +58,7 @@ def construire():
     a.piece("fraise", col.etire(1.0, 1.0, 1.15), None, pos=(0.0, -0.39, 0.745), rot=(33, 0, 0))
 
     H = Vector((0.0, -0.51, 0.99))
-    RT = A.repere(H, (-28, 0, 0))                 # la tête relevée sans se renverser : les deux yeux restent de face
+    RT = A.repere(H, (-10, 0, 0))                 # la tête relevée sans se renverser : les deux yeux restent de face
     crane = A.boule(1.0, 48, 24)
     for c in (1, -1):
         crane.sculpte(lambda v, c=c: K.bosse(v, (c * 0.9, -0.4, -0.2), 0.16, 0.28))      # les joues
@@ -74,7 +74,10 @@ def construire():
         dent = O.pointe(0.022, 0.0065, 8)
         a.piece("croc_%d" % k, O.couche(O.teinte(dent, np.array(DENT)), RT @ A.cadre(Vector((dx, -0.150, -0.010)), (0.0, 0.20, -1.0), (0, 1, 0))), None, poil=False)
     # les yeux : ouverts (ils ne se ferment que dans « dort »), deux petits yeux vifs sous le front
-    O.paire_yeux(a, "tete", H, (0.60, -0.74, 0.30), 0.0150, decolle=0.003, R=RT)
+    O.paire_yeux(a, "tete", H, (0.50, -0.82, 0.22), 0.0180, decolle=0.003, R=RT)
+    for nom_c, c_ in (("G", 1), ("D", -1)):                      # un cerne ambré autour de chaque œil : gris sur gris, le 2e disparaissait
+        pos_c, n_c = a.surface("tete", H, RT.to_3x3() @ Vector((c_ * 0.50, -0.82, 0.22)))
+        a.piece("cerne_" + nom_c, A.tore(0.0270, 0.0058, 28, 8), M.hexa("#d8b868"), mat=A.cadre(pos_c + n_c * 0.001, n_c), poil=False)
     for nom, c in (("G", 1), ("D", -1)):
         ore = A.tour(A.profil([(0.036, 0), (0.030, 0.034), (0.016, 0.068), (0.005, 0.088), (0, 0.094)], 4), 20).etire(1.0, 0.45, 1.0)
         ore.teinte = np.where((ore.v[:, 2] > 0.060)[:, None], SOMBRE, FUMEE)

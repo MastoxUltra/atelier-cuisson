@@ -48,8 +48,8 @@ def construire():
     r = O.oiseau(a, dos=BRIQUE, ventre=CLAIR, tete=GRISBLEU, aile=BRIQUE * 0.92, queue=BRIQUE * 0.85, bec=BEC, patte=JAUNE, long=0.36,
                  ray=0.115, incline=36.0, z0=0.140, tete_r=(0.064, 0.074, 0.062), tete_pos=(0.0, -0.100, 0.052), bec_long=0.050,
                  bec_ray=0.0245, bec_baisse=-0.35, aile_dim=(0.026, 0.085, 0.230), aile_pos=(0.0, 0.035, 0.0),
-                 queue_dim=(0.044, 0.140, 0.012), queue_haut=-16.0, patte_long=0.120, patte_ray=0.0135, oeil_r=0.0185,
-                 oeil_dir=(0.42, -0.88, 0.20), bout_aile=BRIQUE * 0.55, coupe_dos=1.25, tete_rot=(-6, 0, 0), cou_ray=0.062, aile_pointue=True, peint_tete=peint_tete)
+                 queue_dim=(0.044, 0.140, 0.012), queue_haut=-16.0, patte_long=0.120, patte_ray=0.0135, oeil_r=0.0230,
+                 oeil_dir=(0.32, -0.93, 0.20), bout_aile=BRIQUE * 0.55, coupe_dos=1.25, tete_rot=(-6, 0, 0), cou_ray=0.062, aile_pointue=True, peint_tete=peint_tete)
     H, T, haut = r["H"], r["T"], r["haut"]
 
     # le bec crochu : le bout du bec se recourbe vers le bas en un crochet pointu
