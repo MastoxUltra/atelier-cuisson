@@ -47,7 +47,9 @@ def construire():
         f = m.v[:, 2] / L
         t[f > 0.965] = AMBRE * 0.82                                  # le dessus du museau, un peu plus sombre
         return t
-    fil, L = O.fil_corps(a, "corps", CHEMIN, rayon, peint, None, cotes=40, pas=24, flanc=(1.0, 0.0, 0.0))        # un seul fuseau lisse
+    # un seul fuseau lisse ; haut : le dos toujours en haut le long des boucles (16/10, planche 21 « bizarre » : avec le flanc
+    # fixe, le corps s'écrasait en ruban tordu là où la boucle passait par le flanc, le ventre jaune tournant autour)
+    fil, L = O.fil_corps(a, "corps", CHEMIN, rayon, peint, None, cotes=40, pas=24, flanc=(1.0, 0.0, 0.0), haut=(0.0, 0.0, 1.0))
 
     # ----- la nageoire en ourlet : un mince ruban le long du dos, de la nuque jusqu'au bout de la queue -----
     pts = []

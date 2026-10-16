@@ -147,23 +147,55 @@ class Fil:
         self.long = float(self.fait[-1])
         self.flanc = np.asarray(flanc, float) / np.linalg.norm(flanc)
         self.haut = None if haut is None else np.asarray(haut, float) / np.linalg.norm(haut)
+        self.nuques = None
+        if self.haut is not None:                                    # un repère à rotation minimale, parti de la nuque vers « haut »
+            t = self.sens / np.maximum(np.linalg.norm(self.sens, axis=1, keepdims=True), 1e-12)
+            n0 = self.haut - (t[0] @ self.haut) * t[0]
+            if np.linalg.norm(n0) < 1e-3:
+                n0 = np.cross(t[0], self.flanc)
+            r = np.zeros_like(t)
+            r[0] = n0 / np.linalg.norm(n0)
+            for i in range(len(t) - 1):                              # la double réflexion (Wang et al.) : pas de torsion
+                v1 = self.p[i + 1] - self.p[i]
+                c1 = float(v1 @ v1)
+                if c1 < 1e-18:
+                    r[i + 1] = r[i]
+                    continue
+                rl = r[i] - (2.0 / c1) * (v1 @ r[i]) * v1
+                tl = t[i] - (2.0 / c1) * (v1 @ t[i]) * v1
+                v2 = t[i + 1] - tl
+                c2 = float(v2 @ v2)
+                r[i + 1] = rl - (2.0 / c2) * (v2 @ rl) * v2 if c2 > 1e-18 else rl
+            # le bout (une tête) finit le dessus vers « haut » : un cou qui monte en reculant puis se recourbe arrivait tête en
+            # bas ; la torsion qui manque est répartie le long de la partie qui se dresse (contrôle à sec du 16/10)
+            fin = self.haut - (t[-1] @ self.haut) * t[-1]
+            if np.linalg.norm(fin) > 1e-3:
+                fin = fin / np.linalg.norm(fin)
+                phi = math.atan2(float(np.cross(r[-1], fin) @ t[-1]), float(r[-1] @ fin))
+                couche_ = np.abs(t @ self.haut) < 0.30                # couché au sol (ou presque)
+                dresses = np.nonzero(~couche_)[0]
+                debut = 0
+                if len(dresses):                                     # le début de la dernière partie dressée
+                    avant_ = np.nonzero(couche_[:dresses[-1]])[0]
+                    debut = int(avant_[-1]) if len(avant_) else 0
+                s_a, s_b = self.fait[debut], self.fait[-1]
+                if abs(phi) > 1e-3 and s_b > s_a:
+                    th = phi * np.clip((self.fait - s_a) / (s_b - s_a), 0.0, 1.0)
+                    tr = np.cross(t, r)
+                    r = r * np.cos(th)[:, None] + tr * np.sin(th)[:, None]
+            self.nuques = r
 
     def _repere(self, s):
         """(centre, avant, nuque, flanc) à s mètres de la base."""
         centre = np.stack([np.interp(s, self.fait, self.p[:, k]) for k in range(3)], axis=-1)
         avant = np.stack([np.interp(s, self.fait, self.sens[:, k]) for k in range(3)], axis=-1)
         avant = avant / np.linalg.norm(avant, axis=-1, keepdims=True)
-        nuque = np.cross(avant, self.flanc)
-        flanc = np.broadcast_to(self.flanc, np.shape(avant)).copy()
-        if self.haut is not None:
-            proj = self.haut - (avant @ self.haut)[..., None] * avant          # le haut, d'équerre avec le fil
-            lg = np.linalg.norm(proj, axis=-1, keepdims=True)
-            ok = (lg > 0.30)[..., 0]
-            n2 = proj / np.maximum(lg, 1e-12)
-            f2 = np.cross(n2, avant)
-            nuque = np.where(ok[..., None], n2, nuque)
-            flanc = np.where(ok[..., None], f2, flanc)
-        return centre, avant, nuque, flanc
+        if self.nuques is None:
+            return centre, avant, np.cross(avant, self.flanc), np.broadcast_to(self.flanc, np.shape(avant)).copy()
+        nuque = np.stack([np.interp(s, self.fait, self.nuques[:, k]) for k in range(3)], axis=-1)
+        nuque = nuque - np.sum(nuque * avant, axis=-1, keepdims=True) * avant
+        nuque = nuque / np.maximum(np.linalg.norm(nuque, axis=-1, keepdims=True), 1e-12)
+        return centre, avant, nuque, np.cross(nuque, avant)
 
     def cadre(self, s):
         """À s mètres de la base : le centre du fil, la direction où il va, et sa nuque (le dessus)."""
