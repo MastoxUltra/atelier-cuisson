@@ -108,10 +108,10 @@ def construire():
 
     # ----- les yeux : de petites billes sombres, bas sur la tête, derrière le bec ; le trait rose du sourire -----
     for nom, c in (("G", 1), ("D", -1)):
-        s = 0.165 * L
-        centre, direction = FIL.vise(s, 1.00, -c * 0.60, 0.30)
+        s = 0.200 * L
+        centre, direction = FIL.vise(s, 1.50, -c * 0.95, 0.45)
         pos, n = a.surface("corps", centre, direction)
-        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0340)                       # un vrai œil, plus gros
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0520)                       # un vrai œil, plus gros
         bouche = []
         for u in np.linspace(0.0, 1.0, 7):
             ss = (0.030 + 0.105 * u) * L                    # la bouche s'arrête bien avant l'œil

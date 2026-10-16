@@ -40,6 +40,9 @@ def rayon(f):
     return r * (0.74 + 0.26 * min(max((f - 0.86) / 0.10, 0.0), 1.0))     # plus fine et plus anguilliforme, comme le modèle de référence (vues de reference)
 
 
+TOURNE = 34                                   # la fiche tourne la bête vers la caméra (34° devant) : on compte les DEUX yeux ; 0 pour le jeu
+
+
 def construire():
     a = K.Animal("lamproie")
     a.taille = 0.85
@@ -76,9 +79,9 @@ def construire():
 
     # ----- l'œil de chaque côté, et la rangée de sept trous branchiaux -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = Vector((0.08, -0.22, 0.385)), Vector((c * 0.62, -0.78, 0.18))        # sur l'AVANT du cou, côté caméra : les deux yeux se voient
+        centre, direction = Vector((0.08, -0.22, 0.385)), Vector((c * 0.78, -0.62, 0.18))        # sur l'AVANT du cou, côté caméra : les deux yeux se voient
         pos, n = a.surface("corps", centre, direction)
-        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0400)                  # un vrai œil, gros, sur le dessus de la tête
+        a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0280)                  # un vrai œil, gros, sur le dessus de la tête
         trous = None
         for k in range(7):
             cc, dd = fil.vise((0.925 - 0.026 * k) * L, 0.0, -c * 1.0, 0.18)
@@ -99,6 +102,8 @@ def construire():
         rub = A.tube(A.courbe(pts, 2), lambda t: 0.014 * math.sin(math.pi * t) ** 0.7 + 0.003, 8)
         a.piece("dorsale_%d" % k, O.teinte(rub, MARBRE * 1.1), None, poil=False)
     a.tete = c0 + av0 * 0.03
+    if TOURNE:
+        O.tourner(a, TOURNE)
     return a
 
 

@@ -39,8 +39,6 @@
 | chevre | - | - | 2 | - |
 | chevreuil | - | - | 3 | - |
 | chien | - | - | 2 | - |
-| chien | - | - | 2 | - |
-| chien | - | - | 2 | - |
 | chouette | - | - | 2 | - |
 | cigale | - | - | 1 | - |
 | cloporte | - | - | 1 | - |
@@ -85,6 +83,7 @@
 | girafe | - | - | 4 | - |
 | glouton | - | - | 4 | - |
 | gnou | - | - | 3 | - |
+| grandgousier | - | - | 4 | - |
 | grenouille | - | - | 1 | - |
 | grenouille_venimeuse | - | - | 2 | - |
 | grillon_des_cavernes | - | - | 2 | - |
@@ -179,9 +178,13 @@
 | poisson_aveugle | - | - | 3 | - |
 | poisson_clown | - | - | 2 | - |
 | poisson_globe | - | - | 2 | - |
+| poisson_hache | - | - | 4 | - |
+| poisson_lanterne | - | - | 4 | - |
 | poisson_lune | - | - | 4 | - |
 | poisson_rouge | - | - | 1 | - |
+| poisson_vipere | - | - | 4 | - |
 | poule | - | - | 1 | - |
+| poulpe_dumbo | - | - | 4 | - |
 | protee | - | - | 4 | - |
 | quetzal | - | - | 3 | - |
 | quokka | - | - | 3 | - |
@@ -204,6 +207,7 @@
 | serval | - | - | 3 | - |
 | silure | - | - | 4 | - |
 | singe | - | - | 2 | - |
+| siphonophore | - | - | 5 | - |
 | souris | - | - | 1 | - |
 | suricate | - | - | 2 | - |
 | tamarin | - | - | 3 | - |

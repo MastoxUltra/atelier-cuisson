@@ -80,8 +80,9 @@ def construire():
     # les bandes sombres du visage : de l'œil au museau, de chaque côté (peintes à plat)
     ang_ = np.arctan2(np.abs(tete.v[:, 0]), tete.v[:, 1])
     zz_ = tete.v[:, 2]
-    bande_ = (zz_ > 0.14) & (zz_ < 0.275) & (np.abs(ang_ - (1.50 + 2.2 * (zz_ - 0.14))) < 0.15)
-    tete.teinte[bande_] = BANDE
+    centre_ = 1.50 + 2.2 * (zz_ - 0.14)
+    tete.teinte[(zz_ > 0.14) & (zz_ < 0.275) & (np.abs(ang_ - centre_) < 0.17)] = NOIR          # la bande NOIRE de l'œil au nez
+    tete.teinte[(zz_ > 0.14) & (zz_ < 0.275) & (np.abs(ang_ - (centre_ - 0.34)) < 0.14)] = BLANC     # la bande BLANCHE au-dessus
     a.piece("tete", tete, None, mat=H @ A.repere((0, 0, -0.050)))
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.028, 0.020, 0.016), M.hexa("#2e2824"), mat=H @ A.repere((0, 0.012, 0.246)), poil=False)
     a.tete = H @ Vector((0, 0.010, 0.140))

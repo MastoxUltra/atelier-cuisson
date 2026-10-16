@@ -26,7 +26,7 @@ NAGEOIRE = np.array(M.hexa("#9d1f33"))
 CREME = np.array(M.hexa("#f3e6cc"))
 FIL = M.hexa("#3a1018")
 
-CHEMIN = [(0.0, -0.46, 0.66), (0.0, -0.34, 0.48), (0.0, -0.14, 0.32), (0.0, 0.10, 0.23), (0.0, 0.36, 0.22), (0.0, 0.58, 0.32),
+CHEMIN = [(0.0, -0.46, 0.52), (0.0, -0.34, 0.40), (0.0, -0.14, 0.32), (0.0, 0.10, 0.23), (0.0, 0.36, 0.22), (0.0, 0.58, 0.32),
           (0.0, 0.72, 0.48), (0.0, 0.76, 0.62)]
 
 
@@ -74,7 +74,7 @@ def construire():
 
     # ----- le visage : l'œil rond, la bouche tendue ; il serre les dents -----
     for nom, c in (("G", 1), ("D", -1)):
-        centre, direction = fil.vise(0.090 * L, 0.55, -c * 0.60, 0.40)
+        centre, direction = fil.vise(0.090 * L, 0.50, -c * 0.62, 0.72)
         pos, n = a.surface("corps", centre, direction)
         a.oeil("oeil_" + nom, pos + n * 0.003, n, 0.0380)
         # (plus de paupière lourde : l'anneau posé sur l'œil ; l'œil est nu, rond et ouvert)

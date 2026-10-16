@@ -61,7 +61,7 @@ def construire():
     tete.teinte = np.where((tete.v[:, 2] > 0.35)[:, None], DOS, SABLE)
     tete.teinte[(tete.v[:, 1] < -0.66) & (tete.v[:, 2] < 0.06) & (tete.v[:, 2] > -0.55) & (np.abs(tete.v[:, 0]) < 0.45)] = CLAIR      # un petit museau clair peint, plus de bloc blanc
     a.piece("tete", tete.etire(0.070, 0.066, 0.062), None, mat=H)
-    a.piece("museau", A.boule(1.0, 28, 14).etire(0.022, 0.026, 0.020), tuple(CLAIR), mat=H @ A.repere((0.0, -0.066, -0.014)))   # un petit bout de museau, fondu dans la tête
+    # (le museau est PEINT sur la tête, la pièce du petit museau est retirée : son poil long se lisait comme un bloc blanc)
     a.piece("nez", A.boule(1.0, 20, 10).etire(0.012, 0.010, 0.010), ROSE, mat=H @ A.repere((0.0, -0.092, -0.008)), poil=False)
     a.tete = H @ Vector((0.0, -0.080, -0.010))
     for nom, c in (("G", 1), ("D", -1)):
