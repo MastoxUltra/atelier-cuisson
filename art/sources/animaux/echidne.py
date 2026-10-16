@@ -68,7 +68,7 @@ def construire():
     # ----- le museau : un cône qui pointe le nez en l'air, la truffe en feutrine noire -----
     # (16/10, planche 21 : « je sais pas si c'est fait exprès ») : le museau faisait 0,32, plus long que le corps (0,26) ;
     # celui de l'échidné fait à peu près le tiers du corps, un tube court qui s'affine
-    LM = 0.125
+    LM = 0.170                                            # 0,125 : il ne se voyait plus (16/10, 2e essai)
     museau = A.tour(A.profil([(0.050, 0.0), (0.041, 0.25 * LM), (0.031, 0.55 * LM), (0.024, 0.80 * LM), (0.019, 0.93 * LM), (0, LM)], 6), 32)
     NEZ = A.repere(CORPS + Vector((0, -0.062, 0.000)), (96, 0, 0))      # dans ce repère : X la gauche, Y le haut, Z vers la truffe
     a.piece("museau", museau, PRUNE, mat=NEZ)

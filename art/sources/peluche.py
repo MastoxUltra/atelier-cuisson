@@ -514,19 +514,22 @@ def _planche(construire, titre=None):
         nom_ = lambda p: str(p.get("nom", "")).lower()
         morceaux = [p["monde"] for p in a._toutes() if nom_(p).startswith(("tete", "museau", "nez", "truffe", "bec", "oreille", "machoire", "joue"))]
         ornements = [p["monde"] for p in a._toutes() if nom_(p).startswith(ORNEMENTS)]
+        peau_seule = False
         if not morceaux and a.tete is not None:              # la base fusionnée : une seule peau, on prend ce qui entoure la tête
             T = np.vstack([p["monde"] for p in a._toutes() if not nom_(p).startswith(ORNEMENTS)])
-            pres_ = np.linalg.norm(T - np.asarray(a.tete, float), axis=1) < 0.45 * taille
+            pres_ = np.linalg.norm(T - np.asarray(a.tete, float), axis=1) < 0.28 * taille   # 0,45 prenait le cou des bêtes à long cou (16/10)
             morceaux = [T[pres_]] if pres_.sum() > 50 else []
+            peau_seule = bool(morceaux)
         if morceaux:
             V = np.vstack(morceaux)
             tb, th = V.min(axis=0), V.max(axis=0)
             recul_pres = max(recul_pres, 1.35 * float(np.linalg.norm(th - tb)) + 0.15)
-            vise_pres = Vector(((tb + th) * 0.5).tolist())
+            vise_pres = Vector(a.tete) if peau_seule else Vector(((tb + th) * 0.5).tolist())   # la peau seule : a.tete est au centre de la tête
             if ornements:                                    # le recul couvre aussi la ramure, vue autour de la tête
                 O = np.vstack([V] + ornements)
                 ob, oh = O.min(axis=0), O.max(axis=0)
-                ecart = max(float(np.linalg.norm(oh - (tb + th) * 0.5)), float(np.linalg.norm(ob - (tb + th) * 0.5)))
+                cv = np.asarray(tuple(vise_pres), float)
+                ecart = max(float(np.linalg.norm(oh - cv)), float(np.linalg.norm(ob - cv)))
                 recul_pres = max(recul_pres, 2.5 * ecart + 0.15)
     except Exception:
         pass

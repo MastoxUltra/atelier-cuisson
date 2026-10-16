@@ -45,7 +45,7 @@ def construire():
 
     def rayon(t):
         base = float(np.interp(t, nodes, RAYONS))
-        return base * (1.0 + 0.070 * math.cos(math.tau * 14.0 * t) * min(1.0, 4.0 * (1 - t)))     # les anneaux, plus marqués
+        return base * (1.0 + 0.045 * math.cos(math.tau * 14.0 * t) * min(1.0, 4.0 * (1 - t)))     # les anneaux, doux (0,07 : des boules empilées)
     corps = K.tube_peint(ch, rayon, [(1.0, SAFRAN)], 28)
     a.piece("corps", corps, None)
     poitrail = A.boule(1.0, 40, 20).etire(0.050, 0.040, 0.135)                                         # plus discret
@@ -64,8 +64,8 @@ def construire():
             mat=A.cadre(H + Vector((0.0, -0.062, -0.016)) + dirm * 0.129, dirm, (0, 0, 1)), poil=False)
     # la couronne : cinq petites bosses arrondies serrées sur le crâne, comme sur un vrai (plus une crête de pointes)
     for k, (x, hh, lean) in enumerate(((-0.030, 0.066, -22), (-0.015, 0.078, -9), (0.0, 0.084, 0), (0.015, 0.078, 9), (0.030, 0.066, 22))):
-        bosse = A.boule(1.0, 16, 8).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.0125, 0.0125, 0.022)
-        a.piece("couronne_%d" % k, O.couche(O.teinte(bosse, np.array(ANNEAU)), A.cadre(H + Vector((x, 0.016, hh - 0.012)),
+        bosse = A.boule(1.0, 16, 8).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.0165, 0.0165, 0.032)   # assez grandes pour se voir
+        a.piece("couronne_%d" % k, O.couche(O.teinte(bosse, np.array(ANNEAU)), A.cadre(H + Vector((x, 0.016, hh - 0.008)),
                 (math.sin(math.radians(lean)), 0.18, 1.0), (0, 1, 0))), None, poil=False)
     O.paire_yeux(a, "tete", H, (0.64, -0.74, 0.22), 0.0200, couleur_lourde=tuple(SAFRAN), coupe=0.60, decolle=0.003, R=RT)
     a.tete = H + Vector((0.0, -0.17, -0.04))

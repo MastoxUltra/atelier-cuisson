@@ -88,9 +88,13 @@ def construire():
     c_, a_ = Vector(FIL_.cadre(L)[0]), Vector(FIL_.cadre(L)[1])
     fourche = [(0.0, -0.0026), (0.040, -0.0028), (0.060, -0.0120), (0.064, -0.0092), (0.046, 0.0), (0.064, 0.0092), (0.060, 0.0120),
                (0.040, 0.0028), (0.0, 0.0026)]
+    # la langue DROITE devant le nez, à plat (16/10, l'auteur : « la langue n'est pas droite ») : la silhouette est tracée en
+    # long sur X ; posée telle quelle dans un repère dont X est le flanc, elle sortait de travers comme une moustache. Ses
+    # axes sont remis dans l'ordre du repère : la longueur le long de la tête, la fourche à plat, l'épaisseur vers le haut.
     langue = A.decoupe(fourche, 0.0030, 0.0010)
-    haut = (Vector((0, 0, 1)) - a_ * a_.z).normalized()
-    a.piece("langue", langue, LANGUE, mat=A.cadre(c_ - haut * 0.004, (a_ * 0.9 - haut * 0.1).normalized(), haut), poil=False)
+    langue.v = langue.v[:, [1, 2, 0]].copy()
+    devant = Vector((a_.x, a_.y, 0.0)).normalized()
+    a.piece("langue", langue, LANGUE, mat=A.cadre(c_ - devant * 0.016 - Vector((0, 0, 0.006)), devant, Vector((0, 0, 1))), poil=False)
     a.tete = c_ + a_ * 0.03
     return a
 

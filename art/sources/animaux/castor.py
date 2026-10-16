@@ -65,9 +65,9 @@ def construire():
     museau = A.boule(1.0, 36, 18).sculpte(lambda v: K.emousse(v, 0.75)).etire(0.092, 0.070, 0.064)
     a.piece("museau", O.teinte(museau, CLAIR), None, mat=RT @ A.repere((0.0, -0.100, -0.040)))
     a.piece("nez", A.boule(1.0, 16, 8).etire(0.032, 0.020, 0.020), NEZ, mat=RT @ A.repere((0.0, -0.166, -0.016)), poil=False)
-    for nom_d, c in (("G", 1), ("D", -1)):                       # deux incisives orange qui dépassent sous la lèvre
+    for nom_d, c in (("G", 1), ("D", -1)):                       # deux incisives orange qui sortent du bord de la bouche (elles pendaient sous le menton)
         dent = A.boule(1.0, 16, 8).sculpte(lambda v: K.emousse(v, 0.70)).etire(0.0105, 0.0060, 0.0190)
-        a.piece("dent_" + nom_d, dent, ORANGE, mat=RT @ A.repere((c * 0.0108, -0.150, -0.096), (-8, 0, 0)), poil=False)
+        a.piece("dent_" + nom_d, dent, ORANGE, mat=RT @ A.repere((c * 0.0108, -0.158, -0.080), (-8, 0, 0)), poil=False)   # au bord de la bouche
     O.broder(a, "bouche", "museau", RT @ Vector((0.0, -0.100, -0.040)), [(0.55 * u_, -0.70, -0.62 + 0.08 * u_ * u_) for u_ in np.linspace(-1, 1, 7)],
              0.0024, FIL, R=RT)
     O.paire_yeux(a, "tete", H, (0.60, -0.70, 0.40), 0.0170, decolle=0.003, R=RT)
