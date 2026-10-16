@@ -93,8 +93,8 @@ def construire():
     a.piece("truffe", A.boule(1.0, 24, 12).etire(0.034, 0.024, 0.022), M.hexa("#1e1a18"), mat=H @ A.repere((0, 0.022, 0.296)), poil=False)
     a.tete = H @ Vector((0, 0.020, 0.200))
     for nom, c in (("G", 1), ("D", -1)):
-        regard = H3 @ Vector((c * 0.58, 0.30, 0.50))
-        a.rustine("iris_" + nom, "tete", H @ Vector((0, 0.020, 0.100)), regard, 0.17, OEIL, 0.003, 0)
+        regard = H3 @ Vector((c * 0.48, 0.30, 0.62))     # plus en avant : de face, les deux yeux (16/10)
+        a.rustine("iris_" + nom, "tete", H @ Vector((0, 0.020, 0.100)), regard, 0.22, OEIL, 0.003, 0)
         p, n = a.surface("tete", H @ Vector((0, 0.020, 0.100)), regard)
         a.oeil("oeil_" + nom, p + n * 0.006, n, 0.0215)
         po = A.profil([(0, 0), (0.054, 0.012), (0.070, 0.050), (0.060, 0.092), (0.030, 0.124), (0, 0.136)], 6)

@@ -82,7 +82,7 @@ def construire():
     pts = ((0.0, 0.0), (0.095, 0.290), (0.190, 0.580), (0.280, 0.870), (0.355, 1.150))                       # (avance, monte)
     enc = K.Fil([tuple(BASE + Vector((0, -u, z))) for u, z in pts], (1, 0, 0))
     Lc = enc.long
-    tab = [(0.0, 0.140), (0.10, 0.148), (0.30, 0.122), (0.60, 0.098), (0.85, 0.084), (1.0, 0.074)]
+    tab = [(0.0, 0.140), (0.10, 0.148), (0.30, 0.120), (0.60, 0.094), (0.85, 0.074), (1.0, 0.064)]     # le haut plus fin que la tête
     cou = fuseau(tab, Lc, 64)
     paver(cou, 5, 0.17, 0.016)
     a.piece("cou", cou.sculpte(lambda v: v * [0.86, 1.0, 1.0]).sculpte(enc.couche), None)
@@ -98,19 +98,20 @@ def construire():
     nez = Vector((math.sin(l) * math.cos(p), -math.cos(l) * math.cos(p), math.sin(p)))
     T = A.cadre(Vector(centre) + Vector((0.0, -0.020, 0.040)), nez, Vector((0, 0, 1)))
     T3 = T.to_3x3()
-    tete = fuseau([(0.0, 0.0), (0.05, 0.052), (0.20, 0.064), (0.45, 0.045), (0.70, 0.036), (0.90, 0.034), (0.97, 0.028), (1.0, 0.0)], 0.400, 56, 0.006)      # long et fin : un museau, pas une boule
-    tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.4)[:, None] | (tete.v[:, 2] > 0.340)[:, None], CREME, MIEL)
-    tete.teinte[tete.v[:, 2] > 0.372] = CREME * 0.80 + np.array(CORNE) * 0.20        # le bout des lèvres, à peine plus sombre
-    # (16/10 : le bout CORNE, gonflé, faisait une grosse truffe noire de chien ; le museau d'une girafe est clair)
+    # 16/10 : une tête plus forte que le haut du cou (la tête fine sur un cou épais faisait un bâton), le front plein ; le museau
+    # d'un fauve uni, à peine plus sombre au bout (le bout CORNE faisait une truffe noire de chien, puis la crème une boule blanche)
+    tete = fuseau([(0.0, 0.0), (0.05, 0.062), (0.20, 0.082), (0.45, 0.064), (0.70, 0.052), (0.90, 0.047), (0.97, 0.038), (1.0, 0.0)], 0.420, 56, 0.006)
+    tete.teinte = np.where((np.arctan2(tete.v[:, 0], tete.v[:, 1]) > 2.5)[:, None], CREME, MIEL)
+    tete.teinte[tete.v[:, 2] > 0.360] = MIEL * 0.82
     a.piece("tete", tete.sculpte(lambda v: v * [0.84, 1.0, 1.0]), None, mat=T @ A.repere((0, 0.040, -0.060)))
     a.tete = T @ Vector((0, 0.040, 0.140))
     for nom, c in (("G", 1), ("D", -1)):
         pos, n = a.surface("tete", T @ Vector((0, 0.040, 0.050)), T3 @ Vector((c * 0.84, 0.42, 0.06)))
         a.oeil("oeil_" + nom, pos + n * 0.004, n, 0.0200)                                 # plus grands : de grands yeux sombres
         # (paupière retirée : yeux ouverts, bouton net, sans air fatigué ni fâché)
-        oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.019, 0.070), (0.013, 0.130), (0, 0.150)], 5), 18)
+        oss = A.tour(A.profil([(0, 0), (0.024, 0.006), (0.020, 0.050), (0.015, 0.088), (0, 0.102)], 5), 18)      # courts, comme une vraie
         a.piece("ossicone_" + nom, oss, tuple(MIEL), mat=A.cadre(T @ Vector((c * 0.030, 0.092, -0.040)), Vector((c * 0.10, 0.20, 0.97)), (0, 1, 0)))
-        a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.024, 0.024, 0.026), BRUN, pos=tuple(T @ Vector((c * 0.034, 0.108, -0.040)) + Vector((c * 0.012, 0.024, 0.116))))
+        a.piece("houppe_" + nom, A.boule(1.0, 16, 8).etire(0.022, 0.022, 0.022), BRUN, pos=tuple(T @ Vector((c * 0.034, 0.108, -0.040)) + Vector((c * 0.008, 0.016, 0.080))))
         po = A.profil([(0, 0), (0.030, 0.008), (0.040, 0.032), (0.030, 0.060), (0.010, 0.078), (0, 0.084)], 5)
         E = A.cadre(T @ Vector((c * 0.064, 0.056, -0.034)), Vector((c * 0.95, 0.10, 0.28)), (0, 0, 1))
         a.piece("oreille_" + nom, K.bandes(A.tour(po, 24).etire(1.10, 0.36, 1.15), [(0.060, tuple(MIEL)), (9, BRUN)]), None, mat=E)   # plus petites

@@ -77,6 +77,11 @@ def construire():
     H3 = H.to_3x3()
     tete = fuseau([(0.0, 0.0), (0.06, 0.060), (0.24, 0.074), (0.50, 0.060), (0.78, 0.046), (0.96, 0.040), (1.0, 0.0)], 0.300, 48, 0.006)
     tete.teinte = np.where(((tete.v[:, 2] > 0.80 * 0.300) | (np.abs(np.arctan2(tete.v[:, 0], tete.v[:, 1])) > 2.3))[:, None], BLANC, CARAMEL)
+    # les bandes sombres du visage : de l'œil au museau, de chaque côté (peintes à plat)
+    ang_ = np.arctan2(np.abs(tete.v[:, 0]), tete.v[:, 1])
+    zz_ = tete.v[:, 2]
+    bande_ = (zz_ > 0.14) & (zz_ < 0.275) & (np.abs(ang_ - (1.50 + 2.2 * (zz_ - 0.14))) < 0.15)
+    tete.teinte[bande_] = BANDE
     a.piece("tete", tete, None, mat=H @ A.repere((0, 0, -0.050)))
     a.piece("truffe", A.boule(1.0, 20, 10).etire(0.028, 0.020, 0.016), M.hexa("#2e2824"), mat=H @ A.repere((0, 0.012, 0.246)), poil=False)
     a.tete = H @ Vector((0, 0.010, 0.140))

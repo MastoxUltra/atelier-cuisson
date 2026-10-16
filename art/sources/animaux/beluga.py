@@ -81,7 +81,7 @@ def construire():
         for f, haut in ((0.992, -0.50), (0.975, -0.52), (0.955, -0.50), (0.935, -0.44)):
             cen, av, nq = fil.cadre(f * L)
             pts += propres(a.trace("corps", Vector(cen), [Vector(av * 0.10 + flanc * c + nq * haut)], 0.006))
-        a.broderie("sourire_" + ("G" if c > 0 else "D"), A.courbe(pts, 4), 0.0030, MARINE)
+        # (le sourire brodé est retiré : vu de face, ses deux traits bleus faisaient des moustaches)
         cen, av, nq = fil.cadre(0.905 * L)
         p, n = a.surface("corps", Vector(cen), Vector(av * 0.16 + flanc * c * 0.95 + nq * 0.30))
         a.bouton("oeil_" + ("G" if c > 0 else "D"), p + n * 0.002, n, 0.022)

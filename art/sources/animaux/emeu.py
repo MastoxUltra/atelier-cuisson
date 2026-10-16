@@ -60,7 +60,7 @@ def construire():
     #       long à la croupe ; elles couvrent le haut, pas le ventre, et s'arrêtent bien au-dessus des jambes -----
     rng = np.random.default_rng(9)
     touffes = None
-    for i in range(46):
+    for i in range(130):                                                          # serrées et larges : une toison hirsute (à 46, des taches)
         z = rng.uniform(-0.15, 0.95)
         t = rng.uniform(0.0, 2 * math.pi)
         r = math.sqrt(max(0.0, 1 - z * z))
@@ -69,17 +69,18 @@ def construire():
             continue                                                              # pas sur la poitrine, plus lisse
         p = np.array(CORPS) + d * np.array([0.236, 0.326, 0.266])
         long_ = 0.080 + 0.060 * rng.random() + 0.040 * max(0.0, d[1])
-        m = A.boule(1.0, 10, 6).etire(0.036, 0.030, long_).pose(tuple(p + np.array([d[0] * 0.01, d[1] * 0.01, -long_ * 0.70])),
+        m = A.boule(1.0, 10, 6).etire(0.062, 0.048, long_).pose(tuple(p + np.array([d[0] * 0.01, d[1] * 0.01, -long_ * 0.70])),
                                                                  (12 * d[1], -14 * d[0], 0))
         touffes = m if touffes is None else touffes + m
     a.piece("plumage", touffes, tuple(SOMBRE))
 
-    # ----- le cou : long, fort et nu, bleuté, qui part de la poitrine et se tend vers nous en S doux ; la tête moyenne -----
+    # ----- le cou : long et fort, emplumé en bas, nu et bleuté en haut, qui part de la poitrine et se tend vers nous en S doux ; la tête moyenne -----
     fil = K.Fil([(0.0, -0.200, 0.780), (0.0, -0.310, 0.950), (0.0, -0.300, 1.150), (0.0, -0.360, 1.320)], (1, 0, 0))
     L = fil.long
     pc = A.profil([(0, 0), (0.095, 0.03 * L), (0.068, 0.30 * L), (0.056, 0.70 * L), (0.052, 0.95 * L), (0, 1.01 * L)], 6)
     cou = A.tour(pc, 28)
-    cou.teinte = np.tile(COU, (len(cou.v), 1))
+    haut_cou = K.lisse((cou.v[:, 2] / L - 0.55) / 0.30)                           # le bas du cou emplumé, le bleu nu seulement en haut
+    cou.teinte = np.asarray(TAUPE * 0.92)[None, :] * (1 - haut_cou[:, None]) + np.asarray(COU)[None, :] * haut_cou[:, None]
     a.piece("cou", cou.sculpte(fil.couche), None)
     bout = Vector(fil.cadre(L)[0])
     H = A.repere(bout + Vector((0.0, -0.030, 0.020)), (6, 0, LACET))

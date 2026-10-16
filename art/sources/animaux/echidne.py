@@ -39,7 +39,7 @@ def sur(a, piece, centre, vers):
 def construire():
     a = K.Animal("echidne")
     a.taille = 0.50
-    a.tete = Vector((0, -0.250, 0.075))
+    a.tete = Vector((0, -0.130, 0.105))                  # le gros plan vise la tête (le bout du museau sortait seul du cadre)
 
     # ----- le corps : un galet rond, plus plat dessous, qui s'affine vers le visage -----
     def galet(v):
@@ -69,11 +69,13 @@ def construire():
     # (16/10, planche 21 : « je sais pas si c'est fait exprès ») : le museau faisait 0,32, plus long que le corps (0,26) ;
     # celui de l'échidné fait à peu près le tiers du corps, un tube court qui s'affine
     LM = 0.170                                            # 0,125 : il ne se voyait plus (16/10, 2e essai)
-    museau = A.tour(A.profil([(0.050, 0.0), (0.041, 0.25 * LM), (0.031, 0.55 * LM), (0.024, 0.80 * LM), (0.019, 0.93 * LM), (0, LM)], 6), 32)
+    museau = A.tour(A.profil([(0.050, 0.0), (0.040, 0.25 * LM), (0.029, 0.55 * LM), (0.020, 0.80 * LM), (0.012, 0.94 * LM), (0, LM)], 6), 32)   # fin jusqu'au bout
     NEZ = A.repere(CORPS + Vector((0, -0.062, 0.000)), (96, 0, 0))      # dans ce repère : X la gauche, Y le haut, Z vers la truffe
     a.piece("museau", museau, PRUNE, mat=NEZ)
     a.couture("museau", "museau", 8, 0.45, 0.94)
-    a.piece("truffe", A.boule(1.0, 24, 12).etire(0.017, 0.015, 0.014), K.NOIR, mat=NEZ @ A.repere((0, 0.002, LM - 0.002)), poil=False)
+    # (2e essai : plus de truffe en boule noire, « un nez de clown » : deux petites narines au bout du tube)
+    for nom_n, c in (("G", 1), ("D", -1)):
+        a.piece("narine_" + nom_n, A.boule(1.0, 12, 6).etire(0.0032, 0.0026, 0.0020), K.NOIR, mat=NEZ @ A.repere((c * 0.0042, 0.0012, LM - 0.010)), poil=False)
     bouche = [a.trace("museau", NEZ @ Vector((0, 0, z * LM / 0.32)), [NEZ.to_3x3() @ Vector((math.cos(math.radians(d)), math.sin(math.radians(d)), 0))])[0]
               for z, d in ((0.290, -52), (0.265, -40), (0.235, -31), (0.205, -27), (0.175, -25))]
     a.broderie("bouche", bouche, 0.0024, paire=True)            # une bouche toute droite : pas impressionné
@@ -146,7 +148,7 @@ def echine(points, cote):
 # le galet et tout ce qui est cousu dessus plient ensemble, et se rangent avec « corps »
 PORTEURS = [("corps", echine, "corps"), ("manteau", echine, "corps"), ("ourlet", echine, "corps"), ("piquants", echine, "corps"),
             ("oeil", echine, "corps"), ("joue", echine, "corps"),
-            ("museau", "museau"), ("truffe", "museau"), ("bouche", "museau"),
+            ("museau", "museau"), ("truffe", "museau"), ("narine", "museau"), ("bouche", "museau"),
             ("oreille", "oreille", True), ("pavillon", "oreille", True),
             ("patte_avant", "patte_avant", True), ("patte_arriere", "patte_arriere", True)]
 
