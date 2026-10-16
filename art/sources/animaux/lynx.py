@@ -67,16 +67,13 @@ def construire():
     a.piece("nez", A.boule(1.0, 14, 8).etire(0.017, 0.013, 0.012), NEZ, mat=RT @ A.repere((0.0, -0.136, -0.022)), poil=False)
     O.paire_yeux(a, "tete", H, (0.60, -0.76, 0.18), 0.0185, couleur_lourde=tuple(BEIGE), coupe=0.60, decolle=0.003, R=RT)
     for nom, c in (("G", 1), ("D", -1)):
-        for k in range(5):
-            ang_ = math.radians(-70 + 35 * k)
-            fav = O.pointe(0.066, 0.013, 8)
-            d = Vector((c * (0.30 + 0.5 * abs(math.sin(ang_))), -0.15, -0.65 + 0.35 * math.cos(ang_))).normalized()
-            a.piece("favori_%s%d" % (nom, k), O.couche(O.teinte(fav, CREME * 0.95), RT @ A.cadre(Vector((c * 0.094, -0.020, -0.050 + 0.026 * k)), d, (0, 0, 1))),
-                    None, poil=False)
-        ore = A.tour(A.profil([(0.060, 0), (0.054, 0.030), (0.034, 0.068), (0.013, 0.096), (0, 0.106)], 4), 20).etire(1.0, 0.40, 1.0)      # des oreilles triangulaires, plus des oreilles de lapin
-        a.piece("oreille_" + nom, O.couche(O.teinte(ore, BEIGE * 0.96), RT @ A.cadre(Vector((c * 0.074, 0.016, 0.078)), (c * 0.15, 0.10, 1.0), (0, 1, 0))), None)
-        pinc = O.tube_r([(0, 0, 0), (c * 0.005, 0.002, 0.060), (c * 0.012, 0.002, 0.086)], [0.012, 0.020, 0.007], 10)               # de vrais pinceaux, bien longs
-        a.piece("pinceau_" + nom, O.couche(O.teinte(pinc, NOIR), RT @ A.cadre(Vector((c * 0.084, 0.026, 0.198)), (c * 0.10, 0.05, 1.0), (0, 1, 0))), None, poil=False)
+        joue = A.boule(1.0, 24, 12).etire(0.050, 0.030, 0.052)                       # des favoris doux, en bourrelet de poil : plus de pointes blanches
+        a.piece("favori_" + nom, O.teinte(joue, CREME * 0.95), None, mat=RT @ A.repere((c * 0.082, -0.030, -0.036), (0, 0, c * 14)))
+        ore = A.tour(A.profil([(0.056, 0), (0.048, 0.034), (0.028, 0.082), (0.010, 0.120), (0, 0.134)], 4), 20).etire(1.0, 0.40, 1.0)
+        ore.teinte = np.where((ore.v[:, 2] > 0.088)[:, None], np.asarray(NOIR), np.asarray(BEIGE * 0.96))      # le bout de l'oreille noir      # des oreilles triangulaires, plus des oreilles de lapin
+        a.piece("oreille_" + nom, O.couche(ore, RT @ A.cadre(Vector((c * 0.074, 0.016, 0.078)), (c * 0.15, 0.10, 1.0), (0, 1, 0))), None)
+        pinc = O.tube_r([(0, 0, 0), (c * 0.006, 0.002, 0.070), (c * 0.014, 0.002, 0.140)], [0.016, 0.026, 0.008], 12)               # de vrais pinceaux, bien longs
+        a.piece("pinceau_" + nom, O.couche(O.teinte(pinc, NOIR), RT @ A.cadre(Vector((c * 0.080, 0.016, 0.204)), (c * 0.10, 0.05, 1.0), (0, 1, 0))), None, poil=False)
     O.broder(a, "bouche", "museau", RT @ Vector((0, -0.088, -0.030)), [(0.50 * u_, -0.82, -0.36 + 0.10 * u_ * u_) for u_ in np.linspace(-1, 1, 7)], 0.0021, FIL, R=RT)
     a.tete = H + Vector((0.0, -0.14, 0.0))
 

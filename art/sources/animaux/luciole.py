@@ -53,8 +53,8 @@ def construire():
     # ----- la tête : une petite boule noire sous le thorax, deux gros boutons, les longues antennes -----
     H = Vector((0.0, -0.120, 0.100))
     tete = A.boule(1.0, 28, 14).etire(0.062, 0.056, 0.052)                      # une vraie tête, plus une petite boule
-    a.piece("tete", O.teinte(tete, BRUN * 0.95), None, pos=tuple(H))
-    O.paire_yeux(a, "tete", H, (0.45, -0.88, 0.18), 0.0270, decolle=0.003)
+    a.piece("tete", O.teinte(tete, np.array(M.hexa("#8a6a54"))), None, pos=tuple(H))
+    O.paire_yeux(a, "tete", H, (0.45, -0.88, 0.18), 0.0340, decolle=0.003)
     for nom, c in (("G", 1), ("D", -1)):
         ant = O.tube_r([(c * 0.030, -0.168, 0.125), (c * 0.050, -0.205, 0.150), (c * 0.065, -0.230, 0.146)], [0.0085, 0.0070, 0.0050], 8)
         a.piece("antenne_" + nom, O.teinte(ant, BRUN * 0.8), None, poil=False)

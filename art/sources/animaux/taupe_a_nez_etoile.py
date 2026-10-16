@@ -28,6 +28,9 @@ NEZ = M.hexa("#241a18")
 H = Vector((0.0, -0.480, 0.200))              # le centre de la tête
 
 
+TOURNE = 25                                   # la fiche tourne la bête vers la caméra (25° devant) : on compte les DEUX yeux ; 0 pour le jeu
+
+
 def construire():
     a = K.Animal("taupe_a_nez_etoile")
     a.taille = 0.58                                # plus gros : il se noyait dans l'herbe (« flou »)
@@ -79,6 +82,8 @@ def construire():
                          lambda t_: 0.034 + 0.014 * math.sin(math.pi * min(t_ * 1.1, 1.0)), [(1.0, tuple(ROSE * 0.96))], 14)
     a.piece("queue", queue, None)
     a.tete = H + Vector((0.0, -0.20, 0.0))
+    if TOURNE:
+        O.tourner(a, TOURNE)
     return a
 
 

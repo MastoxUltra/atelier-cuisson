@@ -28,7 +28,7 @@ CLAIR = np.array(M.hexa("#b8895f"))           # le ventre, le museau
 CHARBON = np.array(M.hexa("#322c2b"))         # la queue, les pieds, les mains
 ORANGE = M.hexa("#f2860f")                    # l'accent : les incisives
 ORANGE_DENT = M.hexa("#f79c3c")               # les incisives, un orange un peu plus clair (16/10)
-CLAIR_LEVRE = M.hexa("#b8895f")               # la lèvre du haut, en feutrine du ton du museau
+CLAIR_LEVRE = M.hexa("#a87c55")               # la lèvre du haut, en feutrine du ton du museau (la feutrine rend plus clair)
 NEZ = M.hexa("#171311")
 FIL = M.hexa("#241810")
 H = Vector((0.0, -0.395, 0.360))              # le centre de la tête
@@ -72,8 +72,8 @@ def construire():
     # les deux incisives SORTENT de sous la lèvre (leur haut caché dedans), plates comme des ciseaux à bois, le bas coupé
     # droit, collées l'une à l'autre ; la bouche fermée juste derrière et sous leur pointe (vue de face de la référence)
     for nom_l, c in (("G", 1), ("D", -1)):
-        lobe = A.boule(1.0, 24, 12).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.020, 0.010, 0.013)
-        a.piece("levre_" + nom_l, lobe, CLAIR_LEVRE, mat=RT @ A.repere((c * 0.015, -0.172, -0.050)), poil=False)
+        lobe = A.boule(1.0, 24, 12).sculpte(lambda v: K.emousse(v, 0.85)).etire(0.0175, 0.0080, 0.0110)   # un petit rebord
+        a.piece("levre_" + nom_l, lobe, CLAIR_LEVRE, mat=RT @ A.repere((c * 0.0135, -0.1715, -0.0495)), poil=False)
 
     def incisive(v):                                             # un pavé aux arêtes douces, le bas coupé droit
         s_ = K.emousse(v, 0.50)
@@ -82,8 +82,8 @@ def construire():
     for nom_d, c in (("G", 1), ("D", -1)):
         dent = A.boule(1.0, 20, 12).sculpte(incisive).etire(0.0088, 0.0045, 0.0200)
         a.piece("dent_" + nom_d, dent, ORANGE_DENT, mat=RT @ A.repere((c * 0.0086, -0.1705, -0.067), (8, 0, 0)), poil=False)
-    a.broderie("fente", [RT @ Vector(p_) for p_ in ((0.0, -0.1720, -0.0370), (0.0, -0.1775, -0.0420), (0.0, -0.1795, -0.0500),
-                                                    (0.0, -0.1780, -0.0570))], 0.0014, FIL)
+    a.broderie("fente", [RT @ Vector(p_) for p_ in ((0.0, -0.1720, -0.0385), (0.0, -0.1760, -0.0430), (0.0, -0.1780, -0.0495),
+                                                    (0.0, -0.1765, -0.0560))], 0.0013, FIL)
     O.broder(a, "bouche", "museau", RT @ Vector((0.0, -0.100, -0.040)), [(0.55 * u_, -0.70, -0.58 + 0.06 * u_ * u_) for u_ in np.linspace(-1, 1, 7)],
              0.0022, FIL, R=RT)
     a.fusion_a_part = ("levre",)                                 # posée sur la peau gonflée, pas fondue : le rebord et la fente restent
