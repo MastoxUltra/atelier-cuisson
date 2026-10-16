@@ -85,12 +85,12 @@ def construire():
     a.tete = H @ Vector((0, 0.0, 0.110))
     for nom, c in (("G", 1), ("D", -1)):
         regard = H3 @ Vector((c * 0.52, 0.30, 0.58))                         # sur l'avant de la tête : les deux yeux se voient de face
-        a.rustine("tache_" + nom, "tete", H.to_translation(), regard, 0.42, tuple(NOIR), 0.003, 0)
+        a.rustine("tache_" + nom, "tete", H.to_translation(), regard, 0.32, tuple(RAYURE), 0.003, 0)       # un cerne brun (plus noir) : l'œil noir s'y lit
         p, n = a.surface("tete", H.to_translation(), regard)
         a.oeil("oeil_" + nom, p + n * 0.004, n, 0.0230)
         po = A.profil([(0, 0), (0.016, 0.006), (0.021, 0.020), (0.016, 0.034), (0.006, 0.042), (0, 0.046)], 5)
-        a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.40, 1.0), tuple(NOIR),
-                mat=A.cadre(H @ Vector((c * 0.050, 0.020, -0.040)), H3 @ Vector((c * 0.86, 0.16, 0.10)), H3 @ Vector((c * 0.3, -0.9, 0.0))))
+        a.piece("oreille_" + nom, A.tour(po, 20).etire(1.0, 0.40, 1.0), tuple(RAYURE),
+                mat=A.cadre(H @ Vector((c * 0.040, 0.030, -0.036)), H3 @ Vector((c * 0.50, 0.84, 0.12)), H3 @ Vector((c * 0.3, -0.5, 0.8))))   # plantée sur le crâne, brune : plus de boule noire flottante
 
     # ----- les bras fins, les mains jointes sur le ventre ; les cuisses, de LONGS pieds étroits ; la queue : le troisième pied -----
     for nom, c in (("G", 1), ("D", -1)):

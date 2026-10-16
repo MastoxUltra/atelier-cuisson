@@ -58,8 +58,7 @@ def construire():
 
     # ----- le museau : deux grosses babines crème piquées de points, la moustache en brosse -----
     for nom, c in (("G", 1), ("D", -1)):
-        # la moustache : un coussin APLATI et large, enfoncé dans le museau, plus deux boules : le bord du bas s'aplatit, le haut
-        # se fond dans la tête
+        # la moustache : un coussin APLATI et large, enfoncé dans le museau : le bord du bas s'aplatit, le haut se fond dans la tête
         coussin = A.boule(1.0, 40, 20).sculpte(lambda v: np.stack([v[:, 0] * 0.082, v[:, 1] * 0.046, v[:, 2] * np.where(v[:, 2] < 0, 0.036, 0.050)], axis=1))
         a.piece("babine_" + nom, coussin, CREME, mat=H @ A.repere((c * 0.050, -0.096, -0.052), (0, 0, c * 10)),
                 motif=("pois", POINTS))
